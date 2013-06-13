@@ -1,0 +1,10 @@
+README for MITTENS
+==================
+
+For the most part, MITTENS is just big group of IDL *.pro files that can be used for poking around in MEarth data. To use these tools, you will need to download the source from https://bitbucket.org/zberta/mearth-tools/, store them somewhere, and add that directory to your IDL_PATH environment variable by adding a line that looks something like
+
+setenv MITTENS_PATH ~/idl_routines/zkb/mearth-tools
+setenv IDL_PATH +$MITTENS_PATH:{$IDL_PATH}
+
+
+to your ~/.myrc file (if you're running this on a CfA machine). You can 
