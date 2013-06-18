@@ -3,8 +3,26 @@ README for MITTENS
 
 For the most part, MITTENS is just big group of IDL *.pro files that can be used for poking around in MEarth data. To use these tools, you will need to download the source from https://bitbucket.org/zberta/mearth-tools/, store them somewhere, and add that directory to your IDL_PATH environment variable by adding a line that looks something like
 
+# =======================================================================
+#  MEarth IDL Tools for Transits of Extrasolar Neptunes and Super-earths
+# =======================================================================
+
+# sets the directory where are all data (reprocessed LC's, search results, etc...) will be stored
+setenv MITTENS_DATA /pool/eddie1/zberta/mearth_data/
+
+# set the PATH to the MITTENS routines, and add it to the IDL PATH
 setenv MITTENS_PATH ~/idl_routines/zkb/mearth-tools
-setenv IDL_PATH +$MITTENS_PATH:{$IDL_PATH}
+setenv IDL_PATH +{$MITTENS_PATH}:{$IDL_PATH}
+
+# define an alias, so you can type "mittens" from the UNIX prompt
+alias mittens "idl mearth.pro"
+
+# the next two lines are needed to allow IDL to access the database
+setenv IDL_DLM_PATH /data/mearth1/db/idl:+~/idl_routines/galloy/idldoc
+setenv PGSERVICE mearth
+
+# =======================================================================
 
 
-to your ~/.myrc file (if you're running this on a CfA machine). You can 
+These tools will allow you to run the analysis pipeline (takes a long time, and best run inside a VNC window so you don't have to watch it) and explore the data and results with interactive data visualization tools.
+

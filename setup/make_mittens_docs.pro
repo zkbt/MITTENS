@@ -34,9 +34,9 @@ PRO make_mittens_docs
 ;
 ;-
 
-
-	file_delete, getenv('MITTENS_PATH')+'/docs/', /recu, /allo
-	idldoc, root=getenv('MITTENS_PATH'), output=getenv('MITTENS_PATH')+'/docs/', format_style='rst', $
+	code_docs_dir = 'routine_descriptions/'
+	file_delete, getenv('MITTENS_PATH')+'/' + code_docs_dir, /recu, /allo
+	idldoc, root=getenv('MITTENS_PATH'), output=getenv('MITTENS_PATH')+'/' + code_docs_dir, format_style='rst', $
 		title='MITTENS!', subtitle='MEarth IDL Tools for Transits of Extrasolar Neptunes and Super-earths'
-	spawn, 'firefox ' + getenv('MITTENS_PATH')+'/docs/index.html'
+	spawn, 'firefox ' + getenv('MITTENS_PATH')+'/' + code_docs_dir + 'index.html'
 END

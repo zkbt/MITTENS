@@ -1,0 +1,167 @@
+FUNCTION pdf_to_lc, candidate, vartools=vartools
+
+	; basic setup
+	common mearth_tools
+	common this_star
+	@filter_parameters
+
+	; load up files
+	if n_elements(candidate) eq 0 then begin
+		; prompt for which candidate to explore!
+		restore, star_dir + 'candidates_pdf.idl'
+		print_struct, best_candidates
+		if not keyword_set(which) then which = question(/number, /int, 'which candidate would you like to explore?')
+		candidate = best_candidates[which]	
+	endif
+
+	other_tel =  ~strmatch(star_dir, '*te0*')
+	; load up (this season of) this star
+	restore, star_dir + 'box_pdf.idl'
+	restore, star_dir + 'inflated_lc.idl'
+	
+
+	; create decorrelation/variability templates
+	;templates = generate_templates()
+	if ~other_tel then template_names = tag_names(templates)
+
+	; generate "nothings", one for each unique night of data (to allow fitting each separately)
+	nothings = generate_nothings(inflated_lc)
+	night_is_done = bytarr(n_elements(nothings))
+
+	; create placeholder light curves for the two halves of the model
+	systematics_model = fltarr(n_elements(inflated_lc))
+	variability_model = fltarr(n_elements(inflated_lc))
+	uncertainty_variability_model = fltarr(n_elements(inflated_lc))
+	uncertainty_overall_model = fltarr(n_elements(inflated_lc))
+	if ~other_tel then nightly_fits = replicate(spliced_clipped_season_fit[0], n_elements(spliced_clipped_season_fit), n_elements(nothings))
+
+	if ~other_tel then begin	
+		restore, star_dir + 'flares_pdf.idl'
+
+		; mask out points that have been idenified as being on flaring nights
+		if i_onflarenight[0] ge 0 then inflated_lc[i_onflarenight].okay = 0
+	endif	
+	; find the appropriate duration bin to match the candidate
+	duration_bin = median(boxes[0].duration[1:*]  - boxes[0].duration)
+	i_duration = value_locate(boxes[0].duration-duration_bin/2, candidate.duration)
+	; find the boxes that are constrained by data
+	i_interesting = where(boxes.n[i_duration] gt 0)
+	; find the in-transit boxes (for this candidate)
+
+	pad = long((max(boxes.hjd) - min(boxes.hjd))/candidate.period)+1 > long((max(candidate.hjd0) - min(boxes.hjd))/candidate.period)+1 > long((max(candidate.hjd0) - min(candidate.hjd0))/candidate.period)+1 
+
+	i_interestingintransit = where_intransit(boxes[i_interesting], candidate, i_oot=i_oot, /box, n_intransit, pad=pad);buffer=-candidate.duration/4
+
+	nights = round(boxes.hjd -mearth_timezone())
+	phased_time = (boxes.hjd - candidate.hjd0)/candidate.period + pad + 0.5
+	orbit_number = long(phased_time)
+	phased_time = (phased_time - orbit_number - 0.5)*candidate.period
+	in_an_intransit_box = bytarr(n_elements(inflated_lc))
+
+	if n_intransit gt 0 then begin
+		i_intransit = i_interesting[i_interestingintransit]
+		i_intransit = i_intransit[sort(abs(phased_time[i_intransit]))]
+	;	h = histogram(nights[i_intransit], reverse_indices=ri)
+		h = histogram(orbit_number[i_intransit], reverse_indices=ri)
+		ri_firsts = ri[uniq(ri[0:n_elements(h)-1])]
+		uniq_intransit =(ri[ri_firsts]); + ri[ri_firsts])/2; ri[((ri_firsts +ri_lasts)/2.)]
+		print, star_dir
+		event_hjds = boxes[i_intransit[uniq_intransit]].hjd
+		for i=0, n_elements(event_hjds)-1 do begin
+			print, 'HJD ' + string(event_hjds[i], format='(F9.3)') + ' = ' + rw(string(date_conv(event_hjds[i]+2400000.5d, 'R'))) + ' UT'
+		endfor
+
+		; fit transit nights
+		for i=0, n_elements(uniq_intransit)-1 do begin
+			if ~other_tel then fit = spliced_clipped_season_fit
+			this_box = boxes[i_intransit[uniq_intransit[i]]]
+			if ~other_tel then temp = fit_box(inflated_lc, templates, fit, priors, this_box, i_duration=i_duration, variability_model=variability_model, systematics_model=systematics_model,uncertainty_overall_model=uncertainty_overall_model, uncertainty_variability_model=uncertainty_variability_model)
+			i_intransitnights = where(nothings.hjd eq round(this_box.hjd - mearth_timezone()))
+			night_is_done[i_intransitnights] = 1
+			in_an_intransit_box = in_an_intransit_box or (abs(inflated_lc.hjd - this_box.hjd) lt this_box.duration[i_duration]/2.0)
+			if ~other_tel then nightly_fits[*,i_intransitnights] = fit
+
+		endfor
+	endif
+
+	; fit the remaining nights
+	for i=0, n_elements(nothings)-1 do begin
+		if night_is_done[i] eq 0 then begin
+			if ~other_tel then fit = spliced_clipped_season_fit
+			if ~other_tel then nothings[i] = fit_nothing(inflated_lc, templates, fit, priors, nothings[i], variability_model=variability_model, systematics_model=systematics_model,uncertainty_overall_model=uncertainty_overall_model, uncertainty_variability_model=uncertainty_variability_model)
+			if ~other_tel then nightly_fits[*,i] = fit
+		endif
+	endfor
+
+; 	plot, inflated_lc.flux
+; 	oplot, variability_model, color=250
+; 	oplot, variability_model + systematics_model, color=150
+
+; 	; find in-transit light curve points
+; 	i_intransit = where_intransit(inflated_lc, candidate, i_oot=i_oot, n_intransit)
+; 	n_oot = n_elements(inflated_lc) - n_intransit
+
+	; create new light curves
+	systematics_lc = inflated_lc
+	variability_lc =inflated_lc
+	cleaned_lc = inflated_lc
+	systematics_lc.flux = 0
+	variability_lc.flux = 0
+
+; 	; temporarily mask transits
+; 	oot_lc = inflated_lc
+; 	oot_lc[i_intransit].okay = 0
+
+	; fit out-of-transit points for systematics + variability
+;	season_fit = bayesfit(oot_lc, templates, spliced_clipped_season_fit, generate_priors(spliced_clipped_season_fit, /thinair), systematics_model=systematics_model, variability_model=variability_model)
+;	cleanplot
+;	xplot, /top
+;	loadct, 39
+;	plot, inflated_lc.flux
+;	oplot, color=150, systematics_model+variability_model
+	
+	variability_lc.flux = inflated_lc.flux - systematics_model
+	cleaned_lc.flux = variability_lc.flux - variability_model
+; 	restore, star_dir + 'flares_pdf.idl'
+; 	if i_onflarenight[0] gt 0 then cleaned_lc[i_onflarenight].okay = 0
+;	cleaned_lc = cleaned_lc[where(cleaned_lc.okay)]
+
+	if keyword_set(vartools) then begin
+		restore, star_dir + 'roughly_cleaned_toward_flat_lc.idl'
+		cleaned_lc = roughly_cleaned_lc
+		cleaned_lc.flux = median_filter(filtering_time = 3.0, cleaned_lc.hjd, cleaned_lc.flux)
+	endif	
+	save, filename=star_dir + 'cleaned_lc.idl', cleaned_lc, candidate, in_an_intransit_box
+	save, filename=star_dir + 'variability_lc.idl', variability_lc, candidate, uncertainty_variability_model, uncertainty_overall_model
+	save, filename=star_dir + 'nightly_fits.idl', nightly_fits, nothings
+
+END
+
+
+
+
+; 	; find in-transit light curve points
+; 	pad = long((max(boxes.hjd) - min(boxes.hjd))/candidate.period)+1
+; 	duration_bin = median(boxes[0].duration[1:*]  - boxes[0].duration)
+; 	i_duration = value_locate(boxes[0].duration-duration_bin/2, candidate.duration)	
+;  	nights = round(boxes.hjd -timezone)
+; 	i_interesting = where(boxes.n[i_duration] gt 0, n_interesting)
+; 	i_intransit = i_interesting[where_intransit(boxes[i_interesting], candidate, n_it, buffer=-candidate.duration/4)]
+; 	phased_time = (boxes.hjd - candidate.hjd0)/candidate.period + pad + 0.5
+; 	orbit_number = long(phased_time)
+; 	phased_time = (phased_time - orbit_number - 0.5)*candidate.period
+; 	i_intransit = i_intransit[sort(abs(phased_time[i_intransit]))]
+; 	h = histogram(nights[i_intransit], reverse_indices=ri)
+; 	ri_firsts = ri[uniq(ri[0:n_elements(h)-1])]
+; 	uniq_intransit =(ri[ri_firsts])
+; 	n_lcintransit =0
+; 	for i=0, n_elements(uniq_intransit)-1 do begin
+; 		this_box = {hjd0:boxes[i_intransit[uniq_intransit[i]]].hjd, duration:boxes[i_intransit[uniq_intransit[i]]].duration[i_duration]}
+; 		i_lcintransittemp = where_intransit(inflated_lc, this_box, i_oot=i_oottemp, n_lcintransittemp)
+; 		if i eq 0 then i_lcintransit = i_lcintransittemp else i_lcintransit = [i_lcintransittemp, i_lcintransit]
+; 		n_lcintransit +=  n_lcintransittemp
+; 		temp = boxes[i_intransit[uniq_intransit[i]]]
+; 		fit = spliced_clipped_season_fit
+; 		temp = fit_box(inflated_lc, templates, fit, priors, temp);, /display )
+; 
+; 	endfor

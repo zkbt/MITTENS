@@ -18,7 +18,7 @@
 ;
 ;-
 
-common mearth_tools, display, verbose, done_string, doing_string, skipping_string, tab_string, tf, possible_years, reduced_dir, working_dir, radii, interactive, yearly_filters, fake_dir, fake_trigger_dir, n_effective_for_rescaling, colorbars
+common mearth_tools, display, verbose, done_string, doing_string, skipping_string, error_string, tab_string, tf, possible_years, reduced_dir, working_dir, radii, interactive, yearly_filters, fake_dir, fake_trigger_dir, n_effective_for_rescaling, colorbars
 
 ; define data directories in which to look for data for each year
 possible_years = [2008,2009,2010,2011,2012] ; based on the year in which a season starts (= August/September/October); will need to modify for South
@@ -28,9 +28,10 @@ yearly_filters = ['iz', 'iz', 'I', 'iz','iz']
 ; set working directory; on CfA network or on laptop?
 ;if getenv('HOME') eq '/Users/zachoryberta' then working_dir = '/Users/zachoryberta/mearth/' else 
 
-working_dir = '/pool/eddie1/zberta/mearth_most_recent/'
+working_dir = getenv('MITTENS_DATA');'/pool/eddie1/zberta/mearth_most_recent/'
+file_mkdir, working_dir
 
-; set directory for general plots
+; set directory for general (population level) plots
 plot_dir = working_dir + 'plots/'
 ; fake_dir = 'fake_phased/'
 ; fake_trigger_dir = 'fake_trigger/'
@@ -60,7 +61,7 @@ printl
 print, ' now running MEarth IDL Tools for Transits of Extrasolar Neptunes and Super-earths (MITTENS)!'
 print, '   working_dir   = ', working_dir
 print, '   plotting?     = ', tf[display]
-print, '   interactive?     = ', tf[interactive]
+print, '   interactive?  = ', tf[interactive]
 print, '   verbose?      = ', tf[verbose]
 print, '   !quiet?       = ', tf[!quiet]
 printl
