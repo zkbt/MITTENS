@@ -57,7 +57,6 @@ FUNCTION box_folding_robot, input_candidate, boxes, nights=nights, pad=pad, k=k
             candidate.rescaling =  sqrt((chi_sq/(candidate.n_boxes -1) > 1.0))
             candidate.depth_uncertainty *= candidate.rescaling
           endif
-    
 	endif
           if keyword_set(display) and keyword_set(interactive) then begin
 	!p.multi=[0,1,2]

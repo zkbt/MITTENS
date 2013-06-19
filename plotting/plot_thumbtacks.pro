@@ -1,6 +1,6 @@
 pro plot_thumbtacks
 	cleanplot
-	if keyword_set(remake) then begin
+	;if keyword_set(remake) then begin
 		restore, 'thesis_sphere.idl'
 
 		c = compile_sample()
@@ -128,20 +128,20 @@ pro plot_thumbtacks
 
 			device, /close
 			epstopdf, filename
-	endfor
+		endfor
 
-	device, filename='status_hemisphere_legend.eps', /color, xsize=0.7, ysize=.85, /inches
-	!x.margin =[1,1]
-	!y.margin =[0,1]
-			loadct, 67, file='~/zkb_colors.tbl'
-;	temps = [300,400,500,600,700,800,900,1000,1100,1200,1300,1400,1500]
-;	temps = [300,450,600,750,900,1050,1200]
-	temps = [300,600,900,1200]
-	x = fltarr(n_elements(temps))
-	plot, x, temps, /nodata, xs=4, ys=4
-	plots, x, temps, psym=8, color=make_dye(temps)
-	
-	xyouts, x, temps-40, ' ' + string(form='(I4)',temps) + 'K', color =make_dye(temps), charthick=5, charsize=1
-	device, /close
-	epstopdf, 'status_hemisphere_legend.eps'
+		device, filename='status_hemisphere_legend.eps', /color, xsize=0.7, ysize=.85, /inches
+		!x.margin =[1,1]
+		!y.margin =[0,1]
+				loadct, 67, file='~/zkb_colors.tbl'
+	;	temps = [300,400,500,600,700,800,900,1000,1100,1200,1300,1400,1500]
+	;	temps = [300,450,600,750,900,1050,1200]
+		temps = [300,600,900,1200]
+		x = fltarr(n_elements(temps))
+		plot, x, temps, /nodata, xs=4, ys=4
+		plots, x, temps, psym=8, color=make_dye(temps)
+		
+		xyouts, x, temps-40, ' ' + string(form='(I4)',temps) + 'K', color =make_dye(temps), charthick=5, charsize=1
+		device, /close
+		epstopdf, 'status_hemisphere_legend.eps'
 END

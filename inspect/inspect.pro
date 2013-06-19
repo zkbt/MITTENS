@@ -59,7 +59,7 @@
 ;-
 
 PRO zkb_kill_widget, widget_name
-
+stop
 END
 ;------------------------------------------------------------------------------
 ;	procedure xinspect_ev
@@ -72,7 +72,7 @@ END
 ;*** work properly with the XManager.
 ;------------------------------------------------------------------------------
 PRO xinspect_ev, event
-common xinspect_common, child_ids, whatarewelookingat
+common xinspect_common, child_ids
 COMPILE_OPT hidden					; Don't appear in HELP
 							; output unless HIDDEN
 							; keyword is specified.
@@ -80,29 +80,13 @@ COMPILE_OPT hidden					; Don't appear in HELP
 WIDGET_CONTROL, event.id, GET_UVALUE = eventval		;find the user value
 							;of the widget where
 print_struct, event
-IF N_ELEMENTS(eventval) EQ 0 THEN RETURN
 print, "eventval is : ", eventval							;the event occured
+IF N_ELEMENTS(eventval) EQ 0 THEN RETURN
 
-CASE tag_names(event, /struct) of 
-	'WIDGET_LIST': 	begin
-				if strmatch(eventval[0], 'phased*') then begin
-					whatarewelookingat.mode = 'candidate'
-					whatarewelookingat.i_candidate = event.index
-					process_with_candidate, whatarewelookingat.best_candidates[whatarewelookingat.i_candidate]
-				endif else if strmatch(eventval[0], 'single*') then begin
-					print, 'single event mode not ready yet!'
-				endif 
-			end
-	'':		begin
-				if n_elements(eventval) gt 1 then begin
-				 	thebuttonclicked = eventval[event.value]
-				endif
-			end
-	'WIDGET_BUTTON': thebuttonclicked = eventval
-ENDCASE
-; 
+if n_elements(eventval) gt 1 then begin
+	thebuttonclicked = eventval[event.value]
+endif else thebuttonclicked = eventval
 
-if n_elements(thebuttonclicked) eq 0 then return
 print, 'thebuttonclicked is ', thebuttonclicked
 CASE thebuttonclicked OF
 
@@ -174,70 +158,6 @@ END ;============= end of xinspect event handling routine task =============
 PRO xinspect, GROUP = GROUP, BLOCK=block
 common xinspect_common
 
-
-
-;===========================================================================================================================
-;===========================================================================================================================
-;===========================================================================================================================
-
-	; CLEAN THIS UP!
-	octopus = 1
-	diag=1
-	common mearth_tools
-	common this_star
-	if keyword_set(external_dir) then begin
-	;	file_copy, star_dir + 'candidates_pdf.idl',  star_dir + 'backup_candidates_pdf.idl'
-		if keyword_set(octopus) then file_copy, external_dir + 'octopus_candidates_pdf.idl', star_dir + 'temp_candidates_pdf.idl', /over else file_copy, external_dir + 'candidates_pdf.idl', star_dir + 'temp_candidates_pdf.idl', /over
-	endif
-	; always use the star_dir that was set before running explore_pdf
-	candidate_star_dir = star_dir
-	if strmatch(candidate_star_dir, '*combined*') gt 0 then begin
-		combined=1
-		if strmatch(candidate_star_dir, '*ye*') then year_of_combination = long(stregex(/extract, stregex(/extrac, candidate_star_dir, 'ye[0-9]+'), '[0-9]+'))
-	endif
-	printl
-	print, 'exploring ', candidate_star_dir
-	printl
-
-	if keyword_set(octopus) then candidates_filename = 'octopus_candidates_pdf.idl' else if keyword_set(vartools) then candidates_filename='vartools_bls.idl' else candidates_filename = 'candidates_pdf.idl'
-	if keyword_set(external_dir) then candidates_filename = 'temp_candidates_pdf.idl'
-	; select the candidate to explore
-	nothing  = {period:1d8, hjd0:0.0d, duration:0.02, depth:0.0, depth_uncertainty:1000.0, n_boxes:0, n_points:0, rescaling:1.0, ratio:0.0}
-
-	if file_test(star_dir + candidates_filename) eq 0 then begin
-		;mprint, skipping_string, ' no candidate pdf was found!'
-		;return
-	endif else begin
-		restore, candidate_star_dir + candidates_filename
-		if keyword_set(vartools) then best_candidates = bls
-	endelse
-
-
-	if n_elements(best_candidates) eq 0 then best_candidates = nothing else best_candidates = [best_candidates, nothing]
-;	if not keyword_set(which) then begin
-;		print_struct, best_candidates
-;		which = question(/number, /int, 'which candidate would you like to explore?')
-;	;	print_struct, best_candidates[which]
-;	endif
-
-	restore, star_dir() + 'box_pdf.idl'
-	sn = max(boxes.depth/boxes.depth_uncertainty, dim=1)
-	n_peaks = 20
-	peaks = select_peaks(sn, n_peaks)
-	which_duration = intarr(n_peaks)
-	for i=0, n_peaks-1 do begin
-		i_match = where(boxes[peaks[i]].depth/boxes[peaks[i]].depth_uncertainty eq sn[peaks[i]], n_match)
-		if n_match eq 0 then stop
-		which_duration[i] = min(i_match)
-		temp = {hjd:boxes[peaks[i]].hjd, duration:boxes[peaks[i]].duration[which_duration[i]], depth:boxes[peaks[i]].depth[which_duration[i]], depth_uncertainty:boxes[peaks[i]].depth_uncertainty[which_duration[i]]}
-		if n_elements(best_boxes) eq 0 then best_boxes = temp else best_boxes = [best_boxes, temp]
-	endfor
-	boxes_strings = rw(string(best_boxes.hjd)) +', D/sigma=' + rw(string(best_boxes.depth/best_boxes.depth_uncertainty))
-
-;===========================================================================================================================
-;===========================================================================================================================
-;===========================================================================================================================
-
 ;*** If xinspect can have multiple copies running, then delete the following
 ;*** line and the comment for it.  Often a common block is used that prohibits
 ;*** multiple copies of the widget application from running.  In this case, 
@@ -261,26 +181,16 @@ xinspectbase = WIDGET_BASE(TITLE = "xinspect", /column)	;create the main base
 ;*** like to add other routines or remove any of these, remove them both below
 ;*** and in the xinspect_ev routine.
 
+outputs = widget_base(xinspectbase, row=1, /frame)
+eps = widget_button(outputs, uvalue='eps', value='save to EPS')
+png = widget_button(outputs, uvalue='png', value='save to PNG')
+blog = widget_button(outputs, uvalue='blog', value='post to blog')
 
-whatarewelookingat = {best_candidates:best_candidates, best_boxes:best_boxes, mode:'candidate', i_candidate:0, i_box:0}
-; eps = widget_button(outputs, uvalue='eps', value='save to EPS')
-; png = widget_button(outputs, uvalue='png', value='save to PNG')
-; blog = widget_button(outputs, uvalue='blog', value='post to blog')
-
-plotting_frame = widget_base(xinspectbase, /row, /frame)
-
-spawn, 'cat ' + star_dir + 'pos.txt', result1
-spawn, 'cat ' + star_dir + 'lspm_obs.txt', result2
-spawn, 'cat ' + star_dir + 'lspm_phys.txt', result3
-text = widget_text(plotting_frame, xsize=20, ysize=15, value=[result1, result2, result3])
-
-skymap_draw = widget_draw(plotting_frame, xsize=400, ysize=400)
-
-
-thingstoplot = widget_base(plotting_frame, /row, /frame, /nonexclusive)
+thingstoplot = widget_base(xinspectbase, row=2, /frame, /nonexclusive)
 thingstoplot_values = ['event', 'orb. phase', 'rot. phase', 'time', '#', 'D/sigma', 'correlations', 'periodogram', 'MarPLE']
-thingstoplot_setvalues = [0,0,0,0,0,0,0,0,0]
-thingstoplot = cw_bgroup(plotting_frame, thingstoplot_values, /COLUMN, /NONEXCLUSIVE, LABEL_TOP='What do you want to plot?', /FRAME, uvalue=thingstoplot_values, uname='thingstoplot', set_val=thingstoplot_setvalues)
+thingstoplot_setvalues = [0,1,0,0,0,0,0,0,0]
+thingstoplot = cw_bgroup(xinspectbase, thingstoplot_values, /COLUMN, /NONEXCLUSIVE, LABEL_TOP='Plots to Show', /FRAME, uvalue=thingstoplot_values, uname='thingstoplot', set_val=thingstoplot_setvalues)
+
 
 
 ; opends9 = widget_base(xinspectbase, /column)
@@ -289,22 +199,8 @@ thingstoplot = cw_bgroup(plotting_frame, thingstoplot_values, /COLUMN, /NONEXCLU
 ; imagesneartransit = widget_button(opends9, uvalue='ds9 near-transit images', value='ds9 near-transit images')
 
 
-; opends9_values = ['[1 image]/night', 'in-transit', 'near-transit']
-; opends9 = cw_bgroup(xinspectbase, opends9_values, /COLUMN, LABEL_TOP='Open Images in ds9?', /FRAME, uvalue=opends9_values)
-
-text = widget_label(xinspectbase, value='How do you want to explore?')
-explore_base = widget_base(xinspectbase, row=1, /frame)
-	explorecandidate_base = widget_base(explore_base, /col)
-	exploresingle_base = widget_base(explore_base, /col)
-
-text = widget_label(explorecandidate_base, value='Phased Candidates')
-candidate_strings = rw('P='+string(best_candidates.period)) + ', D/sigma=' + rw(string(best_candidates.depth/best_candidates.depth_uncertainty))
-candidate_list = widget_list(explorecandidate_base, value=candidate_strings, ysize=5, uvalue='phased'+rw(indgen(n_elements(candidate_strings))))
-
-text = widget_label(exploresingle_base, value='Interesting Single Events')
-boxes_list = widget_list(exploresingle_base, value=boxes_strings, ysize=5, uvalue='single'+rw(indgen(n_elements(candidate_strings))))
-
-
+opends9_values = ['[1 image]/night', 'in-transit', 'near-transit']
+opends9 = cw_bgroup(xinspectbase, opends9_values, /COLUMN, LABEL_TOP='Open Images in ds9?', /FRAME, uvalue=opends9_values)
 
 done = WIDGET_BUTTON(xinspectbase, value='Done', uvalue='Done') 
 
@@ -319,12 +215,6 @@ xinspect_variables = {xinspectbase:xinspectbase}
 
 WIDGET_CONTROL, xinspectbase, /REALIZE			;create the widgets
 							;that are defined
- WIDGET_CONTROL, skymap_draw, GET_VALUE = draw_window 
-
-
-wset, draw_window
-lspm = fix(stregex(/ext, stregex(/ext, star_dir(), 'ls[0-9]+'), '[0-9]+')) 
-plot_skymap, lspm
 
 ;orb. phase
 

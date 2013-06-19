@@ -18,7 +18,7 @@
 ;
 ; CATEGORY:
 ;	Widgets.
-;
+; ;
 ; CALLING SEQUENCE:
 ;	xlc_time
 ;
@@ -369,7 +369,7 @@ context_button = widget_button(bottomselect_base, uvalue='context', value='see i
 WIDGET_CONTROL, xlc_timebase, /REALIZE
 
 ; figure out what window index correponds to the draw window
- WIDGET_CONTROL, draw, GET_VALUE = draw_window 
+WIDGET_CONTROL, draw, GET_VALUE = draw_window 
 
 ; first pass at plot
 WSET, draw_window 

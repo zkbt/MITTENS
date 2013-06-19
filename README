@@ -14,6 +14,9 @@ setenv MITTENS_DATA /pool/eddie1/zberta/mearth_data/
 setenv MITTENS_PATH ~/idl_routines/zkb/mearth-tools
 setenv IDL_PATH +{$MITTENS_PATH}:{$IDL_PATH}
 
+# this line temporarily necessary, until all my weird little code bits are nicely packaged
+setenv IDL_PATH {$IDL_PATH}:+{$HOME}/idl_routines
+
 # define an alias, so you can type "mittens" from the UNIX prompt
 alias mittens "idl mearth.pro"
 
@@ -22,7 +25,6 @@ setenv IDL_DLM_PATH /data/mearth1/db/idl:+~/idl_routines/galloy/idldoc
 setenv PGSERVICE mearth
 
 # =======================================================================
-
 
 These tools will allow you to run the analysis pipeline (takes a long time, and best run inside a VNC window so you don't have to watch it) and explore the data and results with interactive data visualization tools.
 
