@@ -24,7 +24,7 @@ FUNCTION generate_priors, fit, thinair=thinair, bootstrap=bootstrap, assume_star
 			cm_center =    0.00301826    
 			cm_width =   0.00178824
 		endif
-		if ye eq 12 then begin
+		if ye ge 12 then begin
 			cm_center =    0.00301826    
 			cm_width =   0.00178824
 		endif

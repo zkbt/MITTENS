@@ -17,7 +17,7 @@ PRO combine_boxes, lspm, remake=remake, now=now, year=year
 	
 
 	; don't remake, if the combined PDF is more recent than the uncombined PDF's
-	if min(is_uptodate(star_dir + 'box_pdf.idl', f+'box_pdf.idl')) gt 0 then begin
+	if min(is_uptodate(star_dir + 'box_pdf.idl', f+'box_pdf.idl')) gt 0 and ~keyword_set(remake) then begin
 		mprint, 'the combined PDF is more recent than all of the uncombined ones!'
 		mprint, skipping_string, 'not merging!'
 		return
@@ -62,10 +62,19 @@ PRO combine_boxes, lspm, remake=remake, now=now, year=year
 			mprint, tab_string, n_elements(inflated_lc), ' binned light curve points'
 			mprint, tab_string, n_elements(boxes), ' boxes'
 
-			if file_test(star_dir + 'pos.txt') eq 0 then begin
+
+			ls = long(stregex(/ext, stregex(/ext, this_star_dir, 'ls[0-9]+'), '[0-9]+'))	
+			ye = long(stregex(/ext, stregex(/ext, this_star_dir, 'ye[0-9]+'), '[0-9]+'))
+			te = long(stregex(/ext, stregex(/ext, this_star_dir, 'te[0-9]+'), '[0-9]+'))
+
+			substar = {star_dir:this_star_dir, ls:ls[0], ye:ye[0], te:te[0], n_exposures:n_elements(ext_var), n_observations:n_elements(inflated_lc), n_boxes:n_elements(boxes)}
+			if n_elements(components) eq 0 then components = substar else components = [components, substar]
+	
+			
+		;	if file_test(star_dir + 'pos.txt') eq 0 then begin
 				if file_test(star_dir) eq 0 then file_mkdir, star_dir
-				file_copy, this_star_dir + 'pos.txt', star_dir, /over
-			endif
+		;		file_copy, this_star_dir + 'pos.txt', star_dir, /over
+		;	endif
 
 $`
 ;			restore, star_dir + 'sfit.idl'
@@ -102,7 +111,7 @@ $`
 	
 
 	boxes = smoothed_boxes[i]
-	plot_boxes, boxes
+	if keyword_set(display) then plot_boxes, boxes
 
 	i = sort(big_inflated_lc.hjd)
 	inflated_lc = big_inflated_lc[i]
@@ -112,6 +121,7 @@ $`
 	save, filename=star_dir + 'box_pdf.idl', boxes
 	save, filename=star_dir + 'inflated_lc.idl', inflated_lc
 	save, filename=star_dir + 'ext_var.idl', ext_var
+	save, filename=star_dir + 'components.idl', components
 ;	save, filename=star_dir + 'sfit.idl', sfit
 		
 	i = sort(raw_big_target_lc.hjd)

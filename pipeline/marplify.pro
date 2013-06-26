@@ -34,9 +34,11 @@ PRO marplify, lspm, old=old, remake=remake, year=year, fake=fake, nofold=nofold,
 	common mearth_tools
 	clear
 
-; 	; get LSPM info
-; 	if keyword_set(lspm) then i = get_lspm_info(lspm)
+	if ~keyword_set(lspm) then lspm = long(stregex(ls_dir(), '[0-9]+', /ext))
 
+;;;;;;;;;;;;;;;;;;!!!!!!!!!!!!!!!!!!!!!!
+	old = 1
+;;;;;;;;;;;;;;;;;;!!!!!!!!!!!!!!!!!!!!!!
 
 	; by default, just look at the star from within this year
 	if keyword_set(old) then begin
@@ -60,7 +62,7 @@ PRO marplify, lspm, old=old, remake=remake, year=year, fake=fake, nofold=nofold,
 		
 		; switch into this star
 		set_star, ls[i],  ye[i], te[i]
-		process_staryete
+		process_staryete, nofold=nofold, remake=remake, bulldoze=bulldoze
 
 		if n_elements(radii) lt 6 then stop
 	endfor
@@ -79,22 +81,22 @@ PRO marplify, lspm, old=old, remake=remake, year=year, fake=fake, nofold=nofold,
 		return
 	endif
 
-	; run the phased search on the combined PDF timeseries
-	if is_astonly() eq 0 and ~keyword_set(nofold)  then begin
-		if file_test(star_dir() + 'inprogress.txt') eq 0 then begin 
-			; make a temporary file to prevent duplication of effort for this long step
-			openw, lun, star_dir() + 'inprogress.txt', /get_lun
-			spawn, 'hostname', hostname
-			printf, lun, hostname
-			printf, lun, systime()
-			close, lun
-			free_lun, lun
-	
-			if ~is_uptodate(star_dir() + 'boxes_all_durations.txt.bls', star_dir() + 'box_pdf.idl') or ~is_uptodate(star_dir() +  'octopus_candidates_pdf.idl', star_dir() + 'box_pdf.idl')  then call_origami_bot
-	;		fold_boxes
-			file_delete, star_dir() + 'inprogress.txt', /allow
-		endif 
-	endif
+; ; 	run the phased search on the combined PDF timeseries
+; 	if is_astonly() eq 0 and ~keyword_set(nofold)  then begin
+; 		if file_test(star_dir() + 'inprogress.txt') eq 0 then begin 
+; 			make a temporary file to prevent duplication of effort for this long step
+; 			openw, lun, star_dir() + 'inprogress.txt', /get_lun
+; 			spawn, 'hostname', hostname
+; 			printf, lun, hostname
+; 			printf, lun, systime()
+; 			close, lun
+; 			free_lun, lun
+; 	
+; 		if ~is_uptodate(star_dir() + 'boxes_all_durations.txt.bls', star_dir() + 'box_pdf.idl') or ~is_uptodate(star_dir() +  'octopus_candidates_pdf.idl', star_dir() + 'box_pdf.idl')  then call_origami_bot
+; 			fold_boxes
+; 			file_delete, star_dir() + 'inprogress.txt', /allow
+; 		endif 
+; 	endif
 
 	; summarize the statistics in fast-reading files
 	candidate_filename =  'candidates_pdf.idl'

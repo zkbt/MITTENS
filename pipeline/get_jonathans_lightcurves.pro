@@ -144,16 +144,20 @@ PRO get_jonathans_lightcurves, filename, remake=remake
 						;	make_field_image, star_dir, jmi_file_prefix, old=old
 					
 							if n_datapoints gt 0 then begin
-					
-								; define the set of stars that is not the target star
-								i_comparisons = where((fits_lc.class eq -1 or (fits_lc.class eq 9 and fits_lc.pointer ne fits_lc[i_target].pointer)) and fits_lc.medflux lt fits_lc[i_target].medflux+2.5, n_comparisons);and total(finite(/nan, fits_lc.flux), 1) lt (0.75*n_datapoints > 1) 
 								limiting_mag_offset = 2.5
 					
+								; define the set of stars that is not the target star
+								i_comparisons = where((fits_lc.class eq -1 or (fits_lc.class eq 9 and fits_lc.pointer ne fits_lc[i_target].pointer)) and fits_lc.medflux lt fits_lc[i_target].medflux+limiting_mag_offset, n_comparisons);and total(finite(/nan, fits_lc.flux), 1) lt (0.75*n_datapoints > 1) 
+
 								; push down to fainter comparisons if there aren't enough bright ones
 								while (n_comparisons eq 0) and (limiting_mag_offset) lt 10 do begin
 									limiting_mag_offset += 0.5
 									i_comparisons = where((fits_lc.class eq -1 or (fits_lc.class eq 9 and fits_lc.lspm ne fits_lc[i_target].lspm))  and fits_lc.medflux lt fits_lc[i_target].medflux+ limiting_mag_offset, n_comparisons); and total(finite(/nan, fits_lc.flux), 1) lt (0.75*n_datapoints > 1)
 								endwhile
+								comparison_weights = median(fits_lc[i_comparisons].weight, dim=1)
+								i_sorted_comps = reverse(sort(comparison_weights))
+								i_comparisons = i_comparisons[i_sorted_comps[0:((n_elements(i_sorted_comps)-1) < 20)]]
+							;	plot, fits_lc[i_comparisons].weight
 								comparisons_pointers = fits_lc[i_comparisons].pointer
 								
 								; create structures to store time-independent information on every star in the field

@@ -43,4 +43,6 @@ PRO set_star, lspm, year, tel, combine=combine, random=random, n=n, days=days, f
 		mprint, ' star set to ', star_dir
 		mprint, '||||||||||||||||||||||||||||||||||||||'
 	endelse
+	!prompt = '|mittens{' + star_dir + '}| '
+
 END

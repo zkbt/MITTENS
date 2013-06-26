@@ -65,6 +65,5 @@ FUNCTION bayesfit, lc, templates, fit, priors, outputs=outputs, systematics_mode
 		converged = abs((rescaling - previous_rescaling)/rescaling) lt 0.01 or count gt 20
 ;		fit[where(fit.solved)].uncertainty*=fit[n_elements(fit)-1].coef	; make sure this is legit!
 	endwhile
-	print, ''
 	return,fit
 END

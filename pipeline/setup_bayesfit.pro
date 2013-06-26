@@ -54,10 +54,10 @@ FUNCTION setup_bayesfit, lc, templates, display=display, use_sin=use_sin, fix_ni
 	; set up each template for fitting
 	for i=0, n_tags(templates)-1 do begin
 		if n_elements(templates.(i)) ne n_elements(lc) then begin
-			printl, ':-('
-			print, "     in setup_bayesfit.pro, light curve and template sizes don't match!"
-			print, "             GIVING UP!"
-			printl, ':-('
+			mprint, ':-(:-(:-(:-(:-(:-(:-(:-(:-(:-(:-(:-(:-(:-(:-(:-(:-(:-('
+			mprint, "     in setup_bayesfit.pro, light curve and template sizes don't match!"
+			mprint, "             GIVING UP!"
+			mprint, ':-(:-(:-(:-(:-(:-(:-(:-(:-(:-(:-(:-(:-(:-(:-(:-(:-(:-('
 			return, lc
 		end
 		; clean + normalize the templates	

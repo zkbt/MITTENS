@@ -3,8 +3,15 @@ PRO origami_to_candidates, remake=remake, n_save=n_save
 	common this_star
 	common mearth_tools
 
-	if is_uptodate(star_dir + 'octopus_candidates_pdf.idl', star_dir + 'boxes_all_durations.txt.bls') and ~keyword_set(remake) then return
-	if ~file_test(star_dir() + "boxes_all_durations.txt.bls") and ~file_test(star_dir() + 'box_pdf.idl') and ~keyword_set(remake)  then return
+	if is_uptodate(star_dir + 'octopus_candidates_pdf.idl', star_dir + 'boxes_all_durations.txt.bls') and ~keyword_set(remake) then begin
+		mprint, skipping_string, 'candidates are up-to-date with with the origami spectrum; skipping origami_to_candidates'
+		return
+	endif
+	if ~file_test(star_dir() + "boxes_all_durations.txt.bls") and ~file_test(star_dir() + 'box_pdf.idl') and ~keyword_set(remake) then begin
+		mprint, skipping_string, 'no origami spectrum was found, so origami_to_candidates cannot be run'
+		return
+	endif
+
 	restore, star_dir() + 'box_pdf.idl'
 
 ; before accounting for antitransits
@@ -14,7 +21,14 @@ PRO origami_to_candidates, remake=remake, n_save=n_save
 ; ; ; ; 	multiduration_SN = octopus.(0)[1:n_durations, *]
 
 	mprint, doing_string, 'converting an origami spectrum into a few discrete candidates'
-	mprint, tab_string
+	spawn, 'head -1 ' + star_dir() + "boxes_all_durations.txt.bls", result
+	if strmatch(result, 'no phased candidates*') then begin
+		mprint, tab_string, skipping_string, result
+		nothing  = {period:1d8, hjd0:0.0d, duration:0.02, depth:0.0, depth_uncertainty:1000.0, n_boxes:0, n_points:0, rescaling:1.0, ratio:0.0}
+		best_candidates = nothing
+		save, filename=star_dir + 'octopus_candidates_pdf.idl', best_candidates
+		return
+	endif
 	octopus = read_ascii(star_dir() + "boxes_all_durations.txt.bls")
 	n_durations = (n_elements(octopus.(0)[*,0]) - 1)/2
 	periods = octopus.(0)[0,*]
@@ -22,7 +36,7 @@ PRO origami_to_candidates, remake=remake, n_save=n_save
 	multiduration_SN = octopus.(0)[indgen(n_durations)*2+1, *]
 	upward_SN = max(octopus.(0)[indgen(n_durations)*2+2, *], dim=1)
 
-	if ~keyword_set(n_save) then n_save = 10
+	if ~keyword_set(n_save) then n_save = 5
 	durations = boxes[0].duration
 	candidate_structure = {period:0.0d, hjd0:0.0d, duration:0.0, depth:0.0, depth_uncertainty:0.0, n_boxes:0, n_points:0, rescaling:1.0, ratio:0.0}
 	temp_candidate = candidate_structure
@@ -77,6 +91,7 @@ PRO origami_to_candidates, remake=remake, n_save=n_save
 	for i=0, n_durations-1 do begin
 		sn = multiduration_SN[i,*]
 		i_finite = where(finite(sn))
+	;	stop
 		period_peaks = i_finite[select_peaks(sn[i_finite], n_save, pad=10)]	; turned off reverse
 	;	print, 'looking  at the ', i, 'th duration; it is ', durations[i]
 		for j=0, n_elements(period_peaks)-1 do begin
@@ -93,6 +108,6 @@ PRO origami_to_candidates, remake=remake, n_save=n_save
 	best_candidates = peak_candidates[sorted[0:n_save-1]]
 	save, filename=star_dir + 'octopus_candidates_pdf.idl', best_candidates
 	; plot the spectra
-
+	mprint, done_string
 	
 END

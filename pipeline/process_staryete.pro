@@ -1,4 +1,4 @@
-PRO process_staryete, bulldoze=bulldoze, remake=remake, lenient=lenient,  baddatesokay=baddatesokay, trimtransits=trimtransits, fake=fake
+PRO process_staryete, bulldoze=bulldoze, remake=remake, lenient=lenient,  baddatesokay=baddatesokay, trimtransits=trimtransits, fake=fake, nofold=nofold
 	common mearth_tools
 	common this_star
 
@@ -19,7 +19,7 @@ PRO process_staryete, bulldoze=bulldoze, remake=remake, lenient=lenient,  baddat
 			free_lun, lun
 	
 			; print out basic information on the star to a text file
-			if file_test(star_dir() + 'lspm_info.idl') eq 0 then print_star, /quick
+			if file_test(ls_dir() + 'lspm_info.idl') eq 0 then print_star, /quick
 	
 			; remove obviously bad observations from consideration, bin exposure chunks
 			weed_lightcurve, remake=remake, lenient=lenient,  baddatesokay=baddatesokay, trimtransits=trimtransits
@@ -41,15 +41,15 @@ PRO process_staryete, bulldoze=bulldoze, remake=remake, lenient=lenient,  baddat
 				if is_astonly() eq 0 then fake_triggers, 60000, remake=remake
 			endif
 
-			; run the phased search on the single-telescope-year PDF timeseries
-			if is_astonly() eq 0 and ~keyword_set(nofold)  then begin
-				if ~is_uptodate(star_dir() + 'boxes_all_durations.txt.bls', star_dir() + 'box_pdf.idl') $
-				or ~is_uptodate(star_dir() +  'octopus_candidates_pdf.idl', star_dir() + 'box_pdf.idl') $
-				then call_origami_bot
-
-			;	if ~is_uptodate(star_dir() + 'boxes_all_durations.txt.bls', star_dir() + 'box_pdf.idl')  then call_origami_bot
-;			;;	if ~is_uptodate(star_dir() + 'vartools/roughly_cleaned_toward_flat_lc.ascii.bls', star_dir() + 'target_lc.idl') then run_vartools
-			endif
+; 			; run the phased search on the single-telescope-year PDF timeseries
+; 			if is_astonly() eq 0 and ~keyword_set(nofold)  then begin
+; 				if ~is_uptodate(star_dir() + 'boxes_all_durations.txt.bls', star_dir() + 'box_pdf.idl') $
+; 				or ~is_uptodate(star_dir() +  'octopus_candidates_pdf.idl', star_dir() + 'box_pdf.idl') $
+; 				then call_origami_bot
+; 
+; 			;	if ~is_uptodate(star_dir() + 'boxes_all_durations.txt.bls', star_dir() + 'box_pdf.idl')  then call_origami_bot
+; ;			;;	if ~is_uptodate(star_dir() + 'vartools/roughly_cleaned_toward_flat_lc.ascii.bls', star_dir() + 'target_lc.idl') then run_vartools
+; 			endif
 			file_delete, star_dir() + 'inprogress.txt', /allow
 
 			; print a timestamp to a file
@@ -59,4 +59,5 @@ PRO process_staryete, bulldoze=bulldoze, remake=remake, lenient=lenient,  baddat
 			free_lun, lun
 			close, /all
 		endif
+		
 END

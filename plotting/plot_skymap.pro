@@ -11,7 +11,7 @@ loadct, 0
 
 		c = compile_sample()
 ;
-		sample = struct_conv({lspm:c.lspm, radius:c.radius, mass:c.mass, distance:c.d, v:c.v, k:c.k, ra:c.ra*!pi/180, dec:c.dec*!pi/180})
+		sample = struct_conv({lspm:c.lspmn, radius:c.radius, mass:c.mass, distance:c.distance, v:c.v, k:c.k, ra:c.ra*!pi/180, dec:c.dec*!pi/180})
 ; 		sample_phased_t50 = fltarr(n_elements(c), n_elements(radii))+1500
 ; 		sample_triggered_t50 = fltarr(n_elements(c), n_elements(radii))+1500
 ; 		sample_nobs =  fltarr(n_elements(c), n_elements(radii))

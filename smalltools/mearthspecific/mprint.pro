@@ -1,4 +1,4 @@
-PRO mprint, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o
+PRO mprint, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, line=line
 ;+
 ; NAME:
 ;	mprint
@@ -23,7 +23,12 @@ PRO mprint, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o
   common mearth_tools
   if ~keyword_set(verbose) then return
   
+	if keyword_set(line) then begin
+		print, '================================================================'
+		return
+	endif
   case n_params() of
+   0: print
    1: print, a
    2: print, a, b
    3: print, a, b, c

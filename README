@@ -1,5 +1,8 @@
-README for MITTENS
-==================
+This README describes the MITTENS', the MEarth IDL Tools for Transits of Extrasolar Neptunes and Super-earths. It contains information about how to install them, when and how they should be run to keep the processing of incoming data (and modifications to the database) up to date, and how to use them to explore, visualize, and interact with MEarth light curve data.
+
+===============================
+BASIC INSTALLATION INSTRUCTIONS
+===============================
 
 For the most part, MITTENS is just big group of IDL *.pro files that can be used for poking around in MEarth data. To use these tools, you will need to download the source from https://bitbucket.org/zberta/mearth-tools/, store them somewhere, and add that directory to your IDL_PATH environment variable by adding a line that looks something like
 
@@ -11,11 +14,11 @@ For the most part, MITTENS is just big group of IDL *.pro files that can be used
 setenv MITTENS_DATA /pool/eddie1/zberta/mearth_data/
 
 # set the PATH to the MITTENS routines, and add it to the IDL PATH
-setenv MITTENS_PATH ~/idl_routines/zkb/mearth-tools
+setenv MITTENS_PATH /home/zberta/idl_routines/zkb/mearth-tools
 setenv IDL_PATH +{$MITTENS_PATH}:{$IDL_PATH}
 
 # this line temporarily necessary, until all my weird little code bits are nicely packaged
-setenv IDL_PATH {$IDL_PATH}:+{$HOME}/idl_routines
+setenv IDL_PATH {$IDL_PATH}:+/home/zberta/idl_routines
 
 # define an alias, so you can type "mittens" from the UNIX prompt
 alias mittens "idl mearth.pro"
@@ -27,4 +30,53 @@ setenv PGSERVICE mearth
 # =======================================================================
 
 These tools will allow you to run the analysis pipeline (takes a long time, and best run inside a VNC window so you don't have to watch it) and explore the data and results with interactive data visualization tools.
+
+====================================
+SCHEDULE FOR RUNNING VARIOUS MITTENS
+====================================
+The MITTENS pipeline consists of lots of different routines that convert, through a series of cascading steps, Jonathan's MEarth light curve files into MarPLEs and planet candidates, ready for visualizing. These steps are best run more or less on the following schedule:
+
+--------
+
+[weekly]
+
+Whenever new data comes in, MITTENS will need to be run to propagate these data into the MarPLES and to search them for new candidates. All steps except the phased search can be performed in about a day (for five years of data); the phased search will take longer. Here are the commands:
+
+fits_into_lightcurves
+; open MEarth FITS curves,
+; pull out target stars, 
+; save lightcurves (+ more!) into MITTENS directories
+
+lightcurves_into_marples
+; process light curves into MarPLES,
+; starting in individual star-year-telescope chunks,
+; then combining those chunks into star-year chunks and star chunks
+
+marples_into_candidates
+; take MarPLEs, in either star-year or star chunks,
+; and search all relevant periods, phases, and durations 
+; for the best possible periodic planet candidates
+
+--------
+
+[weekly]
+
+Once the raw data have been processed through into MarPLEs and candidates, run the following commands to summarize the results. They will save files that will be read in by xinspect for navigating throughout the sample.
+
+load_summary_of_observations
+load_summary_of_marples
+load_summary_of_candidates
+load_ensemble_of_marples
+load_ensemble_of_lightcurves
+
+---
+[monthly?}
+Whenever new measurements enter the database that could affect the stellar parameter estimates, the MITTENS directories will need to have their internal stellar parameter estimates updated. To do so, run from the |mittens| prompt:
+
+load_stellar_parameters
+; runs an SQL query, save the structure in the MITTEN directory 
+
+repopulate_stars_with_new_parameters
+; goes into each star directory, and replaces its stellar parameters
+---
 

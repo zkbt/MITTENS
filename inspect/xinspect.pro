@@ -3,19 +3,7 @@
 ;	xinspect
 ;
 ; PURPOSE:
-;	This routine is a template for widgets that use the XManager.  Use
-;	this template instead of writing your widget applications from
-;	"scratch".
-;
-;	This documentation should be altered to reflect the actual 
-;	implementation of the xinspect widget.  Use a global search and 
-;	replace to replace the word "xinspect" with the name of the routine 
-;	you would like to use. 
-;
-;	All the comments with a "***" in front of them should be read, decided 
-;	upon and removed for your final copy of the xinspect widget
-;	routine.
-;
+;	
 ; CATEGORY:
 ;	Widgets.
 ;
@@ -58,122 +46,105 @@
 ;	Created from a template written by: Steve Richards, January, 1991.
 ;-
 
-PRO zkb_kill_widget, widget_name
+PRO xinspect_ev, event
+
+	; set up common variables, to keep track of throughout xinspect process
+	common xinspect_common, child_ids, whatarewelookingat, xinspect_coordinate_conversions, xinspect_camera
+	COMPILE_OPT hidden	; prevent this sub-procedure from showing up in HELP
+
+	; find the uservalue of the widget where the event happened
+	WIDGET_CONTROL, event.id, GET_UVALUE = eventval	
+
+
+
+	; if the event is unidentifiable, then return
+	IF N_ELEMENTS(eventval) EQ 0 THEN RETURN
+
+	; debug
+	help, event, eventval
+
+	; decide what to do, based on what kind of event it is
+	CASE tag_names(event, /struct) of 
+		'WIDGET_LIST': 	begin
+					if strmatch(eventval[0], 'phased*') then begin
+						whatwasclicked = 'phased'
+						whatarewelookingat.mode = 'candidate'
+						whatarewelookingat.i_candidate = event.index
+						process_with_candidate, whatarewelookingat.best_candidates[whatarewelookingat.i_candidate]
+					endif else if strmatch(eventval[0], 'single*') then begin
+						whatwasclicked = 'single'
+						print, 'single event mode not ready yet!'
+					endif
+				end
+		'':		begin
+					if n_elements(eventval) gt 1 then begin
+						whatwasclicked = eventval[event.value]
+					endif
+				end
+		'WIDGET_BUTTON': whatwasclicked = eventval
+		'WIDGET_DRAW': whatwasclicked = eventval
+
+	ENDCASE
+	; debug
+	help, whatwasclicked
+
+	if n_elements(whatwasclicked) gt 0 then begin
+		print, 'whatwasclicked is ', whatwasclicked
+		CASE whatwasclicked OF
+			"draw": begin
+				geometry = widget_info(event.id, /geom)
+				data_click = smulti_datacoord(event=event, coordinate_converstions=xinspect_coordinate_conversions, geometry=geometry)
+				print, data_click
+				plot_xinspect_population, data_click=data_click
+				end
+
+			"orb. phase":	begin
+							if event.select eq 1 then begin
+								xlc_orbit, id=xlc_orbitbase, group=child_ids.xinspect
+								child_ids.xlc_orbit = xlc_orbitbase
+							endif
+							if event.select eq 0 then begin
+								if widget_info(child_ids.xlc_orbit, /valid) then  widget_control, child_ids.xlc_orbit, /destroy
+							endif
+					end
+			
+			"time":		begin
+							if event.select eq 1 then begin
+								xlc_time, id=xlc_timebase, group=child_ids.xinspect
+								child_ids.xlc_time = xlc_timebase
+							endif
+							if event.select eq 0 then begin
+								if widget_info(child_ids.xlc_time, /valid) then  widget_control, child_ids.xlc_time, /destroy
+							endif
+					end
+			
+			"rot. phase":	begin
+							if event.select eq 1 then begin
+								xlc_rotation, id=xlc_rotationbase, group=child_ids.xinspect
+								child_ids.xlc_rotation = xlc_rotationbase
+							endif
+							if event.select eq 0 then begin
+								if widget_info(child_ids.xlc_rotation, /valid) then  widget_control, child_ids.xlc_rotation, /destroy
+							endif
+					end
+			"Done": WIDGET_CONTROL, event.top, /DESTROY		;There is no need to
+										;"unregister" a widget
+										;application.  The
+										;XManager will clean
+										;the dead widget from
+										;its list.
+			
+			ELSE: print, "no event handler yet!"		
+		ENDCASE
+	endif
 
 END
-;------------------------------------------------------------------------------
-;	procedure xinspect_ev
-;------------------------------------------------------------------------------
-; This procedure processes the events being sent by the XManager.
-;*** This is the event handling routine for the xinspect widget.  It is 
-;*** responsible for dealing with the widget events such as mouse clicks on
-;*** buttons in the xinspect widget.  The tool menu choice routines are 
-;*** already installed.  This routine is required for the xinspect widget to
-;*** work properly with the XManager.
-;------------------------------------------------------------------------------
-PRO xinspect_ev, event
-common xinspect_common, child_ids, whatarewelookingat
-COMPILE_OPT hidden					; Don't appear in HELP
-							; output unless HIDDEN
-							; keyword is specified.
-
-WIDGET_CONTROL, event.id, GET_UVALUE = eventval		;find the user value
-							;of the widget where
-print_struct, event
-IF N_ELEMENTS(eventval) EQ 0 THEN RETURN
-print, "eventval is : ", eventval							;the event occured
-
-CASE tag_names(event, /struct) of 
-	'WIDGET_LIST': 	begin
-				if strmatch(eventval[0], 'phased*') then begin
-					whatarewelookingat.mode = 'candidate'
-					whatarewelookingat.i_candidate = event.index
-					process_with_candidate, whatarewelookingat.best_candidates[whatarewelookingat.i_candidate]
-				endif else if strmatch(eventval[0], 'single*') then begin
-					print, 'single event mode not ready yet!'
-				endif 
-			end
-	'':		begin
-				if n_elements(eventval) gt 1 then begin
-				 	thebuttonclicked = eventval[event.value]
-				endif
-			end
-	'WIDGET_BUTTON': thebuttonclicked = eventval
-ENDCASE
-; 
-
-if n_elements(thebuttonclicked) eq 0 then return
-print, 'thebuttonclicked is ', thebuttonclicked
-CASE thebuttonclicked OF
-
-;*** here is where you would add the actions for your events.  Each widget
-;*** you add should have a unique string for its user value.  Here you add
-;*** a case for each of your widgets that return events and take the
-;*** appropriate action.
-
-  "orb. phase":	begin
-				if event.select eq 1 then begin
-					xlc_orbit, id=xlc_orbitbase, group=child_ids.xinspect
-					child_ids.xlc_orbit = xlc_orbitbase
-				endif
-				if event.select eq 0 then begin
-					if widget_info(child_ids.xlc_orbit, /valid) then  widget_control, child_ids.xlc_orbit, /destroy
-				endif
-			end
-
-  "time":	begin
-				if event.select eq 1 then begin
-					xlc_time, id=xlc_timebase, group=child_ids.xinspect
-					child_ids.xlc_time = xlc_timebase
-				endif
-				if event.select eq 0 then begin
-					if widget_info(child_ids.xlc_time, /valid) then  widget_control, child_ids.xlc_time, /destroy
-				endif
-			end
-
-  "rot. phase":	begin
-				if event.select eq 1 then begin
-					xlc_rotation, id=xlc_rotationbase, group=child_ids.xinspect
-					child_ids.xlc_rotation = xlc_rotationbase
-				endif
-				if event.select eq 0 then begin
-					if widget_info(child_ids.xlc_rotation, /valid) then  widget_control, child_ids.xlc_rotation, /destroy
-				endif
-			end
 
 
-
-
-  "Done": WIDGET_CONTROL, event.top, /DESTROY		;There is no need to
-							;"unregister" a widget
-							;application.  The
-							;XManager will clean
-							;the dead widget from
-							;its list.
-
-  ELSE: print, "no event handler yet!"		;When an event occurs
-							;in a widget that has
-							;no user value in this
-							;case statement, an
-							;error message is shown
-ENDCASE
-
-
-END ;============= end of xinspect event handling routine task =============
-
-
-
-;------------------------------------------------------------------------------
-;	procedure xinspect
-;------------------------------------------------------------------------------
-; This routine creates the widget and registers it with the XManager.
-;*** This is the main routine for the xinspect widget.  It creates the
-;*** widget and then registers it with the XManager which keeps track of the 
-;*** currently active widgets.  
-;------------------------------------------------------------------------------
 PRO xinspect, GROUP = GROUP, BLOCK=block
-common xinspect_common
-
+	common xinspect_common
+	common mearth_tools
+	common this_star
 
 
 ;===========================================================================================================================
@@ -183,8 +154,7 @@ common xinspect_common
 	; CLEAN THIS UP!
 	octopus = 1
 	diag=1
-	common mearth_tools
-	common this_star
+
 	if keyword_set(external_dir) then begin
 	;	file_copy, star_dir + 'candidates_pdf.idl',  star_dir + 'backup_candidates_pdf.idl'
 		if keyword_set(octopus) then file_copy, external_dir + 'octopus_candidates_pdf.idl', star_dir + 'temp_candidates_pdf.idl', /over else file_copy, external_dir + 'candidates_pdf.idl', star_dir + 'temp_candidates_pdf.idl', /over
@@ -232,7 +202,7 @@ common xinspect_common
 		temp = {hjd:boxes[peaks[i]].hjd, duration:boxes[peaks[i]].duration[which_duration[i]], depth:boxes[peaks[i]].depth[which_duration[i]], depth_uncertainty:boxes[peaks[i]].depth_uncertainty[which_duration[i]]}
 		if n_elements(best_boxes) eq 0 then best_boxes = temp else best_boxes = [best_boxes, temp]
 	endfor
-	boxes_strings = rw(string(best_boxes.hjd)) +', D/sigma=' + rw(string(best_boxes.depth/best_boxes.depth_uncertainty))
+	boxes_strings = rw(string(best_boxes.hjd)) +'=' + mjdtodate(best_boxes.hjd) + ', D/sigma=' + rw(string(best_boxes.depth/best_boxes.depth_uncertainty))
 
 ;===========================================================================================================================
 ;===========================================================================================================================
@@ -274,7 +244,7 @@ spawn, 'cat ' + star_dir + 'lspm_obs.txt', result2
 spawn, 'cat ' + star_dir + 'lspm_phys.txt', result3
 text = widget_text(plotting_frame, xsize=20, ysize=15, value=[result1, result2, result3])
 
-skymap_draw = widget_draw(plotting_frame, xsize=400, ysize=400)
+skymap_draw = widget_draw(plotting_frame, xsize=400, ysize=400, uval='draw', /button_event)
 
 
 thingstoplot = widget_base(plotting_frame, /row, /frame, /nonexclusive)
@@ -324,7 +294,8 @@ WIDGET_CONTROL, xinspectbase, /REALIZE			;create the widgets
 
 wset, draw_window
 lspm = fix(stregex(/ext, stregex(/ext, star_dir(), 'ls[0-9]+'), '[0-9]+')) 
-plot_skymap, lspm
+plot_xinspect_population, coordinate_conversions=xinspect_coordinate_conversions
+;plot_skymap, lspm
 
 ;orb. phase
 

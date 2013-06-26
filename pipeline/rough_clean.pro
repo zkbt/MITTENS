@@ -16,7 +16,7 @@
 		return
 	endif
 	if keyword_set(use_sin) then str = '(to sinusoid)' else str='(to flat)'
-	mprint, doing_string, 'attemping a rough clean of the light curve to assess noise levels '+str
+	mprint, doing_string, 'doing a rough clean of the light curve to assess noise levels '+str
 	if file_test( star_dir  + 'target_lc.idl') eq 0 then begin
 		mprint, skipping_string, ' no enough data points in the weeded light curve to bother continuing!'
 		return
@@ -61,29 +61,31 @@
 ; 	print, 'parameters after 1) inflating by the CM, and 2) clipping egregious outliers'
 ; 	print_struct, rough_fit
 
-	loadct, 0, /silent
-	xplot, title=star_dir() + ' rough cleaning'
-	loadct, 39,/sil
-	!p.multi=[0,2,3, 0,1]
-	ploterror, inflated_lc.hjd,  inflated_lc.flux, inflated_lc.fluxerr, psym=8, yr=range(inflated_lc.flux, inflated_lc.fluxerr)
-	plots,  inflated_lc.hjd, systematics_model + variability_model, color=250
-	
-	ploterror, inflated_lc.hjd,  inflated_lc.flux - systematics_model , inflated_lc.fluxerr, psym=8, yr=range(inflated_lc.flux, inflated_lc.fluxerr)
-	plots,  inflated_lc.hjd, variability_model, color=250
-	
-	ploterror, inflated_lc.hjd,  inflated_lc.flux - systematics_model - variability_model, inflated_lc.fluxerr, psym=8, yr=range(inflated_lc.flux, inflated_lc.fluxerr)
-	hline, 0, color=250
-
-	if keyword_set(use_sin) and keyword_set(period) then begin
-		x = inflated_lc.hjd mod period
-		ploterror, x, inflated_lc.flux, inflated_lc.fluxerr, psym=8, yr=range(inflated_lc.flux, inflated_lc.fluxerr)
-		plots,  x, systematics_model + variability_model, color=250
+	if keyword_set(display) then begin
+		loadct, 0, /silent
+		xplot, title=star_dir() + ' rough cleaning'
+		loadct, 39,/sil
+		!p.multi=[0,2,3, 0,1]
+		ploterror, inflated_lc.hjd,  inflated_lc.flux, inflated_lc.fluxerr, psym=8, yr=reverse(range(inflated_lc.flux, inflated_lc.fluxerr))
+		plots,  inflated_lc.hjd, systematics_model + variability_model, color=250
 		
-		ploterror, x,  inflated_lc.flux - systematics_model , inflated_lc.fluxerr, psym=8, yr=range(inflated_lc.flux, inflated_lc.fluxerr)
-		plots,  x, variability_model, color=250
+		ploterror, inflated_lc.hjd,  inflated_lc.flux - systematics_model , inflated_lc.fluxerr, psym=8, yr=reverse(range(inflated_lc.flux, inflated_lc.fluxerr))
+		plots,  inflated_lc.hjd, variability_model, color=250, psym=3
 		
-		ploterror, x,  inflated_lc.flux - systematics_model - variability_model, inflated_lc.fluxerr, psym=8, yr=range(inflated_lc.flux, inflated_lc.fluxerr)
+		ploterror, inflated_lc.hjd,  inflated_lc.flux - systematics_model - variability_model, inflated_lc.fluxerr, psym=8, yr=reverse(range(inflated_lc.flux, inflated_lc.fluxerr))
 		hline, 0, color=250
+	
+		if keyword_set(use_sin) and keyword_set(period) then begin
+			x = inflated_lc.hjd mod period
+			ploterror, x, inflated_lc.flux, inflated_lc.fluxerr, psym=8, yr=reverse(range(inflated_lc.flux, inflated_lc.fluxerr))
+			plots,  x, systematics_model + variability_model, color=250
+			
+			ploterror, x,  inflated_lc.flux - systematics_model , inflated_lc.fluxerr, psym=8, yr=reverse(range(inflated_lc.flux, inflated_lc.fluxerr))
+			plots,  x, variability_model, color=250, psym=3
+			
+			ploterror, x,  inflated_lc.flux - systematics_model - variability_model, inflated_lc.fluxerr, psym=8, yr=reverse(range(inflated_lc.flux, inflated_lc.fluxerr))
+			hline, 0, color=250
+		endif
 	endif
 
 	roughly_cleaned_lc = inflated_lc
@@ -104,7 +106,7 @@
 	endif
 
 	rough_summary = {rescaling:rescaling, uncertainty_in_rescaling:rescaling_unc, chisq:total((roughly_cleaned_lc.flux/roughly_cleaned_lc.fluxerr)^2), dof:n_elements(roughly_cleaned_lc) - n_fit, n_points:n_elements(roughly_cleaned_lc), n_4sig_outliers_up:total(n_sigma lt -4), n_4sig_outliers_down:total( n_sigma gt 4)}
-	print_struct, rough_summary
+;	print_struct, rough_summary
 	save, rough_summary, filename=star_dir + summary_filename
 END
 

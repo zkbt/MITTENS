@@ -1,4 +1,4 @@
-FUNCTION generate_boxes, lc , highres=highres
+FUNCTION generate_boxes, lc , highres=highres, durations=durations, res=res
 ;+
 ; NAME:
 ;	generate_boxes
@@ -26,12 +26,17 @@ FUNCTION generate_boxes, lc , highres=highres
 	@data_quality
 	@filter_parameters
 
-	min_duration = 0.02
-	max_duration = 0.1
-	bin_duration = 0.01
-	n_durations = (max_duration - min_duration)/bin_duration+1;10
-	durations = findgen(n_durations)*bin_duration + min_duration
-	res = 5.0/60.0/24.0; 10./60./24.
+	if ~keyword_set(durations) then begin
+		min_duration = 0.02
+		max_duration = 0.1
+		bin_duration = 0.01
+		n_durations = (max_duration - min_duration)/bin_duration+1;10
+		durations = findgen(n_durations)*bin_duration + min_duration
+	endif else begin
+		max_duration = max(durations)
+		n_durations = n_elements(durations)
+	endelse
+	if ~keyword_set(res) then res = 5.0/60.0/24.0; 10./60./24.
 	if keyword_set(highres) then res = 2.0/60.0/24.0
 
 	i_okay = where(lc.okay, n_okay)

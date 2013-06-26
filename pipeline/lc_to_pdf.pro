@@ -1,4 +1,4 @@
-PRO lc_to_pdf, test=test, redtest=redtest, remake=remake, grazing=grazing, highres=highres, keep_flares=keep_flares, timemachine=timemachine, fake_setup=fake_setup, real=real, white=white, squash_flares=squash_flares
+PRO lc_to_pdf, test=test, redtest=redtest, remake=remake, grazing=grazing, highres=highres, keep_flares=keep_flares, timemachine=timemachine, fake_setup=fake_setup, real=real, white=white, squash_flares=squash_flares, crude_lens=crude_lens
 ;keep_flares = ~keyword_set(squash_flares)
 ;+
 ; NAME:
@@ -59,7 +59,8 @@ PRO lc_to_pdf, test=test, redtest=redtest, remake=remake, grazing=grazing, highr
 	n_harmonics = 1
 	while(unsatisfied_with_harmonic_terms) do begin
 		templates = generate_templates(target_lc=target_lc, common_mode_lc=common_mode_lc, n_harmonics=n_harmonics)
-		boxes = generate_boxes(target_lc, highres=highres)
+		if keyword_set(crude_lens) then boxes = generate_boxes(target_lc, durations=(findgen(13)+1.0)/12.0*0.5, res=0.5/24.0) else boxes = generate_boxes(target_lc, highres=highres)
+		
 		grazers = generate_grazers(target_lc)
 		flares = generate_flares(target_lc)	; good that it's sampled only at data points!
 		initialized_fit = setup_bayesfit(target_lc, templates, /use_sin, /use_constant)	; not using sin
