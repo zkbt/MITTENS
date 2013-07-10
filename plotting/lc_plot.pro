@@ -5,7 +5,7 @@ END
 FUNCTION trimlongdate, axis, index, value, level
 	if value gt 2400000.5d and value le 2500000.5d then begin
 		trimmed = value - 2450000.5
-		str = rw(string(trimmed, form='(D10.5)'))
+		str = rw(string(trimmed, form='(D10.2)'))
 	;	if index eq 0 then str = "HJD - 2450000.5 = " + str
 		return, str
 	endif
@@ -13,7 +13,7 @@ FUNCTION trimlongdate, axis, index, value, level
 END	
 
 
-PRO lc_plot, time=time, night=night, transit=transit, eps=eps, phased=phased, candidate=candidate, fixed=fixed, wtitle=wtitle, lcs=lcs, sin=sin, number=transit_number, diagnosis=diagnosis, comparisons=comparisons, xrange=xrange, pdf=pdf, no_basic=no_basic, no_variability=no_variability, no_cleaned=no_cleaned, box=box, xmargin=xmargin, ymargin=ymargin, censorship=censorship, top=top, png=png, event=event, anonymous=anonymous, externalformatting=externalformatting, charsize=charsize, noleft=noleft, noright=noright, symsize=symsize, replacementtitle=replacementtitle, addspace=addspace, noxtitle=noxtitle, offset=offset, fake=fake, n_durations=n_durations, zoom=zoom, shift=shift, scale=scale, binned=binned, n_bins=n_bins, xpos=xpos, ypos=ypos, hatlen=hatlen, label=label, no_model=no_model, no_raw=no_raw, no_outliers=no_outliers, no_intransit=no_intransit, coordinate_conversions=coordinate_conversions
+PRO lc_plot, time=time, night=night, transit=transit, eps=eps, phased=phased, candidate=candidate, fixed=fixed, wtitle=wtitle, lcs=lcs, sin=sin, number=transit_number, diagnosis=diagnosis, comparisons=comparisons, xrange=xrange, pdf=pdf, no_basic=no_basic, no_variability=no_variability, no_cleaned=no_cleaned, box=box, xmargin=xmargin, ymargin=ymargin, censorship=censorship, top=top, png=png, event=event, anonymous=anonymous, externalformatting=externalformatting, charsize=charsize, noleft=noleft, noright=noright, symsize=symsize, replacementtitle=replacementtitle, addspace=addspace, noxtitle=noxtitle, offset=offset, fake=fake, n_durations=n_durations, zoom=zoom, shift=shift, scale=scale, binned=binned, n_bins=n_bins, xpos=xpos, ypos=ypos, hatlen=hatlen, label=label, no_model=no_model, no_raw=no_raw, no_outliers=no_outliers, no_intransit=no_intransit, coordinate_conversions=coordinate_conversions, failed=failed, select_xrange=select_xrange, select_yrange=select_yrange, select_which=select_which, selected_times=selected_times, perform_censoring=perform_censoring
 
 ;+
 ; NAME:
@@ -74,6 +74,12 @@ PRO lc_plot, time=time, night=night, transit=transit, eps=eps, phased=phased, ca
 
 	; UNCORRECTED
 	lc_titles = 'Basic MEarth!CPhotometry!C(mag.)'												; define a title
+	if file_test(star_dir + 'inflated_lc.idl') eq 0 then begin
+		mprint, tab_string, error_string, "couldn't find ", star_dir + 'inflated_lc.idl'
+		mprint, tab_string, tab_string, " so no light curves will be plotted."
+		failed = 1
+		return
+	endif
 	restore, star_dir + 'inflated_lc.idl'															; restore the basic light curve
 	if n_elements(segments_boundaries) eq 0 then segments_boundaries  = n_elements(inflated_lc)-1	; define the segment boundaries, if they weren't defined in inflated_lc.idl
 	lc = replicate(lc_point, n_elements(inflated_lc))												; create a plotting lightcurve structure array
@@ -84,8 +90,13 @@ PRO lc_plot, time=time, night=night, transit=transit, eps=eps, phased=phased, ca
 	copy_struct, target_lc, raw_lc																; fill up a raw plotting light curve with the raw basic light curve
 	raw_lcs = create_struct('uncorrected', raw_lc)												; create the jellyfish to hold  different raw light curves
 
+	if file_test(star_dir + 'variability_lc.idl') eq 0 then begin
+		mprint, tab_string, error_string, "couldn't find " + star_dir + 'variability_lc.idl; not plotting!'
+		failed=1
+		return
+	endif
 	; VARIABILITY
-		restore, star_dir + 'variability_lc.idl'
+	restore, star_dir + 'variability_lc.idl'
 
 	if ~keyword_set(no_variability) then begin												; sometimes, might not want to plot variability
 		lc_titles = [lc_titles, 'Stellar!CVariability!C(mag.)']										; set up everything else as for basic light curves above
@@ -113,8 +124,8 @@ PRO lc_plot, time=time, night=night, transit=transit, eps=eps, phased=phased, ca
 	tags_of_lc = tag_names(lcs)
 
 	; set up an array for censoring data (1= okay, 0 = bad)
-	if n_elements(censorship) eq 0 then censorship = ones(n_elements(lcs.(0)))
-	for i=0, n_lc-1 do lcs.(i).okay = lcs.(i).okay and censorship
+	if n_elements(censorship) ne n_elements(lcs.(0)) then censorship = struct_conv({okay:ones(n_elements(lcs.(0))), hjd:lcs.(0).hjd})
+	if ~keyword_set(perform_censoring) then for i=0, n_lc-1 do lcs.(i).okay = lcs.(i).okay and censorship.okay
 
 ; =============================
 ; basic plotting setup
@@ -360,7 +371,7 @@ PRO lc_plot, time=time, night=night, transit=transit, eps=eps, phased=phased, ca
 ;			xpos = 0
 
 		endif
-		if ~keyword_set(externalformatting) then	xplot, !d.window < 30, xsize=xsize, ysize=ysize, title=wtitle, xpos=xpos, ypos=ypos, top=top
+		if ~keyword_set(externalformatting) then xplot, !d.window < 30, xsize=xsize, ysize=ysize, title=wtitle, xpos=xpos, ypos=ypos, top=top
 		if ~keyword_set(externalformatting) then symsize=1.0
 	endelse
 
@@ -424,6 +435,9 @@ PRO lc_plot, time=time, night=night, transit=transit, eps=eps, phased=phased, ca
 	;			usersym, cos(theta), sin(theta), /fill
 	;			plots, lc[i_intransit].x, lc[i_intransit].flux, psym=8, symsize=2.5, color=255, noclip=0
 			endif
+
+
+
 			; plot binned diagnostics
 			!p.color = 0
 			@psym_circle
@@ -433,6 +447,9 @@ PRO lc_plot, time=time, night=night, transit=transit, eps=eps, phased=phased, ca
 					segment = seg_start + indgen(segments_boundaries[i_seg] - seg_start )
 					plot_lc, no_outliers=no_outliers, xaxis=lcs.(0)[segment].x,xtickunits=xtickunits, lc[segment], symsize=symsize, time=time, nobad=fake, colorbar=colorbars[i_seg], /noaxes
 				endfor
+
+			this_coordinate_conversion = {x:!x, y:!y, p:!p}
+			if n_tags(coordinate_conversions) eq 0 then coordinate_conversions = this_coordinate_conversion else coordinate_conversions = [coordinate_conversions, this_coordinate_conversion]
 
 
 			if keyword_set(transit) then begin
@@ -513,12 +530,21 @@ PRO lc_plot, time=time, night=night, transit=transit, eps=eps, phased=phased, ca
 	; add some spaces before light curves
 	if keyword_set(comparisons) or keyword_set(diagnosis) then begin
 		smultiplot
+		this_coordinate_conversion = {x:!x, y:!y, p:!p}
+		if n_tags(coordinate_conversions) eq 0 then coordinate_conversions = this_coordinate_conversion else coordinate_conversions = [coordinate_conversions, this_coordinate_conversion]
+
 		smultiplot
+		this_coordinate_conversion = {x:!x, y:!y, p:!p}
+		if n_tags(coordinate_conversions) eq 0 then coordinate_conversions = this_coordinate_conversion else coordinate_conversions = [coordinate_conversions, this_coordinate_conversion]
+
 	endif
 
 	; start plotting light curves!
 	!y.range=[scale, -scale]
 	bin =0.001
+
+
+		selected_times = {n_raw:0, n_binned:0}
 
 	; loop over the light curves
 	for i=0, n_lc-1 do begin
@@ -562,6 +588,76 @@ PRO lc_plot, time=time, night=night, transit=transit, eps=eps, phased=phased, ca
 		xvariable = !x
 		yvariable = !y
 		i_intransit = where(lcs.(i).intransit, n_intransit)
+
+
+		if n_elements(select_which) eq 0 then select_which = n_lc - 1
+		if i eq select_which then begin
+			; deal with the binned ones
+			selected = bytarr(n_elements(lcs.(i))) + 1
+			if n_elements(select_xrange) eq 0 and n_elements(select_yrange) eq 0 then selected *= 0
+			if n_elements(select_xrange) gt 0 then begin
+				print, select_xrange
+				selected = selected AND lcs.(i).x ge min(select_xrange) and lcs.(i).x le max(select_xrange)
+				print, total(selected)
+
+			endif
+			if n_elements(select_yrange) gt 0 then begin
+				print, select_yrange
+				print, total(selected)
+
+				selected = selected AND lcs.(i).flux ge min(select_yrange) and lcs.(i).flux le max(select_yrange)
+			endif
+			if keyword_set(perform_censoring) then begin
+				i_tocensor = where(selected, n_tocensor)
+				if n_tocensor gt 0 then begin
+					censorship[i_tocensor].okay = censorship[i_tocensor].okay ne 1
+					print, 'censoring to : ', censorship[i_tocensor].okay
+				endif
+				for i_lc=0, n_lc-1 do lcs.(i_lc).okay = lcs.(i_lc).okay and censorship.okay
+			endif
+
+			i_selected = where(selected, n_selected); and lcs.(i).okay
+			if n_selected gt 0 then selected_hjds = lcs.(i)[i_selected].hjd else selected_hjds = 0.d
+
+			; deal with the raw ones
+			raw_selected = bytarr(n_elements(raw_lcs.(i))) + 1
+			if n_elements(select_xrange) eq 0 and n_elements(select_yrange) eq 0 then raw_selected *= 0
+			if n_elements(select_xrange) gt 0 then begin
+				print, select_xrange
+				raw_selected = raw_selected AND raw_lcs.(i).x ge min(select_xrange) and raw_lcs.(i).x le max(select_xrange)
+				print, total(raw_selected)
+
+			endif
+			if n_elements(select_yrange) gt 0 then begin
+				print, select_yrange
+
+				raw_selected = raw_selected AND raw_lcs.(i).flux ge min(select_yrange) and raw_lcs.(i).flux le max(select_yrange)
+				print, total(raw_selected)
+			endif
+			i_raw_selected = where(raw_selected and raw_lcs.(i).okay, n_raw_selected)
+
+			if n_raw_selected gt 0 then raw_selected_hjds = raw_lcs.(i)[i_raw_selected].hjd
+			if n_selected gt 0 then begin
+				if n_raw_selected gt 0 then begin
+					selected_times = {raw:raw_selected_hjds, binned:selected_hjds, n_raw:n_raw_selected, n_binned:n_selected}
+				endif else begin
+					selected_times = {binned:selected_hjds, n_raw:n_raw_selected, n_binned:n_selected}
+				endelse
+			endif else begin
+				if n_raw_selected gt 0 then begin
+					selected_times = {raw:raw_selected_hjds, n_raw:n_raw_selected, n_binned:n_selected}
+				endif else begin
+				endelse
+			endelse
+			
+		endif else n_selected = 0
+		help, n_selected, select_which
+
+		if i eq select_which then begin
+			if n_raw_selected gt 0 then begin
+				plots, raw_lcs.(i)[i_raw_selected].x, raw_lcs.(i)[i_raw_selected].flux, psym=6, symsize=2*symsize, color=200, thick=2, noclip=0
+			endif
+		endif
 
 ; 		if keyword_set(box) or keyword_set(phased) then begin
 ; 			xvert = [-candidate.period/2, -candidate.duration/2, -candidate.duration/2, candidate.duration/2, candidate.duration/2, candidate.period/2]
@@ -648,16 +744,8 @@ PRO lc_plot, time=time, night=night, transit=transit, eps=eps, phased=phased, ca
 				endfor
 			endif
 
-		if n_intransit gt 0 and (~keyword_set(binned) or ~(keyword_set(phased) or keyword_set(event))) and ~keyword_set(no_intransit) then begin
-; 			if keyword_set(phased) then begin
-; 				plots, candidate.duration/2.0*24*[1,1], [1, 0.5]*!y.range[1], thick=1;, color=255
-; 				plots, -candidate.duration/2.0*24*[1,1], [1, 0.5]*!y.range[1], thick=1;, color=255
-; 			endif; else 
-			loadct, /silent, 54, file='~/zkb_colors.tbl'
-			plots, lcs.(i)[i_intransit].x, lcs.(i)[i_intransit].flux, psym=8, symsize=2*symsize, color=50, thick=3, noclip=0
-;			usersym, cos(theta), sin(theta), /fill
-;			plots, lcs.(i)[i_intransit].x, lcs.(i)[i_intransit].flux, psym=8, symsize=2.5, color=255, noclip=0
-		endif
+
+
 
 		loadct, 0
 		if keyword_set(title) and i eq 0 then !p.title=title
@@ -677,6 +765,26 @@ PRO lc_plot, time=time, night=night, transit=transit, eps=eps, phased=phased, ca
 			if ~keyword_set(n_bins) then n_bins = 5*candidate.period/candidate.duration
 			plot_binned, lcs.(i).x, lcs.(i).flux, n_bins=n_bins, /sem,  psym=8, /overplot, color=180, symsize=0.3, thick=5*keyword_set(eps), /justbins, hatlen=hatlen
 		endif 
+
+
+		if n_intransit gt 0 and (~keyword_set(binned) or ~(keyword_set(phased) or keyword_set(event))) and ~keyword_set(no_intransit) then begin
+; 			if keyword_set(phased) then begin
+; 				plots, candidate.duration/2.0*24*[1,1], [1, 0.5]*!y.range[1], thick=1;, color=255
+; 				plots, -candidate.duration/2.0*24*[1,1], [1, 0.5]*!y.range[1], thick=1;, color=255
+; 			endif; else 
+			usersym, cos(theta), sin(theta), thick=2
+			loadct, /silent, 58, file='~/zkb_colors.tbl'
+			plots, lcs.(i)[i_intransit].x, lcs.(i)[i_intransit].flux, psym=8, symsize=2*symsize, color=50, thick=2, noclip=0
+;			plots, lcs.(i)[i_intransit].x, lcs.(i)[i_intransit].flux, psym=8, symsize=2.5, color=255, noclip=0
+		endif
+
+		if i eq select_which then begin
+			if n_selected gt 0 then begin
+				loadct, /silent, 0, file='~/zkb_colors.tbl'
+				plots, lcs.(i)[i_selected].x, lcs.(i)[i_selected].flux, psym=6, symsize=2*symsize, color=50, thick=2, noclip=0
+			endif
+		endif
+
 		this_coordinate_conversion = {x:!x, y:!y, p:!p}
 		if n_tags(coordinate_conversions) eq 0 then coordinate_conversions = this_coordinate_conversion else coordinate_conversions = [coordinate_conversions, this_coordinate_conversion]
 ; 		if ~keyword_set(time) then begin

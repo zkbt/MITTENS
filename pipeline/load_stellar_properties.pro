@@ -16,15 +16,21 @@ PRO load_stellar_properties
 
 	; run through all ls####/ direcories and replace lspm_info.idl with updated ones
 	f = file_search('ls*/')
-	for i=0, n_elements(f)-1 do begin
-		lspmn = long(stregex(/ext, f[i], '[0-9]+'))
+
+	for i=0, n_elements(ensemble_lspm)-1 do begin
+		lspmn = ensemble_lspm[i].lspmn	;long(stregex(/ext, f[i], '[0-9]+'))
+		this_ls_dir = 'ls'+string(lspmn, form='(I04)') +'/'
 		if lspmn gt 0 then begin
 		;	mprint, f[i], lspmn
-			lspm_info = get_lspm_info(lspmn)
+			lspm_info = ensemble_lspm[i];get_lspm_info(lspmn)
 			if n_tags(lspm_info) gt 0 then begin
-				mprint, doing_string, 'saving stellar parameters to ', f[i] + '/lspm_info.idl'
-				save, lspm_info, filename=f[i] + '/lspm_info.idl'
-			endif else mprint, skipping_string, "couldn't find stellar parameters for ", f[i]
+				mprint, doing_string, 'saving stellar parameters to ', this_ls_dir + '/lspm_info.idl'
+				if file_test(this_ls_dir) eq 0 then begin
+					mprint, tab_string, doing_string, 'creating ' + this_ls_dir
+					file_mkdir, this_ls_dir
+				endif
+				save, lspm_info, filename=this_ls_dir + '/lspm_info.idl'
+			endif else mprint, skipping_string, "couldn't find stellar parameters for ", this_ls_dir
 		endif
 	endfor
 	return

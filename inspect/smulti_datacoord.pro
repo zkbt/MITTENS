@@ -1,4 +1,4 @@
-FUNCTION smulti_datacoord, event=event, coordinate_converstions=coordinate_conversions, geometry=geometry
+FUNCTION smulti_datacoord, event=event, coordinate_conversions=coordinate_conversions, geometry=geometry
 	; function uses stored coordinate conversion parameters and the click from a draw event to return the data coordinates of a click (and which subpanel of a smultiplot series was clicked)
 
 	; event must be a draw event
@@ -6,6 +6,7 @@ FUNCTION smulti_datacoord, event=event, coordinate_converstions=coordinate_conve
 	pixel_click = {x:double(event.x), y:double(event.y)}
 	for i=0, n_elements(coordinate_conversions)-1 do begin
 
+	
 		; these lines account for arbitrary smultiplot panels
 		normal_position = coordinate_conversions[i].p.position
 		pixel_xrange = [normal_position[0], normal_position[2]]*geometry.xsize
@@ -18,6 +19,10 @@ FUNCTION smulti_datacoord, event=event, coordinate_converstions=coordinate_conve
 			!x = coordinate_conversions[i].x
 			!y = coordinate_conversions[i].y
 			!p = coordinate_conversions[i].p
+			if tag_exist(coordinate_conversions[i], 'xlog') and tag_exist(coordinate_conversions[i], 'ylog') then begin
+				
+				plot, [0], xlog=coordinate_conversions.xlog, ylog=coordinate_conversions.ylog, title='test', /noerase, /nodata
+			endif
 			click = convert_coord(pixel_click.x, pixel_click.y, /device, /data)
 			return, {x:click[0], y:click[1], which:i}
 		endif else i_plot = -1

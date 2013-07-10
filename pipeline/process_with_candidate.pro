@@ -1,8 +1,12 @@
-PRO process_with_candidate, candidate
+PRO process_with_candidate, input_candidate
 
 	common mearth_tools
 	common this_star
 	candidate_star_dir = star_dir
+
+	if tag_exist(input_candidate, 'PERIOD') then candidate = input_candidate else begin
+		candidate  = {period:1d8, hjd0:input_candidate.hjd, duration:input_candidate.duration, depth:input_candidate.depth, depth_uncertainty:input_candidate.depth_uncertainty, n_boxes:1, n_points:0, rescaling:1.0, ratio:0.0}
+	endelse
 
 	if strmatch(candidate_star_dir, '*combined*') gt 0 then combined=1
 	; if combining multiple years, need to clean each separately

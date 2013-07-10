@@ -1,4 +1,4 @@
-FUNCTION make_star_dir, lspm, year, tel, combine=combine
+FUNCTION make_star_dir, lspm, year, tel, combined=combined
   	ls_string = 'ls'+string(format='(I04)', lspm)
   
 	; use available years, if not specified
@@ -23,7 +23,7 @@ FUNCTION make_star_dir, lspm, year, tel, combine=combine
 		te_string = 'te' + string(format='(I02)', tel)
 		star_dir = ls_string + '/' + ye_string + '/' + te_string + '/'
 	endelse
-	if keyword_set(combine) then begin
+	if keyword_set(combined) then begin
 		if keyword_set(year) then begin
 			star_dir = ls_string + '/' + ye_string + '/combined/' 
 		endif else star_dir = ls_string + '/combined/'

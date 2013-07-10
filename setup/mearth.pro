@@ -18,7 +18,7 @@
 ;
 ;-
 
-common mearth_tools, display, verbose, done_string, doing_string, skipping_string, error_string, tab_string, tf, possible_years, reduced_dir, working_dir, radii, interactive, yearly_filters, fake_dir, fake_trigger_dir, n_effective_for_rescaling, colorbars, ensemble_lspm
+common mearth_tools, display, verbose, done_string, doing_string, skipping_string, error_string, tab_string, tf, possible_years, reduced_dir, working_dir, radii, interactive, yearly_filters, fake_dir, fake_trigger_dir, n_effective_for_rescaling, colorbars, ensemble_lspm, username
 
 ; define data directories in which to look for data for each year
 possible_years = [2008,2009,2010,2011,2012] ; based on the year in which a season starts (= August/September/October); will need to modify for South
@@ -55,6 +55,7 @@ interactive = 0
 tf = ['false', 'true']
 !quiet = 1
 
+username = getenv('USERNAME')
 
 ; create new colorbar file, if need be
 if file_test('~/zkb_colors.tbl') eq 0 then print, "MITTENS require Zach's custom color tables; making them now (this should only happen once)"
@@ -67,10 +68,11 @@ n_effective_for_rescaling = 4
 printl
 print, ' now running MEarth IDL Tools for Transits of Extrasolar Neptunes and Super-earths (MITTENS)!'
 print, '   working_dir   = ', working_dir
+print, '   username      = ', username
 print, '   plotting?     = ', tf[display]
 print, '   interactive?  = ', tf[interactive]
 print, '   verbose?      = ', tf[verbose]
-print, '   !quiet?       = ', tf[!quiet]
+;print, '   !quiet?       = ', tf[!quiet]
 printl
 print
 

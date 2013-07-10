@@ -1,4 +1,4 @@
-FUNCTION has_data, medianed=medianed, n=n, days=days
+FUNCTION has_data, n=n, days=days
 ;+
 ; NAME:
 ;	HAS_DATA
@@ -28,19 +28,24 @@ FUNCTION has_data, medianed=medianed, n=n, days=days
 ;-
 	
 	common this_star
+	common mearth_tools
 	@filter_parameters
-	if keyword_set(medianed) then filename = star_dir + 'medianed_lc.idl' else filename = star_dir + 'target_lc.idl'
+	filename = star_dir + 'inflated_lc.idl'
+
 	ft = file_test(filename)
 	hasdata = ft
 	if ft then begin
 		if keyword_set(n) or keyword_set(days) then begin
 			restore, filename
-			if keyword_set(medianed) then lc = medianed_lc else lc = target_lc
+			lc = inflated_lc
 			if keyword_set(n) then hasdata = hasdata AND  (n_elements(lc) ge n)
+			mprint, tab_string, tab_string, tab_string, star_dir + ' has ' + rw(n_elements(lc)) + ' observations'
 			if keyword_set(days) then begin
 				nights = round(lc.hjd-mearth_timezone())
 				uniq_nights = nights[uniq(nights, sort(nights))]
-				hasdata = hasdata AND (n_elements(uniq_nights) gt days)
+				hasdata = hasdata AND (n_elements(uniq_nights) ge days)
+				mprint, tab_string, tab_string, tab_string, star_dir + ' has ' + rw(n_elements(uniq_nights)) + ' unique nights'
+
 			endif
 		endif
 	endif

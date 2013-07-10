@@ -67,34 +67,7 @@
 ;*** buttons in the xlc_orbit widget.  The tool menu choice routines are 
 ;*** already installed.  This routine is required for the xlc_orbit widget to
 ;*** work properly with the XManager.
-;------------------------------------------------------------------------------
 
-FUNCTION smulti_datacoord, event=event, coordinate_converstions=coordinate_conversions, geometry=geometry
-	; event must be a draw event
-	; coordinate conversions must at least contain x, y, p tags
-	pixel_click = {x:event.x, y:event.y}
-	for i=0, n_elements(coordinate_conversions)-1 do begin
-		normal_position = coordinate_conversions[i].p.position
-		pixel_xrange = [normal_position[0], normal_position[2]]*geometry.xsize
-		pixel_yrange = [normal_position[1], normal_position[3]]*geometry.ysize
-		in_this_plot = pixel_click.x ge pixel_xrange[0] and pixel_click.x le pixel_xrange[1] and pixel_click.y ge pixel_yrange[0] and pixel_click.y le pixel_yrange[1] 
-		if in_this_plot then begin
-			!x = coordinate_conversions[i].x
-			!y = coordinate_conversions[i].y
-			!p = coordinate_conversions[i].p
-			click = convert_coord(pixel_click.x, pixel_click.y, /device, /data)
-			return, {x:click[0], y:click[1], which:i}
-		endif else i_plot = -1
-	endfor
-; 	print, clicked_in_this_plot
-; cleanplot          
-; plot, pixel_xrange, pixel_yrange, /yno 
-; plots, psym=1, symsize=5, pixel_click.x, pixel_click.y      
-; plots, psym=1, symsize=5, pixel_click.x, pixel_click.y
-; 
-; 	if i
-	; figure out which window it was in
-END
 
 PRO xlc_orbit_ev, event
 

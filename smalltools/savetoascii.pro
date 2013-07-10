@@ -12,8 +12,8 @@ PRO savetoascii
 	filename=star_dir() + 'mearth_lightcurve.ascii'
 	openw, lun, filename, /get_lun
 
-	sql = pgsql_query("select * from nc where lspmn = "+string(form='(I)', lspm_info.n)+";")
-	printf, lun, '# MEarth identifier: lspm' + string(lspm_info.n, form='(I04)')
+	sql = pgsql_query("select * from nc where lspmn = "+string(form='(I)', lspm_info.lspmn)+";")
+	printf, lun, '# MEarth identifier: lspm' + string(lspm_info.lspmn, form='(I04)')
 	printf, lun, '# LHS number: ' + rw(sql.lhs)
 	printf, lun, '# NLTT number: ' + rw(sql.nltt)
 	printf, lun, '# 2MASS identifier: J' + rw(sql.twomass)

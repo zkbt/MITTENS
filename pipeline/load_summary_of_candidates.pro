@@ -1,6 +1,7 @@
 PRO load_summary_of_candidates, summary_of_candidates
 
 	common mearth_tools
+	common this_star
 	f = file_search('ls*/combined/octopus_candidates_pdf.idl')
 
 ;	f = subset_of_stars(filename,  year=year, tel=tel, lspm=lspm, radius_range=radius_range, n=n, combined=combined) + filename
@@ -47,7 +48,7 @@ PRO load_summary_of_candidates, summary_of_candidates
 				stats.points = n_elements(inflated_lc)
 				stats.start = min(inflated_lc.hjd)
 				stats.finish = max(inflated_lc.hjd)
-				stats.periods_searched = file_lines(star_dir() + 'boxes_all_durations.txt.bls')
+				stats.periods_searched = file_lines(star_dir + 'boxes_all_durations.txt.bls')
 				save,filename=star_dir + 'octopus_stat_summary.idl', stats
 		;	endif
 			restore, star_dir + 'octopus_stat_summary.idl'

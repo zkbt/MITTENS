@@ -66,8 +66,8 @@ Once the raw data have been processed through into MarPLEs and candidates, run t
 load_summary_of_observations
 load_summary_of_marples
 load_summary_of_candidates
-load_ensemble_of_marples
-load_ensemble_of_lightcurves
+;load_ensemble_of_marples
+;load_ensemble_of_lightcurves
 
 ---
 [monthly?}
@@ -79,4 +79,18 @@ load_stellar_parameters
 repopulate_stars_with_new_parameters
 ; goes into each star directory, and replaces its stellar parameters
 ---
+
+
+
+
+
+
+
+
+
+
+
+KNOWN BUGS
+
+can't select data points when diagnostics are turned on (an annoying problem!)
 
