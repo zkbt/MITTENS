@@ -162,21 +162,26 @@ PRO flag_bad_data, lenient=lenient, clean=clean, baddatesokay=baddatesokay,trimt
 	; censorship
 	i_censored =bytarr(n_elements(ext_var.mjd_obs))
 	ls_dir = stregex(star_dir, 'ls[0-9]+', /ext) + '/'
-	censor_files = file_search(ls_dir + '{*,*/*}/censorship.log')
-	if censor_files[0] ne '' then begin
-		for i_file=0, n_elements(censor_files)-1 do begin
-			openr, censor_lun, /get_lun, censor_files[i_file]
-			hjd =0.0d
-			text = ' '
-			while(~eof(censor_lun)) do begin
-				readf, censor_lun, hjd, text
-				i = where(abs(target_lc.hjd - hjd) le censorship_size/2.0, n_censor)
-				if n_censor gt 0 then i_censored[i] = 1
-			endwhile
-			close, censor_lun
-		endfor
-	endif
+	censor_files = [file_search(ls_dir + '{*,*/*}/censorship.log'), file_search(ls_dir + '{*,*/*}/xlc_*_censorship.log')]
 
+	for i_file=0, n_elements(censor_files)-1 do begin
+;		print, 'censoring datapoints marked in', censor_files[i_file]
+		if censor_files[i_file] eq '' then continue
+		openr, censor_lun, /get_lun, censor_files[i_file]
+		hjd =0.0d
+		text = ' '
+		while(~eof(censor_lun)) do begin
+			readf, censor_lun, hjd, text
+;			print, 'trying to censor ', hjd
+			i = where(abs(target_lc.hjd - hjd) le censorship_size/2.0, n_censor)
+			if n_censor gt 0 then begin
+				i_censored[i] = 1
+;				print, 'censored ', n_censor, ' data points'
+			endif; else print, 'failed!'
+			
+		endwhile
+		close, censor_lun
+	endfor
 
 ; raw_censorship
 	i_raw_censored =bytarr(n_elements(ext_var.mjd_obs))

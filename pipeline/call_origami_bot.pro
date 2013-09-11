@@ -1,4 +1,4 @@
-PRO call_origami_bot
+PRO call_origami_bot, bulldoze=bulldoze
 	common this_star
 	common mearth_tools
 
@@ -9,7 +9,7 @@ PRO call_origami_bot
 		return
 	endif
 
-
+	if keyword_set(bulldoze) then file_delete, star_dir() + 'octopusinprogress.txt', /allow
 	if ~file_test(star_dir() + 'octopusinprogress.txt') then begin 
 		;make a temporary file to prevent duplication of effort for this long step
 		openw, lun, star_dir() + 'octopusinprogress.txt', /get_lun

@@ -55,7 +55,7 @@ interactive = 0
 tf = ['false', 'true']
 !quiet = 1
 
-username = getenv('USERNAME')
+username = getenv('USER')
 
 ; create new colorbar file, if need be
 if file_test('~/zkb_colors.tbl') eq 0 then print, "MITTENS require Zach's custom color tables; making them now (this should only happen once)"

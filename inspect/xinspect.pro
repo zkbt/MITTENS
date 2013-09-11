@@ -61,7 +61,7 @@ PRO xinspect_ev, event
 	IF N_ELEMENTS(eventval) EQ 0 THEN RETURN
 
 	; debug
-	help, event, eventval, /st
+	;help, event, eventval, /st
 
 	; decide what to do, based on what kind of event it is
 	CASE tag_names(event, /struct) of 
@@ -95,7 +95,7 @@ PRO xinspect_ev, event
 				end
 	ENDCASE
 	; debug
-	help, whatwasclicked
+	;help, whatwasclicked
 
 	if n_elements(whatwasclicked) gt 0 then begin
 		print, 'whatwasclicked is ', whatwasclicked
@@ -106,7 +106,7 @@ PRO xinspect_ev, event
 
 				data_click = smulti_datacoord(event=event, coordinate_conversions=xinspect_coordinate_conversions, geometry=geometry)
 				print, data_click
-				help, xinspect_coordinate_conversions
+			;	help, xinspect_coordinate_conversions
 				; use left mouse button to select objects
 				if event.press eq 1 then begin
 					plot_xinspect_population, data_click=data_click, counter=xinspect_camera.counter, coordinate_conversions=xinspect_coordinate_conversions, selected_object=selected_object

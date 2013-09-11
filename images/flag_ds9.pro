@@ -17,6 +17,8 @@ PRO flag_ds9, xpa_name=xpa_name, image_filenames=image_filenames, flagged_in_ds9
 			spawn, 'xpaset -p '+ xpa_name +' cmap Grey; xpaset -p '+ xpa_name +' cmap invert yes  '
 		endelse
 		print, ' USING DS9 TO FLAG:'
-
+		
 	endif else print, ' UH-OH - could not match up images between ds9 and IDL'
+		
+
 END

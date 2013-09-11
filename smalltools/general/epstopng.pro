@@ -3,5 +3,9 @@ PRO epstopng, filename, dpi=dpi, hide=hide
 
 	if not keyword_set(dpi) then dpi = 72
 	spawn, "convert -density "+ strcompress(dpi, /remove_all) + " " + name +'.eps ' + name+'.png&'
-	if ~keyword_set(hide) then spawn, 'konqueror ' + name + '.png &'
+	
+	if ~keyword_set(hide) then begin
+		wait, 2
+		 spawn, 'konqueror ' + name + '.png &'
+	endif
 END

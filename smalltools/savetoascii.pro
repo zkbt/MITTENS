@@ -9,15 +9,17 @@ PRO savetoascii
 
 	if n_elements(inflated_lc) ne n_elements(variability_lc) or n_elements(inflated_lc) ne n_elements(cleaned_lc) or n_elements(cleaned_lc) ne n_elements(variability_lc) then stop
 	
-	filename=star_dir() + 'mearth_lightcurve.ascii'
+	filename=star_dir() + 'lspm' + string(lspm_info.lspmn, form='(I04)') + '_mearth_lightcurve.ascii'
 	openw, lun, filename, /get_lun
 
-	sql = pgsql_query("select * from nc where lspmn = "+string(form='(I)', lspm_info.lspmn)+";")
+	que = "select * from nc where lspmn = "+ rw(string(form='(I)', lspm_info.lspmn))+";"
+	sql = pgsql_query(que)
 	printf, lun, '# MEarth identifier: lspm' + string(lspm_info.lspmn, form='(I04)')
-	printf, lun, '# LHS number: ' + rw(sql.lhs)
-	printf, lun, '# NLTT number: ' + rw(sql.nltt)
-	printf, lun, '# 2MASS identifier: J' + rw(sql.twomass)
-	printf, lun, '# other names: ', sql.othname
+	if n_tags(sql) gt 0 then begin
+		printf, lun, '# LHS number: ' + rw(sql.lhs)
+		printf, lun, '# NLTT number: ' + rw(sql.nltt)
+		printf, lun, '# 2MASS identifier: J' + rw(sql.twomass)
+		printf, lun, '# other names: ', sql.othname
 
 		rah = long(double(sql.catra*180/!pi)/15)
 		ram = long((double(sql.catra*180/!pi)/15 - rah)*60)
@@ -27,8 +29,8 @@ PRO savetoascii
 		decs = ((double(sql.catdec*180/!pi) - decd)*60-decm)*60
 		pos_string = string(rah, format='(I02)') + ":"+ string(ram, format='(I02)')+ ":"+ string(ras, format='(F04.1)') + '  +'+string(decd, format='(I02)')+ ":"+ string(decm, format='(I02)')+ ":"+ string(decs, format='(F04.1)')
 
-	printf, lun, '# RA, Dec = ' + pos_string
-
+		printf, lun, '# RA, Dec = ' + pos_string
+	endif
 	printf, lun, '# file created: ', systime()
 	printf, lun, '#'
 

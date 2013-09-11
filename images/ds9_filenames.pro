@@ -1,4 +1,4 @@
-PRO ds9_filenames, input_filenames, save_image=save_image,  pixels=pixels, xpa_name=xpa_name, finder=finder, mjd_i_think=mjd_i_think, blank=blank, apertures=apertures
+PRO ds9_filenames, input_filenames, save_image=save_image,  pixels=pixels, xpa_name=xpa_name, finder=finder, mjd_i_think=mjd_i_think, blank=blank, apertures=apertures, pid=pid
 
 	; insulate the input_filename array from filenames
 	if n_elements(input_filenames) gt 0 then filenames = input_filenames
@@ -80,9 +80,9 @@ print
 	print
 
 	
-	spawn, command, result
+	spawn, command, result, pid=pid
 	
-	wait, n_elements(filenames)*0.2 > 2
+	wait, n_elements(filenames)*0.4 > 5
 	xpa_command = "xpaget xpans | tail -1 | awk '{print $4}'"
 	spawn, xpa_command, xpa_name
 	print, 'XPA access running through ', xpa_name

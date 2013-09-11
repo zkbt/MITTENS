@@ -143,10 +143,10 @@ PRO lc_plot, time=time, night=night, transit=transit, eps=eps, phased=phased, ca
 	ygap = 0.01
 	title=star_dir
 	if ~keyword_set(scale) then begin
-		scale = 0 
-		for i=0, n_lc-1 do scale=5*mad(lcs.(i).flux) > scale
+		scale = 0
+		for i=0, n_lc-1 do scale=max(abs(range(lcs.(i).flux)))*1.1 > scale;5*mad(lcs.(i).flux) > scale
 		if keyword_set(candidate) then scale = scale > candidate.depth*2
-		scale = scale <(10*1.58*mad(lcs.cleaned.flux))
+	;	scale = scale < (10*1.58*mad(lcs.cleaned.flux))
 	endif
 
 ; =============================
@@ -757,13 +757,26 @@ PRO lc_plot, time=time, night=night, transit=transit, eps=eps, phased=phased, ca
 		for i_seg=0, n_elements(segments_boundaries)-1 do begin
 			if i_seg eq 0 then seg_start = 0 else seg_start = segments_boundaries[i_seg-1]
 			segment = seg_start + indgen(segments_boundaries[i_seg] - seg_start)
-			plot_lc, no_outliers=no_outliers, xaxis=lcs.(i)[segment].x,xtickunits=xtickunits, lcs.(i)[segment], symsize=symsize*(1.0 - keyword_set(binned)*0.5), time=time, nobad=fake, colorbar=colorbars[i_seg], /noaxes
+			plot_lc, no_outliers=no_outliers, xaxis=lcs.(i)[segment].x,xtickunits=xtickunits, lcs.(i)[segment], symsize=symsize*(1.0 - keyword_set(binned)*0.3), time=time, nobad=fake, colorbar=colorbars[i_seg], /noaxes
 		endfor
 
 		if keyword_set(binned) then begin
 			loadct, 0
-			if ~keyword_set(n_bins) then n_bins = 5*candidate.period/candidate.duration
-			plot_binned, lcs.(i).x, lcs.(i).flux, n_bins=n_bins, /sem,  psym=8, /overplot, color=180, symsize=0.3, thick=5*keyword_set(eps), /justbins, hatlen=hatlen
+
+			if ~keyword_set(binwidth) then begin
+				if keyword_set(time) then begin
+					span = max(!x.range) - min(!x.range)
+					if span gt 200 then binwidth = 7
+					if span le 200 and span gt 10 then binwidth = 0.5
+					if span le 10 and span gt 5 then binwidth = 0.25
+					if span le 5 then binwidth = 1.0/24.0
+					;binwidth = (max(!x.range)-min(!x.range))/30.d > (candidate.duration/2.)
+				endif
+				if keyword_set(phased) then binwidth = 24*candidate.duration/6.0
+			endif
+			print, 'binsize is ', binwidth
+			;if ~keyword_set(n_bins) then n_bins = 5*candidate.period/candidate.duration
+			plot_binned, lcs.(i).x, lcs.(i).flux,  lcs.(i).fluxerr, binwidth=binwidth, /sem,  psym=8, /overplot, color=180, symsize=0.3, thick=5*keyword_set(eps), /justbins, hatlen=hatlen, xrange=!x.range
 		endif 
 
 

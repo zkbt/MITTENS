@@ -6,3 +6,4 @@ FUNCTION mjdtohopkinsnight, mjd
 	str = string(form='(I04)', year) + string(form='(I02)', month) + string(form='(I02)', day) 
 	return, str
 END
+

@@ -1,4 +1,4 @@
-PRO ds9_some_hjds, hjd, xpa_name=xpa_name,  filenames=filenames, maxn=maxn
+PRO ds9_some_hjds, hjd, xpa_name=xpa_name,  filenames=filenames, maxn=maxn, pid=pid
 	common this_star
 	@filter_parameters
 	restore, star_dir + 'raw_target_lc.idl'	
@@ -51,7 +51,7 @@ PRO ds9_some_hjds, hjd, xpa_name=xpa_name,  filenames=filenames, maxn=maxn
 		date_dir = stregex(stregex(short_filenames, 'obj.[0-9]+', /ext), '[0-9]+', /ext) +'/'
 		prefix = '{/data/mearth1/reduced/,/data/mearth2/*/reduced/}' + tel_dir + date_dir
 		filenames = file_search(prefix + short_filenames)
-		ds9_filenames, filenames, xpa_name=xpa_name, mjd_i_think=midexp_mjds, apertures=apertures
+		ds9_filenames, filenames, xpa_name=xpa_name, mjd_i_think=midexp_mjds, apertures=apertures, pid=pid
 
 
 
