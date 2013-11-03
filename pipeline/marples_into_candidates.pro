@@ -6,7 +6,7 @@ PRO marples_into_candidates
 	mprint, tab_string, 'and generating periodic candidates (and an origami spectrum) from them'
 	mprint, /line
 
-	display, /off
+;	display, /off
 	verbose, /on
 	interactive, /off
 

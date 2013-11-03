@@ -17,7 +17,7 @@ PRO plot_binned, x, y, yerr, yno=yno, psym=psym, xrange=xrange, yrange=yrange, x
 			binned[i].x = mean(x[i_inbin])
 		endif else begin
 			i_inbin = where(x ge binned[i].x - binwidth/2.0d and x le binned[i].x + binwidth/2.0d, n_inbin)
-			print, n_inbin
+	;		print, n_inbin
 		endelse
 		if n_inbin gt 0 then begin
 			if n_inbin gt 1 then begin
@@ -54,5 +54,5 @@ PRO plot_binned, x, y, yerr, yno=yno, psym=psym, xrange=xrange, yrange=yrange, x
 	i = where(binned.scatter ne 0, n)
 	if ~keyword_set(thick) then thick=3
 	if n gt 0 then oploterror, binned[i].x, binned[i].mean, binned[i].scatter, thick=thick, psym=3, errcolor=errcolor, errthick=thick, hatlen=hatlen
-	print_struct, binned
+;	print_struct, binned
 END

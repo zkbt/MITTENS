@@ -65,12 +65,19 @@ PRO ds9_filenames, input_filenames, save_image=save_image,  pixels=pixels, xpa_n
 		if keyword_set(finder) then label_string = "MEarth master image; 6 arcminutes"
 
 		this_line_of_command =  filename  + ' -pan to '+strcompress(pos_string) + ' fk5  '							
-		if ~keyword_set(blank) then this_line_of_command += "-regions command 'fk5; box("+pos_string+', 360", 360") # dash=1 width=4 color=black font="helvetica 18 bold" text = "'+label_string+'" '+ "' -regions command 'fk5; circle("+south_pos_string+',0")'+'# width=0 color=black font="helvetica 18 bold" text = "'+south_label_string+'" '+ "' -regions command 'fk5; circle("+pos_string+','+string(format='(F4.1)', aperture_size)+"i) # width=4 color=red' "
+		if ~keyword_set(blank) then begin
+			this_line_of_command += "-regions command 'fk5; box("+pos_string+', 360", 360") # dash=1 width=4 color=black font="helvetica 18 bold" text = "'+label_string+'" '+ "' -regions command 'fk5; circle("+south_pos_string+',0")'+'# width=0 color=black font="helvetica 18 bold" text = "'+south_label_string+'" '+"'"
+
+			this_line_of_command += " -regions command 'fk5; point("+pos_string+") # point=x color=red size=10'"
+;			this_line_of_command += " -regions command 'fk5; circle("+pos_string+','+string(format='(F4.1)', aperture_size)+"i) # width=4 color=red'"
+			this_line_of_command += " -regions load " + strmid(filename, 0, strpos(filename, ".fit")) + '_list.ell '
+
+		endif
 		print, this_line_of_command
 		print
 		command += this_line_of_command
 	endfor	
-	rest_of_command =  '-single -frame next -match frame wcs -raise'
+	rest_of_command =  ' -single -frame next -match frame wcs -raise'
 	print, rest_of_command
 print
 print
@@ -78,11 +85,11 @@ print
 	if n_elements(save_image) gt 0 then command += ' -saveimage jpeg ' + save_image + ' -exit'
 	command+='&'
 	print
-
+print, command
 	
 	spawn, command, result, pid=pid
 	
-	wait, n_elements(filenames)*0.4 > 5
+	wait, n_elements(filenames)*0.8 > 5
 	xpa_command = "xpaget xpans | tail -1 | awk '{print $4}'"
 	spawn, xpa_command, xpa_name
 	print, 'XPA access running through ', xpa_name

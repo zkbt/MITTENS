@@ -5,6 +5,8 @@ FUNCTION bayesfit, lc, templates, fit, priors, outputs=outputs, systematics_mode
 	i_consider = where(lc.okay, N)
 	i_include = where(fit.solved, M)
 
+
+
 	N_withpriors = N + M
 	M_withgrazer = M + 1
 
@@ -59,10 +61,10 @@ FUNCTION bayesfit, lc, templates, fit, priors, outputs=outputs, systematics_mode
 		chi_sq = total((residuals[i_consider]/lc[i_consider].fluxerr)^2)
 		fit[n_elements(fit)-1].coef = rescaling
 		fit[n_elements(fit)-1].uncertainty = sqrt(chi_sq/n^2/2.0)
-		rescaling = sqrt(chi_sq/n) > 1
-		
+		rescaling = sqrt(chi_sq/(n>1)) > 1
 ;		print, string(format='(F5.2)', previous_rescaling),  ' --> ',  string(format='(F5.2)',rescaling)
 		converged = abs((rescaling - previous_rescaling)/rescaling) lt 0.01 or count gt 20
+
 ;		fit[where(fit.solved)].uncertainty*=fit[n_elements(fit)-1].coef	; make sure this is legit!
 	endwhile
 	return,fit

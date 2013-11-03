@@ -2,7 +2,7 @@ PRO load_summary_of_candidates, summary_of_candidates
 
 	common mearth_tools
 	common this_star
-	f = file_search('ls*/combined/octopus_candidates_pdf.idl')
+	f = file_search('ls*/combined/'+typical_candidate_filename)
 
 ;	f = subset_of_stars(filename,  year=year, tel=tel, lspm=lspm, radius_range=radius_range, n=n, combined=combined) + filename
 ; 	if keyword_set(unknown) then begin
@@ -12,7 +12,7 @@ PRO load_summary_of_candidates, summary_of_candidates
 ; 	endif
 	ls = long(stregex(/ext, stregex(/ext, f, 'ls[0-9]+'), '[0-9]+'))
 	n = n_elements(f)
-	template = create_struct('LS', 0l, 'STAR_DIR', '', {period:0.0d, hjd0:0.0d, duration:0.0, depth:0.0, depth_uncertainty:0.0, ratio:0.0, n_boxes:0, n_points:0, rescaling:1.0, ignore:0B, known:0B, variability:0B, stats:{boxes:fltarr(9), points:0, points_per_box:fltarr(9), start:0.0d, finish:0.0d, periods_searched:0L}} )
+	template = create_struct('LS', 0l, 'STAR_DIR', '', {period:0.0d, hjd0:0.0d, duration:0.0, depth:0.0, depth_uncertainty:0.0, ratio:0.0, n_boxes:0, n_points:0, rescaling:1.0, inflation_for_bad_duration:1.0, ignore:0B, known:0B, variability:0B, stats:{boxes:fltarr(9), points:0, points_per_box:fltarr(9), start:0.0d, finish:0.0d, periods_searched:0L}} )
 	summary_of_candidates = replicate(template, n)
 	has_boxes = bytarr(n)
 	mprint, doing_string, 'making a summary of the candidates; saving to population/summary_of_candidates.idl'
@@ -39,7 +39,7 @@ PRO load_summary_of_candidates, summary_of_candidates
 		summary_of_candidates[i].star_dir = star_dir
 		summary_of_candidates[i].ls = ls[i]
 		if file_test(star_dir + 'box_pdf.idl') then begin
-		;	if ~file_test( star_dir + 'octopus_stat_summary.idl') then begin
+			if ~is_uptodate( star_dir + 'octopus_stat_summary.idl', f[i]) then begin
 				restore, star_dir + 'box_pdf.idl'
 				stats = {boxes:fltarr(9), points:0, points_per_box:fltarr(9), start:0.0d, finish:0.0d, periods_searched:0L}
 				stats.boxes[*] = total(boxes.n[*] gt 0, 2)
@@ -50,13 +50,13 @@ PRO load_summary_of_candidates, summary_of_candidates
 				stats.finish = max(inflated_lc.hjd)
 				stats.periods_searched = file_lines(star_dir + 'boxes_all_durations.txt.bls')
 				save,filename=star_dir + 'octopus_stat_summary.idl', stats
-		;	endif
+			endif
 			restore, star_dir + 'octopus_stat_summary.idl'
 			summary_of_candidates[i].stats = stats
 		endif
 		mprint, tab_string, star_dir
 	endfor  
-	summary_of_candidates = summary_of_candidates[where(has_boxes)]
+	summary_of_candidates = summary_of_candidates[where(has_boxes and summary_of_candidates.depth_uncertainty gt 0)]
 	save, summary_of_candidates, filename='population/summary_of_candidates.idl'
 
 END

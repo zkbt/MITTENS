@@ -1,6 +1,7 @@
 PRO plot_residuals, top=top, eps=eps, png=png
 common mearth_tools
 common this_star
+cleanplot, /silent
 restore, star_dir + 'inflated_lc.idl'
 restore, star_dir + 'variability_lc.idl'
 restore, star_dir + 'ext_var.idl'

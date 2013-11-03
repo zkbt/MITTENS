@@ -1,0 +1,74 @@
+/* code for the pulsing passion flower attiny45/85 chip 
+   in which a random LED pulses when a button is pressed */
+//                        attiny45/85
+//                   reset -+---+- power
+//          (option 4) pb3 -+*  +- pb2 (option 3)
+//      (switch input) pb4 -+   +- pb1 (option 2)
+//                  ground -+---+- pb0 (option 1)
+//
+//  when switch is pressed, a random pin pulses some number of times
+int ledNumber = 0;
+
+void setup() {
+  pinMode(0, OUTPUT);
+  pinMode(1, OUTPUT);
+  pinMode(2, OUTPUT);
+  pinMode(3, OUTPUT);  
+
+  pinMode(4, INPUT);   // switch pin
+  digitalWrite(4, HIGH);  // turn on pull-up resistor
+}
+
+void loop() {
+  // turn everything off
+  digitalWrite(0, LOW);
+  digitalWrite(1, LOW);
+  digitalWrite(2, LOW);
+  digitalWrite(3, LOW);
+  
+  // read the switch.  0 if closed, 1 if open
+  int switchValue = digitalRead(4); 
+
+  // say that we want to pulse, and pick an LED
+  if (switchValue == 0)
+  {
+    wantToPulse = 1;
+    ledNumber++;
+
+    if (ledNumber== 4)
+    {
+      ledNumber = 0;
+    }
+  }
+  
+  // only pulse if the button was recently pressed!
+  if (wantToPulse == 1)
+  {
+  
+    // pulse 2 times (change k<??? for different number of pulses)
+    for (int k = 0; k<2;k++)
+    {
+    
+      // fade up to bright
+  	  for (int i = 1; i<1000; i=i+10)
+      {
+        digitalWrite(ledNumber, HIGH);
+        delayMicroseconds(i);
+        digitalWrite(ledNumber, LOW);
+	    delayMicroseconds(1000-i);
+      }
+      
+      // fade down to dark
+      for (int i = 1; i<1000; i=i+10)
+      {
+        digitalWrite(ledNumber, HIGH);
+        delayMicroseconds(1000-i);
+        digitalWrite(ledNumber, LOW);
+        delayMicroseconds(i);
+      }
+      
+    }
+    wantToPulse = 0;
+  }
+
+}

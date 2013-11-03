@@ -1,44 +1,67 @@
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <cmath>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
 #include <time.h>
 #define NDURATIONS 9
-using namespace std;
+#define OUTPUT_THRESHOLD 4
+#define RESOLUTION 1e-5
+#define VERBOSE 0
+
 
 // the box folding engine, phase fold a series of boxes to a candidate period + HJD0
 void boxFoldingRobot (	double candidatePeriod,	double allowedOverlap, 
-					double *HJD, double (*Depth)[9], double (*DepthUncertainty)[9], 
+					double *HJD, double (*Depth)[NDURATIONS], double (*DepthUncertainty)[NDURATIONS], 
 					double *foldedDepth, double *foldedDepthUncertainty, 
 					long nBoxes, int *nOffsets, long *totalCount, float *maxSN, float *maxSNanti)
 	{
 
 	// calculate a phased time, based on the candidate period and HJD0
 	double pseudoPhase[nBoxes], phaseOffset[nBoxes];
-	double depthNumerator[NDURATIONS], depthDenominator[NDURATIONS], initialFoldedDepthUncertainty[NDURATIONS], chiSquared[NDURATIONS], rescaling[NDURATIONS];
+	
+	// define arrays to contain intermediate steps required for calculating signal-to-noise ratios
+	double depthNumerator[NDURATIONS], depthDenominator[NDURATIONS], initialFoldedDepthUncertainty[NDURATIONS], chiSquared[NDURATIONS], rescaling[NDURATIONS], chiUnsquared;
+
+	// an array to contain the temporary SN (this will slide through all phases at fixed period)
 	float SN[NDURATIONS];
-	int maxBoxesInTransit = 365;
-	int inTransitIndices[maxBoxesInTransit][NDURATIONS];
- 	float allowedOverlapInPhase = allowedOverlap/candidatePeriod;
+
+	// place limit on the number of in-transit boxes can be included in an event 
+	long maxBoxesInTransit = 365, boxesInTransit[NDURATIONS],  actualNumberOfBoxesToInclude = 0;
+
+	// an array to store the indices of in-transit boxes (will need to be reset!)
+	long inTransitIndices[maxBoxesInTransit][NDURATIONS];
+	
+	
+ 	double allowedOverlapInPhase = allowedOverlap/candidatePeriod;
 	double offsetBetweenPhases=2.5/60.0/24.0/candidatePeriod;
 	double candidatePhase = 0.0;
-	int boxesInTransit[NDURATIONS];
-	for(int j = 0; j<NDURATIONS; j++)
+
+	// initialize some indices
+	long i = 0, j = 0;
+
+	// set transit and antitransit SN arrays to 0, for this period
+	for(j = 0; j < NDURATIONS; j++)
 	{
 		maxSN[j] = 0.0;
 		maxSNanti[j] = 0.0;
 	}
-
-	for(int i = 0; i < nBoxes; i++) 
+	
+	// set all the pseudo phases 
+	for(i = 0; i < nBoxes; i++) 
 	{
 		pseudoPhase[i] = HJD[i]/candidatePeriod;
 		pseudoPhase[i] -= floor(pseudoPhase[i]);
 	}
+	
+	// reset the number of offsets required at this period
 	*nOffsets = 0;
+
+	// loop over the pphases
 	while (candidatePhase < 1)
 	{
 		//reset all candidate properties
-		for(int j = 0; j<NDURATIONS; j++)
+		j=0;
+		for(j = 0; j<NDURATIONS; j++)
 		{
 			boxesInTransit[j] = 0;
 			chiSquared[j] = 0.0; 
@@ -54,7 +77,7 @@ void boxFoldingRobot (	double candidatePeriod,	double allowedOverlap,
 		}
 
 		//offset the phase of the datapoints, so they're centered on zero
-		for(int i=0; i<nBoxes; i++)
+		for(i=0; i<nBoxes; i++)
 		{
 			// compare the pseudo phase to the candidate phase
 			phaseOffset[i] = pseudoPhase[i] - candidatePhase;
@@ -70,7 +93,7 @@ void boxFoldingRobot (	double candidatePeriod,	double allowedOverlap,
 
 			if (phaseOffset[i] > -allowedOverlapInPhase && phaseOffset[i] < allowedOverlapInPhase)
 			{
-				for(int j = 0; j<NDURATIONS; j++)
+				for(j = 0; j<NDURATIONS; j++)
 				{
 					if (DepthUncertainty[i][j] > 0)
 					{
@@ -84,7 +107,7 @@ void boxFoldingRobot (	double candidatePeriod,	double allowedOverlap,
 		}
 
 		// define a folded depth for each duration, and its initial uncertainty
-		for(int j = 0; j<NDURATIONS; j++)
+		for(j = 0; j<NDURATIONS; j++)
 		{
 			// make sure Depth Uncertainty doesn't go to infinity
 			if(boxesInTransit[j] > 0) 
@@ -100,15 +123,21 @@ void boxFoldingRobot (	double candidatePeriod,	double allowedOverlap,
 		}
 
 		// rescale by chi^2 factor, if necessary
-		for(int j = 0; j<NDURATIONS; j++)
+		for(j = 0; j<NDURATIONS; j++)
 		{
 			if (boxesInTransit[j] > 1) 
 			{
-				for(int i = 0; i < min(boxesInTransit[j], maxBoxesInTransit); i++) 
+				actualNumberOfBoxesToInclude = boxesInTransit[j];
+				if (actualNumberOfBoxesToInclude > maxBoxesInTransit) 
+				{
+					actualNumberOfBoxesToInclude = maxBoxesInTransit;
+				}
+				for(i = 0; i < actualNumberOfBoxesToInclude; i++) 
 				{
 					if (phaseOffset[inTransitIndices[i][j]] > -allowedOverlapInPhase && phaseOffset[inTransitIndices[i][j]] < allowedOverlapInPhase)
 					{
-						chiSquared[j] += pow((Depth[inTransitIndices[i][j]][j] - foldedDepth[j])/DepthUncertainty[inTransitIndices[i][j]][j],2);
+						chiUnsquared = (Depth[inTransitIndices[i][j]][j] - foldedDepth[j])/DepthUncertainty[inTransitIndices[i][j]][j];
+						chiSquared[j] += chiUnsquared*chiUnsquared;
 		//				printf("%f %f %f\n", HJD[inTransitIndices[i]] , Depth[inTransitIndices[i]] , DepthUncertainty[inTransitIndices[i]] );
 					
 					}
@@ -138,8 +167,6 @@ void boxFoldingRobot (	double candidatePeriod,	double allowedOverlap,
 		// shift to a new phase offset
 		candidatePhase += offsetBetweenPhases;
 	}
-	//cout << *nOffsets << "   " << *totalCount << endl;
-//	return maxSN;
 }
 
 
@@ -149,57 +176,56 @@ long nLines(char* filename);
 // accept a filename, [timezone] as command line arguments
 int main(int argc, char* argv[]) {
 
+	// introduction
+	printf("==================================================\n");
+	printf("  octopusOrigami is folding many MarPLES at once  \n");
+	printf("==================================================\n");
 	// get filename from command line
-	cout << "The filename = " << argv[1] << endl;
+	printf("     The input file %s ", argv[1]);
 
 	// get number of lines in file
 	long nBoxes = nLines(argv[1]);
-	cout << "  It has " << nBoxes << " lines in it." << endl;
+	printf("has %ld lines in it.\n",  nBoxes);
 
+	// define the number columns that will go into the output file	
 	int nColumns = 1+ 2*NDURATIONS;
-	string tempString;
 	
 	// read in a file of boxes. must be formatted as follows:
 		// with 1-space between columns + 1 at the end of each row
 		// HJD, Depth1, DepthUncertainty1, Depth2, DepthUncertainty2, ...
-	double HJD[nBoxes], Depth[nBoxes][NDURATIONS], DepthUncertainty[nBoxes][NDURATIONS];
-	long i = 0, col=0, row=0;
-	ifstream boxesFile(argv[1]);
+	double tempHJD, tempDepth, tempDepthUncertainty, HJD[nBoxes], Depth[nBoxes][NDURATIONS], DepthUncertainty[nBoxes][NDURATIONS];
+	long i = 0, j=0,  row=0;
+	
+	// define a pointer to the input file
+	FILE *boxesFile;
+	boxesFile = fopen(argv[1], "r");
+	
+	// freak out if the file couldn't be found or opened
 	if(!boxesFile)
 	{
-		cout<<"Error opening file!"<<endl;
+		printf("     !@*($#@ Uh-oh! Error opening file!\n");
 		return -1;
 	}
-	while(!boxesFile.eof())
+	// loop over all the lines of the input file
+	while(!feof(boxesFile))
 	{
-		getline(boxesFile, tempString, ' ');
-		if(col==0)
+		// read the first column of a row as the HJD
+		fscanf(boxesFile, "%lf", &tempHJD);
+		HJD[row] = tempHJD;
+		if (VERBOSE) printf("%lf\n", HJD[row]);
+		
+		// read subsequent pairs of columns as Depth and DepthUncertainty for different durations
+		for(i=0; i<NDURATIONS; i++)
 		{
-			HJD[row] = atof(tempString.c_str());
-		}
-		else
-		{
-			if(col%2==1)
-			{
-				Depth[row][(col-1)/2] =atof(tempString.c_str());
-			}
-			else 
-			{
-				DepthUncertainty[row][(col-2)/2] = atof(tempString.c_str());
-			}
-		}
-	//	printf("%f %i %i %i %i\n",atof(tempString.c_str()), row, col, (col-1)/2, (col-2)/2);
-		col++;
-		if(col==nColumns)
-		{
-//			printf("\n%f ", HJD[row]);
-//			for(int q=0; q<NDURATIONS; q++)
-//				printf("%f %f ", Depth[row][q], DepthUncertainty[row][q]);
-			col=0;
-			row++;
-		}
+			fscanf(boxesFile, "%lf %lf", &tempDepth, &tempDepthUncertainty);
+			Depth[row][i] = tempDepth;
+			DepthUncertainty[row][i] = tempDepthUncertainty;
+			if (VERBOSE) printf("        %lf +/- %lf\n", Depth[row][i], DepthUncertainty[row][i]);
+		}	
+		row++;
 	}
-	printf("\n");
+	fclose(boxesFile);
+	printf("     oO successfully read in these %ld multi-duration boxes.\n", nBoxes);
 
 
 	// define variables for the phase-folding
@@ -207,98 +233,138 @@ int main(int argc, char* argv[]) {
 	double baseHJD = HJD[0], maxHJD0;
 	double allowedOverlap = 5.0/60.0/24.0, foldedDepth[NDURATIONS], foldedDepthUncertainty[NDURATIONS];
 	int boxesInTransit;
-	double timeElapsed;
+	double timeElapsed, timeSinceUpdate;
 
 	double minGap = 1000.0;
 	double oneMinute = 1.0/60.0/24.0;
 
-	for (int i=0; i+1<nBoxes; i++)
+	// figure out what the smallest gap between boxes is, to use for setting the search resolution + defining in-transit boxes
+	for (i=0; i+1<nBoxes; i++)
 		if (HJD[i+1] - HJD[i] < minGap && HJD[i+1] - HJD[i] > oneMinute)
 			minGap = HJD[i+1] - HJD[i];
-	printf("     the smallest gap between boxes is %f days, or %f minutes\n", minGap, minGap*24*60);
 	allowedOverlap = minGap/2.0;
+
+	printf("     The smallest gap between boxes is %f minutes;\n", minGap*24*60);
+	printf("        any box within half this time of mid-transit will be consider a unique, in-transit event.\n");
 
 	// set up period grid
 	double p_min = 0.25, p_max = 10.0, max_misalign = 5.0/60.0/24.0;
 	double data_span = (HJD[nBoxes-1] - HJD[0]);
-	long n_periods = (long)(data_span/max_misalign*log(p_max/p_min)),  nOffsets;
+	double dlnperiod = max_misalign/data_span;
+	if (dlnperiod < RESOLUTION)
+		dlnperiod = RESOLUTION;
+	long nPeriods = (long)(log(p_max/p_min)/dlnperiod),  nOffsets;
+	
+	printf("     Now searching %ld periods, logarithmically space between %f and %f days.\n", nPeriods, p_min, p_max);
 	double period, SN, tempSN;
 	float maxSN[NDURATIONS], maxSNanti[NDURATIONS];
+	
 	// define an output file
-	char outFile[500];
+	char outputFileString[500];
 	char outputString[500];
-	strcpy(outFile, argv[1]);
-	strcat(outFile, ".bls");
+	strcpy(outputFileString, argv[1]);
+	strcat(outputFileString, ".bls");
 
-	ofstream outputFile (outFile);
-	time_t startTime, endTime;
-	startTime = time(NULL);
+	// define an output file pointer	
+	FILE *outputFile;
+	outputFile = fopen(outputFileString, "w");
+
+	// define a time variable, to keep track of pace
+	clock_t startTime, endTime, beforeBoxTime, endBoxTime, lastUpdateTime;
+	startTime = clock();
+	beforeBoxTime = clock();
+	endBoxTime = clock();
+	lastUpdateTime = clock();
+	
+	// define some phase folding variables
 	long totalCount = 0;
 	double phasedTime[nBoxes];
 	long pad = (long) (50000.0/p_min);
+
+	// define variables for keeping track of whether or not to output the result
 	int nothing;
 	int worthPrinting = 0, somethingHasBeenPrinted = 0;
-	if (outputFile.is_open())
+
+	// status update
+	printf("          (this may take a while)\n\n");
+	
+	// loop over all periods of interest
+	for (i=0; i<nPeriods; i++)
 	{
-		for (int i=0; i<n_periods; i++)
+		// set the period for this phase folding
+		period =  p_min*exp(dlnperiod*(double)i);
+
+		// reset the instantaneous SN variable
+		SN = 0.0;
+
+		// set the starting epoch for the phase folding
+		HJD0 = baseHJD;
+		maxHJD0 = baseHJD + period;
+		int nOffsets = 0;
+
+	
+		// run the box-folding robot, to figure out the maximum SN's over all durations, given the period
+		if (VERBOSE) beforeBoxTime = clock();
+		if (VERBOSE) printf("%lf not box-folding,", (double)(beforeBoxTime - endBoxTime)/CLOCKS_PER_SEC);
+		boxFoldingRobot(period,  allowedOverlap,  HJD, Depth, DepthUncertainty, foldedDepth, foldedDepthUncertainty, nBoxes, &nOffsets, &totalCount, maxSN,maxSNanti);
+		if (VERBOSE) endBoxTime = clock();
+		if (VERBOSE) printf("%lf box-folding\n",  (double)(endBoxTime - beforeBoxTime)/CLOCKS_PER_SEC);
+
+		// output a bit of a status update
+		endTime = clock();
+		timeSinceUpdate = (double)(endTime - lastUpdateTime)/CLOCKS_PER_SEC;
+		if (timeSinceUpdate > 10.0) 
 		{
-			period =  p_min*exp(max_misalign/data_span*(double)i);
-			SN = 0.0;
-			HJD0 = baseHJD;
-			maxHJD0 = baseHJD + period;
-			int nOffsets = 0;
-			boxFoldingRobot(period,  allowedOverlap,  HJD, Depth, DepthUncertainty, foldedDepth, foldedDepthUncertainty, nBoxes, &nOffsets, &totalCount, maxSN,maxSNanti);
-			if (i % 1000 == 0) 
-			{
-				printf("completed %d / %d periods, with %d phase offsets; ", i, n_periods, nOffsets);
-				endTime = time(NULL);
-				timeElapsed = difftime(endTime, startTime);
-			//	/(double) CLOCKS_PER_SEC;
-			//	cout << startTime << "    "<< endTime <<endl;
-				printf("%d folds in %f seconds; %f folds (of %i durations each) per second!\r", totalCount, timeElapsed, (float)totalCount/timeElapsed, NDURATIONS);
-
-			}
-			nothing = sprintf(outputString, "%10.7f", period);
-			worthPrinting = 0;
-			for(int j=0; j<NDURATIONS;j++)
-			//	cout << startTime << "    "<< endTime <<endl;j<NDURATIONS;j++)
-			{
-				nothing = sprintf(outputString, "%s %f %f ", outputString, maxSN[j], maxSNanti[j]);
-				if (maxSN[j] > 4 || maxSNanti[j] < -4)
-				{
-					worthPrinting = 1;
-				}
-			}
-			if (worthPrinting == 1)
-			{
-				outputFile << outputString << endl;
-				somethingHasBeenPrinted = 1;
-			}
-
+			timeElapsed =  (double)(endTime - startTime)/CLOCKS_PER_SEC;
+			lastUpdateTime = clock();
+			printf("       period = %lf days (%ld/%ld, now with %i phase offsets; %lf folds/s) \n", period, i, nPeriods, nOffsets, (double)totalCount/timeElapsed);
 		}
-		if (somethingHasBeenPrinted == 0)
+		nothing = sprintf(outputString, "%10.7f", period);
+		worthPrinting = 0;
+		for(j=0; j<NDURATIONS;j++)
 		{
-			outputFile << "no phased candidates had |significances| > 4 sigma in either direction" << endl;
-		}	
-	// fold boxes, and spit out result
+			nothing = sprintf(outputString, "%s %f %f ", outputString, maxSN[j], maxSNanti[j]);
+			if (maxSN[j] > OUTPUT_THRESHOLD || maxSNanti[j] < -OUTPUT_THRESHOLD)
+			{
+				worthPrinting = 1;
+			}
+		}
+		if (worthPrinting == 1)
+		{
+		//	printf(outputString);
+			fprintf(outputFile, "%s\n", outputString);
+			somethingHasBeenPrinted = 1;
+		}
+
 	}
-//	fclose(outputFile);
+	
+	// put something the file, in case no interesting results are found
+	if (somethingHasBeenPrinted == 0)
+	{
+		fprintf(outputFile, "no phased candidates had |significances| > 4 sigma in either direction");
+	}	
+	fclose(outputFile);
 
 	return 0;
-
 }
 
+// a function to figure out how many lines are in a file
 long nLines(char* filename) {
-	string line;
-	long count = 0;
-	ifstream testingFile(filename);
-	if (testingFile.is_open())
+
+	FILE *boxesFile;
+	boxesFile = fopen (filename, "r");
+	if(!boxesFile)
 	{
-		while (testingFile.good() )
-		{
-			getline(testingFile,line);
-			count++;
-		}
+		printf("Error opening file!\n");
+		return -1;
+	}
+	long count = 0;
+	char tempString[1000];
+	while(!feof(boxesFile))
+	{
+		fgets(tempString, 1000, boxesFile);
+	//	printf("%ld %s\n", count, tempString);
+		count++;
 	}
 	return count-1;
 }

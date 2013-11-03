@@ -11,9 +11,8 @@ FUNCTION fit_nothing, lc, templates, fit, priors, nothing, variability_model=var
 	M_withnothing = M
 	i_seasonwide_rescaling = where(strmatch(priors.name, 'UNCERTAINTY_RESCALING'), n_seasonwidematch)
 	if n_seasonwidematch eq 1 then seasonwide_rescaling = priors[i_seasonwide_rescaling].coef
-
-
-	if n eq 0 then begin
+	if ~finite(seasonwide_rescaling) then seasonwide_rescaling = 1000.0
+	if n le 1 then begin
 		coef = priors[i_include].coef
 	endif else begin
 		;	for k=0, n_elements(nothing.duration)-1 do begin

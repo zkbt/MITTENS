@@ -1,0 +1,41 @@
+; MEarth IDL Tools for Transits of Extrasolar Neptunes and Super-earths (MITTENS)!
+
+<<<<<<< local
+common mearth_tools, display, verbose, done_string, doing_string, skipping_string, tab_string, tf, reduced_dir, working_dir, radii, interactive
+if keyword_set(old) then reduced_dir = '/data/mearth1/2008-2010-iz/reduced/' else reduced_dir = '/data/mearth1/reduced/'
+if keyword_set(old) then working_dir = '/pool/eddie1/zberta/mearth/2008_2010/' else working_dir = '/pool/eddie1/zberta/mearth_recent/'
+=======
+common mearth_tools, display, verbose, done_string, doing_string, skipping_string, tab_string, tf, possible_years, reduced_dir, working_dir, radii, interactive
+>>>>>>> other
+
+; need a reduced data directory for each year
+possible_years = [2008,2009,2010,2011]
+reduced_dir = ['/data/mearth2/2008-2010-iz/reduced/','/data/mearth2/2008-2010-iz/reduced/', '/data/mearth2/2010-2011-I/reduced/', '/data/mearth1/reduced/']
+
+; set working directory; on CfA network or on laptop?
+if getenv('HOME') eq '/Users/zachoryberta' then working_dir = '/Users/zachoryberta/mearth/' else working_dir = '/pool/eddie1/zberta/mearth_2011/'
+
+; set directory for general plots
+plot_dir = working_dir + 'plots/'
+
+; move to working directory
+cd, working_dir
+
+; initialize parameters
+radii = [4.0, 3.0, 2.5, 2.2, 2.0]
+display = 0
+verbose = 1
+interactive = 0
+@mearth_strings
+tf = ['false', 'true']
+!quiet = 1
+
+printl
+print, ' now running MEarth IDL Tools for Transits of Extrasolar Neptunes and Super-earths (MITTENS)!'
+print, '   working_dir   = ', working_dir
+print, '   plotting?     = ', tf[display]
+print, '   interactive?     = ', tf[interactive]
+print, '   verbose?      = ', tf[verbose]
+print, '   !quiet?       = ', tf[!quiet]
+printl
+print

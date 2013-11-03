@@ -357,6 +357,7 @@ PRO xlc_time_ev, event
 				endfor
 				close, raw_censor_lun
 				spawn, 'kwrite ' + star_dir + 'raw_image_xlc_time_censorship.log'
+				spawn, 'touch ' + star_dir + 'needtomakemarple'
 			endif 
 			if n_tags(xlc_time_ds9) gt 0 then begin	
 				; quit the ds9 window you were using
@@ -369,6 +370,7 @@ PRO xlc_time_ev, event
 					for i=0, n_censor-1 do printf, censor_lun, string(format='(D13.7)', xlc_time_censorship[i_censor[i]].hjd) + ' was censored by hand by '+username+' on ' + systime()
 					close, censor_lun
 					spawn, 'kwrite ' + star_dir + 'xlc_time_censorship.log'
+					spawn, 'touch ' + star_dir + 'needtomakemarple'
 				endif
 			endif
 			WIDGET_CONTROL, event.top, /DESTROY
@@ -413,7 +415,7 @@ PRO xlc_time_ev, event
 		wset, xlc_time_camera.draw_window
 		erase
 		print, 'draw'
-		help, widget_info(xlc_time_camera.draw_id, /geom)
+;		help, widget_info(xlc_time_camera.draw_id, /geom)
 		printl
 	endif
 
@@ -451,7 +453,7 @@ PRO xlc_time_ev, event
 	endwhile
 
 	; update the selections
-	help, xlc_time_selected_times
+;	help, xlc_time_selected_times
 	if n_tags(xlc_time_selected_times) gt 0 then begin
 		widget_control, xlc_time_camera.select_label_id, set_value=rw(xlc_time_selected_times.n_raw) + ' exp. + ' + rw(xlc_time_selected_times.n_binned) + ' obs.'+ 'selected'
 		widget_control, xlc_time_camera.ds9_button_id, sensitive=xlc_time_selected_times.n_raw gt 0 or xlc_time_selected_times.n_binned gt 0 

@@ -1,4 +1,6 @@
-PRO ds9_some_hjds, hjd, xpa_name=xpa_name,  filenames=filenames, maxn=maxn, pid=pid
+PRO ds9_some_hjds, input_hjd, xpa_name=xpa_name,  filenames=filenames, maxn=maxn, pid=pid
+
+	hjd = input_hjd[sort(input_hjd)]
 	common this_star
 	@filter_parameters
 	restore, star_dir + 'raw_target_lc.idl'	
@@ -7,7 +9,8 @@ PRO ds9_some_hjds, hjd, xpa_name=xpa_name,  filenames=filenames, maxn=maxn, pid=
 	if match_tel then restore, star_dir + 'raw_tel_array.idl'
 
 	sorted = sort(target_lc.hjd)
-	i_hjdmatch = sorted[value_locate(target_lc[sorted].hjd - ext_var[sorted].exptime/2.0/24./60./60, hjd)]
+;	i_hjdmatch = sorted[value_locate(target_lc[sorted].hjd - ext_var[sorted].exptime/2.0/24./60./60, hjd)]
+	i_hjdmatch = sorted[value_locate(target_lc[sorted].hjd, hjd + 0.5/60.0/60.0/24.0)]
 	midexp_mjds = ext_var[i_hjdmatch].mjd_obs
 	if match_tel then midexp_tel = raw_tel_array[i_hjdmatch]
 	
@@ -16,10 +19,9 @@ PRO ds9_some_hjds, hjd, xpa_name=xpa_name,  filenames=filenames, maxn=maxn, pid=
 	sql_query = "select object, tel, night, mjd, exptime, filename, rcore from frame where object like '%"+object_name+"%';"
 	sql = pgsql_query(sql_query, /verb)
 	sql = sql[sort(sql.mjd)]
-	
 		; sql.mjd seems to be start of exposure
 		; ext_var.mjd_obs seems to be mid exposure
-		i_match = value_locate(sql.mjd, midexp_mjds);+ sql.exptime
+	;;;;;	i_match = value_locate(sql.mjd, midexp_mjds);+ sql.exptime
 		for i=0, n_elements(midexp_mjds)-1 do begin
 			success = 0
 			offset = (sql.mjd + 0.5*sql.exptime/24.0d/60.0d/60.0d) - midexp_mjds[i]

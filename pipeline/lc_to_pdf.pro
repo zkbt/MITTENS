@@ -35,10 +35,10 @@ PRO lc_to_pdf, test=test, redtest=redtest, remake=remake, grazing=grazing, highr
 	common mearth_tools
 	
 	; avoid duplication of effort
-	if is_uptodate(star_dir + 'box_pdf.idl', star_dir  + 'target_lc.idl') and not keyword_set(remake)  then begin
+	if (is_uptodate(star_dir + 'box_pdf.idl', star_dir  + 'target_lc.idl') and ~keyword_set(remake)) then begin
     		mprint, skipping_string, 'lc PDF is up-to-date'
 		return
-	endif
+	endif	
 
 	if keyword_set(redtest) then test = 1B
 
@@ -381,8 +381,9 @@ PRO lc_to_pdf, test=test, redtest=redtest, remake=remake, grazing=grazing, highr
 		save, filename=star_dir + 'inflated_lc.idl', inflated_lc, templates
 		save, filename=star_dir + 'box_pdf.idl', boxes,  priors, spliced_clipped_season_fit, box_rednoise_variance
 		save, filename=star_dir + 'spliced_clipped_season_fit.idl', spliced_clipped_season_fit
-		save, filename=star_dir + 'flares_pdf.idl', flares, flare_lc, necessary_flares, i_onflarenight
+		save, filename=star_dir + 'flares_pdf.idl', flares, i_onflarenight,  flare_lc, necessary_flares
 		save, filename=star_dir + 'rednoise_pdf.idl', box_rednoise_variance, flare_rednoise_variance
+		file_delete, star_dir + 'needtomakemarple', /allow
 	endif
 	if keyword_set(test) then begin
 		if keyword_set(redtest) then begin

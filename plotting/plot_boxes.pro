@@ -1,7 +1,16 @@
 PRO plot_boxes, boxes, mark=mark, red_variance=red_variance, log=log, eps=eps, candidate=candidate, png=png, externalformatting=externalformatting, nobottom=nobottom, hold=hold, demo=demo, leg=leg
+
 	common this_star
 	common mearth_tools
 	@filter_parameters
+	
+	if n_elements(boxes) eq 0 then begin
+		restore, star_dir() + 'cleaned_lc.idl'
+		restore, star_dir() + 'box_pdf.idl'
+		;red_variance = box_rednoise_variance
+		candidate = candidate
+	endif
+
 	if keyword_set(eps) then begin
 		set_plot, 'ps'
 		file_mkdir, star_dir() + 'plots/'

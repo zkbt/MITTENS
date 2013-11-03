@@ -18,12 +18,13 @@
 ;
 ;-
 
-common mearth_tools, display, verbose, done_string, doing_string, skipping_string, error_string, tab_string, tf, possible_years, reduced_dir, working_dir, radii, interactive, yearly_filters, fake_dir, fake_trigger_dir, n_effective_for_rescaling, colorbars, ensemble_lspm, username
+common mearth_tools, display, verbose, done_string, doing_string, skipping_string, error_string, tab_string, tf, possible_years, reduced_dir, working_dir, radii, interactive, yearly_filters, fake_dir, fake_trigger_dir, n_effective_for_rescaling, colorbars, ensemble_lspm, username, typical_candidate_filename, fits_suffix
 
 ; define data directories in which to look for data for each year
-possible_years = [2008,2009,2010,2011,2012] ; based on the year in which a season starts (= August/September/October); will need to modify for South
-reduced_dir = ['/data/mearth2/2008-2010-iz/reduced/','/data/mearth2/2008-2010-iz/reduced/', '/data/mearth2/2010-2011-I/reduced/', '/data/mearth1/reduced/', '/data/mearth1/reduced/']
-yearly_filters = ['iz', 'iz', 'I', 'iz','iz']
+possible_years = [2008,2009,2010,2011,2012,2013] ; based on the year in which a season starts (= August/September/October); will need to modify for South
+reduced_dir = ['/data/mearth2/2008-2010-iz/reduced/','/data/mearth2/2008-2010-iz/reduced/', '/data/mearth2/2010-2011-I/reduced/', '/data/mearth1/reduced/', '/data/mearth1/reduced/', '/data/mearth1/reduced/']
+yearly_filters = ['iz', 'iz', 'I', 'iz','iz','iz']
+fits_suffix = '_daily.fits'
 
 ; set working directory; on CfA network or on laptop?
 ;if getenv('HOME') eq '/Users/zachoryberta' then working_dir = '/Users/zachoryberta/mearth/' else 
@@ -41,6 +42,7 @@ plot_dir = working_dir + 'plots/'
 fake_dir = 'final_fake_phased/'
 fake_trigger_dir = 'final_fake_trigger/'
 
+typical_candidate_filename = 'phased_candidates.idl'
 ; move to working directory
 cd, working_dir
 
@@ -75,6 +77,8 @@ print, '   verbose?      = ', tf[verbose]
 ;print, '   !quiet?       = ', tf[!quiet]
 printl
 print
+
+
 
 ;mittens_permissions
 

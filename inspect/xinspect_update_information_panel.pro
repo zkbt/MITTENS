@@ -58,6 +58,17 @@ PRO xinspect_update_information_panel
 			info_on_data = "seems to be none"
 		endelse
 	endelse
+
+
+	if n_elements(info_on_data) eq 0 then begin
+		info_on_data = "seems to be none"
+		widget_control, xinspect_camera.candidates_list, set_value = '(nothing)'
+		widget_control, xinspect_camera.boxes_list, set_value = '(nothing)'
+		widget_control, xinspect_camera.thingstoplot_buttons, get_value=selectedness
+		widget_control, xinspect_camera.thingstoplot_buttons, set_value=selectedness*0
+		widget_control, xinspect_camera.thingstoplot_buttons, sensitive=0
+	endif else widget_control, xinspect_camera.thingstoplot_buttons, sensitive=1
+
 	informative_text = ['THE STAR:', ' '+ info_on_star, '', 'THE DATA:', ' '+info_on_data]
 	widget_control, xinspect_camera.information_panel, set_value=informative_text	
 END

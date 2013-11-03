@@ -1,0 +1,20 @@
+PRO find_funny_parallaxes
+	restore, 'jason_temp.idl'
+	old = get_lspm_info(jason.lspm)
+	v = old.v
+	k = old.k
+	j = old.j
+	restore, '2011_obs_summary.idl'
+	medflux = fltarr(n_elements(k))
+	for i=0, n_elements(medflux) -1 do begin
+		i_match = where(obs_summary.lspm eq jason[i].lspm, n_match)
+		if n_match eq 1 then medflux[i] = obs_summary[i_match.medflux]
+	endfor
+	dm = 5*alog10(jason.distance/10.0)
+	abs_k = k - dm
+	!p.multi=[0,1,3]
+	plot, v-k, abs_k, xtitle='V-K', ytitle='absolute K'
+	plot, medflux-k, abs_k, xtitle='medflux-K', ytitle='absolute K'
+	plot, j-k, abs_k, xtitle='J-K', ytitle='absolute K'
+stop
+END

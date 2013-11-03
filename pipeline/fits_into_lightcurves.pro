@@ -58,9 +58,9 @@ PRO fits_into_lightcurves, desired_lspm, remake=remake, all=all, old=old
 			f_jmi = file_search('ls'+string(form='(I04)', desired_lspm) + '/ye'+string(form='(I02)', year mod 100) + '/te*/jmi_file_prefix.idl')
 			if f_jmi[0] ne '' then for i=0, n_elements(f_jmi)-1 do begin
 				restore, f_jmi[i]
-				if n_elements(jmi_this_year) eq 0 then jmi_this_year = jmi_file_prefix + '_lc.fits' else jmi_this_year =[jmi_this_year, jmi_file_prefix + '_lc.fits']
+				if n_elements(jmi_this_year) eq 0 then jmi_this_year = jmi_file_prefix + fits_suffix else jmi_this_year =[jmi_this_year, jmi_file_prefix + fits_suffix]
 			endfor
-		endif else jmi_this_year = file_search(dir + search_string +'_lc.fits')
+		endif else jmi_this_year = file_search(dir + search_string + fits_suffix)
 
 		exclude_list = ['lspm1335_2010_']
 		

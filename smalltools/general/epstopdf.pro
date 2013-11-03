@@ -25,7 +25,7 @@ PRO epstopdf, filename, pause=pause
   if strmatch(!VERSION.OS_NAME, '*Mac*') then begin
     spawn, 'open ' + name + '.eps'
   endif else begin
-  	spawn, 'epstopdf ' + name + '.eps'
+  	spawn, 'umask 0007; epstopdf ' + name + '.eps'
   	str = 'acroread ' + name + '.pdf'
   	if not keyword_set(pause) then str += '&'
   	spawn, str

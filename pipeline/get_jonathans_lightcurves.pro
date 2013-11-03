@@ -37,7 +37,7 @@ PRO get_jonathans_lightcurves, filename, remake=remake
 		; if successfully read in, then continue to generate an IDL lightcurve		
 		if status eq 0 then begin
 			mprint, doing_string, ' extracting all M dwarf light curves from ', filename
-			jmi_file_prefix = strmid(filename, 0, strpos(filename, '_lc.fits'))
+			jmi_file_prefix = strmid(filename, 0, strpos(filename, fits_suffix))
 			start = stregex(jmi_file_prefix, '(lspm[0-9]+)+', length=length)
 			lspm_section = strmid(jmi_file_prefix, start, length)
 			anything_left = strmid(jmi_file_prefix, start + length, 1000)
@@ -137,7 +137,7 @@ PRO get_jonathans_lightcurves, filename, remake=remake
 						mprint, '      M dwarf #', strcompress(/remo, j), ' going into ', star_dir
 					
 						my_file = file_info(star_dir + 'raw_ext_var.idl')
-						j_file = file_info(jmi_file_prefix + '_lc.fits')
+						j_file = file_info(jmi_file_prefix + fits_suffix)
 						if my_file.mtime le j_file.mtime or keyword_set(remake) then begin
 						
 							; create PNG of field image
@@ -239,6 +239,25 @@ PRO get_jonathans_lightcurves, filename, remake=remake
 								ext_var = ext_var[where(years eq year[i_year])]
 								save, ext_var, filename=star_dir + 'raw_' + 'ext_var.idl'
 								mprint, '          ', strcompress(/remo, n_elements(target_lc)), ' raw photometry points'
+								i_nonastrometric = where(strmatch(ext_var.styp, 'a*') eq 0, n_nonastrometric)
+								if n_nonastrometric gt 0 then begin
+									latest_nonastrometric = max(target_lc[i_nonastrometric].hjd)
+									previous_latest_nonastrometric = 0.0d
+									if file_test(star_dir + 'latest_nonastrometric.txt') then begin
+										openr, lun, /get_lun, star_dir + 'latest_nonastrometric.txt'
+										readf, lun, previous_latest_nonastrometric
+										close, lun
+										free_lun, lun
+									endif
+									if latest_nonastrometric gt previous_latest_nonastrometric then begin
+										spawn, 'touch ' + star_dir + 'needtomakemarple'
+									endif
+									openw, lun, /get_lun, star_dir + 'latest_nonastrometric.txt'
+									printf, lun, latest_nonastrometric
+									close, lun
+									free_lun, lun
+								endif
+
 							endif
 						endif else mprint, '         lightcurve already made, not remaking'
 					endfor

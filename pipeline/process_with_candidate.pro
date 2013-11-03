@@ -68,8 +68,13 @@ PRO process_with_candidate, input_candidate
 		raw_tel_array = big_raw_tel_array
 		save, filename=candidate_star_dir + 'raw_tel_array.idl', raw_tel_array
 		star_dir = candidate_star_dir
+
 	endif else begin
 		lcs = pdf_to_lc(candidate, vartools=vartools)
 	endelse
+
+	all_files = file_search(candidate_star_dir + '*')
+	file_chmod, /u_read, /u_write, /u_execute, /g_read, /g_write, /g_execute, all_files
+
 END
 

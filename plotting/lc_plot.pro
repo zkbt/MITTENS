@@ -202,15 +202,26 @@ PRO lc_plot, time=time, night=night, transit=transit, eps=eps, phased=phased, ca
 	endif
 	if ~keyword_set(zoom) then zoom = 1.0
 	if ~keyword_set(shift) then shift = 0.0
+	
+	
+	if keyword_set(box) and keyword_set(event) then begin
+		for i=0, n_lc-1 do begin
+			raw_lcs.(i).x = (raw_lcs.(i).hjd - box.hjd)*24
+			lcs.(i).x = (lcs.(i).hjd - box.hjd)*24
+		endfor
+		if ~keyword_set(xrange) then xrange = ([-0.5, 0.5] + shift)*transit.duration*10*24 *zoom
+	endif
+	
 	; set xrange
 	if keyword_set(xrange) then !x.range = xrange else begin
 		center = mean(range(raw_lcs.(0).x))
 		span = max(raw_lcs.(0).x) - min(raw_lcs.(0).x) 
-		!x.range = center + [-1, 1]*0.5*span*zoom
+		if ~keyword_set(xrange) then xrange = center + [-1, 1]*0.5*span*zoom
 		if ~keyword_set(n_durations) then n_durations = 5
 		if keyword_set(phased) or keyword_set(event) then begin
-			 if keyword_set(sin) then !x.range = ([-0.5, 0.5] + shift)*sin.period*24*zoom else begin
-				!x.range = ([-0.5, 0.5] + shift)*candidate.period*24*zoom
+			 if keyword_set(sin) then xrange = ([-0.5, 0.5] + shift)*sin.period*24*zoom else begin
+				if ~keyword_set(xrange)then xrange = ([-0.5, 0.5] + shift)*candidate.period*24*zoom
+				!x.range = xrange
 				;if keyword_set(binned) then   else  !x.range = ([-0.5, 0.5] + shift)*transit.duration*24*n_durations*zoom
 			endelse
 		endif
@@ -225,23 +236,15 @@ PRO lc_plot, time=time, night=night, transit=transit, eps=eps, phased=phased, ca
 		i_night = where(abs( inflated_lc.hjd - night) lt 8.0/24.0, n_night)
 		if n_rawnight gt 0 then begin
 			if keyword_set(time) then begin
-				!x.range = box.hjd + 2400000.5d + [-5, 5]/24.0
+				if ~keyword_set(xrange) then xrange = box.hjd + 2400000.5d + [-5, 5]/24.0
 			endif else begin
-				!x.range=[min(i_night), max(i_night)]
+				if ~keyword_set(xrange) then xrange=[min(i_night), max(i_night)]
 			endelse
 		endif else return
 	endif
  
-	if keyword_set(box) and keyword_set(event) then begin
-		for i=0, n_lc-1 do begin
-			raw_lcs.(i).x = (raw_lcs.(i).hjd - box.hjd)*24
-			lcs.(i).x = (lcs.(i).hjd - box.hjd)*24
-		endfor
-		!x.range = ([-0.5, 0.5] + shift)*transit.duration*5*24 *zoom
-	endif
 
 	if keyword_set(xrange) then !x.range = xrange
-
 
 	if keyword_set(phased) or keyword_set(box) then begin
 		x_vertices = [min(!x.range), -candidate.duration/2.0*24, -candidate.duration/2.0*24, candidate.duration/2.0*24, candidate.duration/2.0*24, max(!x.range)] 
@@ -281,7 +284,7 @@ PRO lc_plot, time=time, night=night, transit=transit, eps=eps, phased=phased, ca
 		restore, star_dir + 'raw_ext_var.idl'
 		raw_ext_var = ext_var
 		restore, star_dir + 'ext_var.idl'
-		diagnosis_tags = ['AIRMASS', 'EXTC', 'SEE', 'ELLIPTICITY', 'SKY', 'COMMON_MODE', 'HUMIDITY', 'SKYTEMP', 'RIGHT_XLC', 'LEFT_XLC', 'RIGHT_YLC', 'LEFT_XLC']
+		diagnosis_tags = ['AIRMASS', 'EXTC', 'RMS', 'SEE', 'ELLIPTICITY', 'SKY', 'COMMON_MODE', 'HUMIDITY', 'SKYTEMP', 'RIGHT_XLC', 'LEFT_XLC', 'RIGHT_YLC', 'LEFT_XLC']
 	
 		n_diagnosis = n_elements(diagnosis_tags)
 		ygap=0.004
@@ -448,8 +451,8 @@ PRO lc_plot, time=time, night=night, transit=transit, eps=eps, phased=phased, ca
 					plot_lc, no_outliers=no_outliers, xaxis=lcs.(0)[segment].x,xtickunits=xtickunits, lc[segment], symsize=symsize, time=time, nobad=fake, colorbar=colorbars[i_seg], /noaxes
 				endfor
 
-			this_coordinate_conversion = {x:!x, y:!y, p:!p}
-			if n_tags(coordinate_conversions) eq 0 then coordinate_conversions = this_coordinate_conversion else coordinate_conversions = [coordinate_conversions, this_coordinate_conversion]
+		;	this_coordinate_conversion = {x:!x, y:!y, p:!p}
+		;	if n_tags(coordinate_conversions) eq 0 then coordinate_conversions = this_coordinate_conversion else coordinate_conversions = [coordinate_conversions, this_coordinate_conversion]
 
 
 			if keyword_set(transit) then begin
@@ -530,12 +533,12 @@ PRO lc_plot, time=time, night=night, transit=transit, eps=eps, phased=phased, ca
 	; add some spaces before light curves
 	if keyword_set(comparisons) or keyword_set(diagnosis) then begin
 		smultiplot
-		this_coordinate_conversion = {x:!x, y:!y, p:!p}
-		if n_tags(coordinate_conversions) eq 0 then coordinate_conversions = this_coordinate_conversion else coordinate_conversions = [coordinate_conversions, this_coordinate_conversion]
+	;	this_coordinate_conversion = {x:!x, y:!y, p:!p}
+	;	if n_tags(coordinate_conversions) eq 0 then coordinate_conversions = this_coordinate_conversion else coordinate_conversions = [coordinate_conversions, this_coordinate_conversion]
 
 		smultiplot
-		this_coordinate_conversion = {x:!x, y:!y, p:!p}
-		if n_tags(coordinate_conversions) eq 0 then coordinate_conversions = this_coordinate_conversion else coordinate_conversions = [coordinate_conversions, this_coordinate_conversion]
+	;	this_coordinate_conversion = {x:!x, y:!y, p:!p}
+	;	if n_tags(coordinate_conversions) eq 0 then coordinate_conversions = this_coordinate_conversion else coordinate_conversions = [coordinate_conversions, this_coordinate_conversion]
 
 	endif
 
@@ -590,7 +593,7 @@ PRO lc_plot, time=time, night=night, transit=transit, eps=eps, phased=phased, ca
 		i_intransit = where(lcs.(i).intransit, n_intransit)
 
 
-		if n_elements(select_which) eq 0 then select_which = n_lc - 1
+		if n_elements(select_which) eq 0 then select_which = n_tags(lcs)-1
 		if i eq select_which then begin
 			; deal with the binned ones
 			selected = bytarr(n_elements(lcs.(i))) + 1
@@ -650,7 +653,10 @@ PRO lc_plot, time=time, night=night, transit=transit, eps=eps, phased=phased, ca
 				endelse
 			endelse
 			
-		endif else n_selected = 0
+		endif else begin
+			n_selected = 0
+			
+		endelse
 		help, n_selected, select_which
 
 		if i eq select_which then begin

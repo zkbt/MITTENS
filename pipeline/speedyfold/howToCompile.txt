@@ -1,3 +1,2 @@
-g++ -g -O3 -ffast-math -msse3 origami.c -o origami
-g++ -g -O3 -ffast-math -msse3 octopusOrigami.c -o octopusOrigami
+gcc -g -O3 -ffast-math -msse3 octopusOrigami.c -o octopusOrigami -lm
  

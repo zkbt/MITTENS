@@ -1,4 +1,4 @@
-PRO plot_xinspect_population, counter=counter, summary_of_candidates=summary_of_candidates, interesting_marples=interesting_marples, ensemble_observation_summary=ensemble_observation_summary, stellar_sample=stellar_sample, coordinate_conversions=coordinate_conversions, data_click=data_click, selected_object=selected_object
+PRO plot_xinspect_population, input_lspm, counter=counter, summary_of_candidates=summary_of_candidates, interesting_marples=interesting_marples, ensemble_observation_summary=ensemble_observation_summary, stellar_sample=stellar_sample, coordinate_conversions=coordinate_conversions, data_click=data_click, selected_object=selected_object, xrange=xrange, yrange=yrange
 
 	common mearth_tools
 	cleanplot
@@ -55,7 +55,7 @@ PRO plot_xinspect_population, counter=counter, summary_of_candidates=summary_of_
 			!x.range = (range(x) > 0.01) < 1000
 			!y.range = range(y) > 1
 			xlog = 1
-			ylog = 1
+			ylog = 0
 			!x.style=3
 			!y.style=3
 			xtitle='[Candidate] Period (days)'
@@ -67,8 +67,8 @@ PRO plot_xinspect_population, counter=counter, summary_of_candidates=summary_of_
 			y = summary_of_candidates.depth/summary_of_candidates.depth_uncertainty
 			!x.range = (range(x) > 0.1) < 1000
 			!y.range = range(y) > 1
-			xlog = 1
-			ylog = 1
+			xlog = 0
+			ylog = 0
 			!x.style=3
 			!y.style=3
 			xtitle='[Candidate] Transit/Anti-Transit (at fixed period)'
@@ -81,7 +81,7 @@ PRO plot_xinspect_population, counter=counter, summary_of_candidates=summary_of_
 			!x.range = range(x) > 0.1
 			!y.range = range(y) > 1
 			xlog = 1
-			ylog = 1
+			ylog = 0
 			!x.style=3
 			!y.style=3
 			xtitle='[Candidate] # of Epochs Covered by Light Curve'
@@ -94,7 +94,7 @@ PRO plot_xinspect_population, counter=counter, summary_of_candidates=summary_of_
 			!x.range = range(x) > 0.1
 			!y.range = range(y) > 1
 			xlog = 0
-			ylog = 1
+			ylog = 0
 			!x.style=3
 			!y.style=3
 			xtitle='[Individual MarPLE] Epoch'
@@ -108,7 +108,7 @@ PRO plot_xinspect_population, counter=counter, summary_of_candidates=summary_of_
 			!x.range = range(x) > 0.0001
 			!y.range = range(y) > 1
 			xlog = 1
-			ylog = 1
+			ylog = 0
 			!x.style=3
 			!y.style=3
 			xtitle='[Individual MarPLE] Depth (mag.)'
@@ -121,7 +121,7 @@ PRO plot_xinspect_population, counter=counter, summary_of_candidates=summary_of_
 			!x.range = range(x) > 0.0001
 			!y.range = range(y) > 1
 			xlog = 1
-			ylog = 1
+			ylog = 0
 			!x.style=3
 			!y.style=3
 			xtitle='[Individual MarPLE] Depth Uncertainty (mag.)'
@@ -134,7 +134,7 @@ PRO plot_xinspect_population, counter=counter, summary_of_candidates=summary_of_
 			!x.range = range(x) > 0.1
 			!y.range = range(y) > 1
 			xlog = 1
-			ylog = 1
+			ylog = 0
 			xtitle='[Individual MarPLE] # of Observations in Event'
 			ytitle=goodtex('D/\sigma_{MarPLE}')
 		end
@@ -153,12 +153,14 @@ PRO plot_xinspect_population, counter=counter, summary_of_candidates=summary_of_
 			ytitle=''
 			!x.style=7
 			!y.style=7
-			xmargin=[2,2]
-			ymargin=[2,2]
+			!x.margin=[2,2]
+			!y.margin=[2,2]
 		end
 	endcase
 
-
+	; allow for zooming
+	if n_elements(xrange) gt 0 then	if xrange[0] ne xrange[1] then !x.range = xrange
+	if n_elements(yrange) gt 0 then	if yrange[0] ne yrange[1] then !y.range = yrange
 
 
 	
@@ -171,6 +173,26 @@ PRO plot_xinspect_population, counter=counter, summary_of_candidates=summary_of_
 	coordinate_conversions = {x:!x, y:!y, p:!p, xlog:xlog, ylog:ylog}
 	; (be careful, the xlog and ylog properties might not persist well if other plots are being drawn before the coordinate_conversions will be needed)
 
+	if mode eq 'sample_radial' then begin
+		r = [5, 10, 15, 20, 25]
+		gray = 150
+		theta = findgen(1000)*!pi*2/999.
+		angle = -60*!pi/180
+		loadct, file='~/zkb_colors.tbl', 0
+		for i=0, n_elements(r)-1 do oplot, cos(theta)*r[i], sin(theta)*r[i], thick=1, color=gray
+		off = -1.5
+		xyouts, (r-off)*cos(angle), (r-off)*sin(angle), orient=90+angle*180/!pi, rw(r) + ' pc', align=0.5, charsize=2, charthick=1, color=gray
+	endif
+
+
+	; if the density of points on the plot is small enough, print out the LSPM numbers
+	n_pointsinplot = total(x gt min(!x.range) and x lt max(!x.range) and y gt min(!y.range) and y lt max(!y.range), /int)
+	if n_pointsinplot lt 100 then begin
+		loadct, 52, file='~/zkb_colors.tbl'
+
+		xyouts, x, y, rw(lspmnumbers), align=0.5, noclip=0, color=127
+	endif
+
 	; if plot_xinspect_population has been supplied with a data_click structure, select the closest point in this plot
 	if n_elements(data_click) gt 0 then begin
 		normal_points = convert_coord(x, y, /data, /to_normal)
@@ -181,13 +203,31 @@ PRO plot_xinspect_population, counter=counter, summary_of_candidates=summary_of_
 
 		i_selected = where(r eq min(r))
 		i_selected = i_selected[0]
-
+		input_lspm = lspmnumbers[i_selected]
 		print, normal_click
 	endif
 
+	if keyword_set(input_lspm) then begin
+		i_possible = where(lspmnumbers eq input_lspm, n_possible)
+		if n_possible gt 0 then begin
+			loadct, 42, file='~/zkb_colors.tbl'
+			
+			plots, x[i_possible], y[i_possible], psym=8, symsize=1.5, thick=1, color=100
+		
+			if n_elements(i_selected) eq 0 then begin
+				highest = where(y[i_possible] eq max(y[i_possible]), n_high)
+				if n_high gt 0 then i_selected = i_possible[highest[0]]
+			endif
+		endif
+	endif
+	
 	; if one of the objects has been selected, mark it
 	if n_elements(i_selected) gt 0 then begin
-		plots, x[i_selected], y[i_selected], psym=8, symsize=3, color=254
+		loadct, 42, file='~/zkb_colors.tbl'
+		theta = findgen(21)/20*2*!pi
+		usersym, cos(theta), sin(theta), thick=3
+		plots, x[i_selected], y[i_selected], psym=8, symsize=3, color=0, thick=3
+		usersym, cos(theta), sin(theta), thick=1
 		
 		selected_object = create_struct('lspmn', lspmnumbers[i_selected], 'star_dir', labels[i_selected], structure_name, structure[i_selected])
 		text =   '  LSPM'+string(form='(I04)', selected_object.lspmn) + '  ' ; selected_object.star_dir

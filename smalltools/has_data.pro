@@ -30,18 +30,18 @@ FUNCTION has_data, n=n, days=days
 	common this_star
 	common mearth_tools
 	@filter_parameters
-	filename = star_dir + 'inflated_lc.idl'
+	filename = star_dir + 'ext_var.idl'
 
 	ft = file_test(filename)
 	hasdata = ft
 	if ft then begin
 		if keyword_set(n) or keyword_set(days) then begin
 			restore, filename
-			lc = inflated_lc
+			lc = ext_var
 			if keyword_set(n) then hasdata = hasdata AND  (n_elements(lc) ge n)
 			mprint, tab_string, tab_string, tab_string, star_dir + ' has ' + rw(n_elements(lc)) + ' observations'
 			if keyword_set(days) then begin
-				nights = round(lc.hjd-mearth_timezone())
+				nights = round(lc.mjd_obs-mearth_timezone())
 				uniq_nights = nights[uniq(nights, sort(nights))]
 				hasdata = hasdata AND (n_elements(uniq_nights) ge days)
 				mprint, tab_string, tab_string, tab_string, star_dir + ' has ' + rw(n_elements(uniq_nights)) + ' unique nights'

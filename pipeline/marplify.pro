@@ -34,6 +34,7 @@ PRO marplify, lspm, old=old, remake=remake, year=year, fake=fake, nofold=nofold,
 	common mearth_tools
 	clear
 
+	; if an LSPM wasn't specified, grab it from the current directory
 	if ~keyword_set(lspm) then lspm = long(stregex(ls_dir(), '[0-9]+', /ext))
 
 ;;;;;;;;;;;;;;;;;;!!!!!!!!!!!!!!!!!!!!!!
@@ -62,7 +63,10 @@ PRO marplify, lspm, old=old, remake=remake, year=year, fake=fake, nofold=nofold,
 		
 		; switch into this star
 		set_star, ls[i],  ye[i], te[i]
-		process_staryete, nofold=nofold, remake=remake, bulldoze=bulldoze
+		
+		thesubdirectoryneedsremaking = file_test(star_dir() + 'needtomakemarple') 
+		thecomboneedsremaking =  file_test(ls_dir() + 'combined/' + 'needtomakemarple') 
+		process_staryete, nofold=nofold, remake=keyword_set(remake) or thesubdirectoryneedsremaking or thecomboneedsremaking, bulldoze=bulldoze
 
 		if n_elements(radii) lt 6 then stop
 	endfor
@@ -114,7 +118,7 @@ PRO marplify, lspm, old=old, remake=remake, year=year, fake=fake, nofold=nofold,
 		stats.periods_searched = long(n_periods)
 		save,filename=star_dir() + 'stat_summary.idl', stats
 	endif
-	candidate_filename =  'octopus_candidates_pdf.idl'
+	candidate_filename = typical_candidate_filename;  'octopus_candidates_pdf.idl'
 	if file_test(star_dir() + candidate_filename) then begin
 		restore, star_dir() + candidate_filename
 		restore, star_dir() + 'box_pdf.idl'
@@ -135,4 +139,5 @@ PRO marplify, lspm, old=old, remake=remake, year=year, fake=fake, nofold=nofold,
 	close, lun
 	free_lun, lun
 	close, /all
+	file_delete, star_dir() + 'needtomakemarple', /allow
 END

@@ -20,8 +20,10 @@ FUNCTION smulti_datacoord, event=event, coordinate_conversions=coordinate_conver
 			!y = coordinate_conversions[i].y
 			!p = coordinate_conversions[i].p
 			if tag_exist(coordinate_conversions[i], 'xlog') and tag_exist(coordinate_conversions[i], 'ylog') then begin
-				
-				plot, [0], xlog=coordinate_conversions.xlog, ylog=coordinate_conversions.ylog, title='test', /noerase, /nodata
+				!x.style=!x.style or 4
+				!y.style=!y.style or 4
+				plot, [0], xlog=coordinate_conversions.xlog, ylog=coordinate_conversions.ylog, /noerase, /nodata
+
 			endif
 			click = convert_coord(pixel_click.x, pixel_click.y, /device, /data)
 			return, {x:click[0], y:click[1], which:i}

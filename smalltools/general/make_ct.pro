@@ -107,7 +107,7 @@ n_rows = float(n)/n_cols
 if n_rows mod 1 eq 0.5 then n_rows += 0.5
 n_rows = uint(n_rows)
 multiplot, [n_cols,n_rows], /init, xgap=0.02
-for i=0 ,n-1 do begin
+for ct=0 ,n-1 do begin
 	multiplot
 	@psym_circle
 	loadct, 0, /silent
@@ -119,5 +119,6 @@ for i=0 ,n-1 do begin
 endfor
 multiplot, /def
 device, /close
+set_plot, 'x'
 epstopdf, '~/zkb_colors'
 END

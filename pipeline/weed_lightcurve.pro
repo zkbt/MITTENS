@@ -36,7 +36,7 @@ PRO weed_lightcurve, remake=remake, lenient=lenient, baddatesokay=baddatesokay, 
 	everything_upto_date = 1B
 	ls_dir = stregex(star_dir(), 'ls[0-9]+', /ext) + '/'
 
-	files_to_check =[ file_search(ls_dir + '{*,*/*}/raw_image_censorship.log'),  file_search(ls_dir + '{*,*/*}/censorship.log'),  file_search(ls_dir + '{*,*/*}/xlc_*_censorship.log'),  star_dir() + 'raw_ext_var.idl']
+	files_to_check =[ file_search(ls_dir + '{*,*/*}/raw_image*censorship.log'),  file_search(ls_dir + '{*,*/*}/censorship.log'),  file_search(ls_dir + '{*,*/*}/xlc_*_censorship.log'),  star_dir() + 'raw_ext_var.idl']
 	for i=0, n_elements(files_to_check)-1 do if files_to_check[i] ne '' then everything_upto_date = everything_upto_date AND is_uptodate(star_dir() + 'target_lc.idl', files_to_check[i])
 
 	;if (is_uptodate(star_dir + 'target_lc.idl', star_dir + 'raw_ext_var.idl') and is_uptodate(star_dir + 'target_lc.idl', star_dir + 'censorship.log') and is_uptodate(star_dir + 'target_lc.idl', star_dir + 'raw_image_censorship.log'))$

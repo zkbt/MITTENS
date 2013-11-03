@@ -1,0 +1,225 @@
+PRO fake_trigger, n, remake=remake, play=play
+
+	; diagnose the slow bits (probably occultnl)
+	if keyword_set(profile) then begin
+		profiler, /reset
+		profiler, /system
+		profiler
+		fake_trigger, n, remake=remake
+		profiler, /report, output=output, data=data
+		i = reverse(sort(data.time)) 
+		print_struct, data[i]
+;		if question('do you want to look at the profiler results?', /int) then stop
+		return
+	endif
+
+	; basics
+	common this_star
+	common mearth_tools
+	@constants
+	@filter_parameters
+	if not keyword_set(n) then n=50000
+
+	; figure out root star directory (whether or not already working on a fake)
+	ls = long(stregex(/ext, stregex(/ext, star_dir, 'ls[0-9]+'), '[0-9]+'))
+	ye = long(stregex(/ext, stregex(/ext, star_dir, 'ye[0-9]+'), '[0-9]+'))
+	te = long(stregex(/ext, stregex(/ext, star_dir, 'te[0-9]+'), '[0-9]+'))
+	star_dir = stregex(/ext, star_dir, 'ls[0-9]+/ye[0-9]+/te[0-9]+/')
+
+	; skip if this is already finished
+	if is_uptodate(star_dir + fake_trigger_dir + 'injected_and_recovered.idl', star_dir + 'target_lc.idl') and ~ keyword_set(remake) then begin
+		print, 'already faked lots of triggers for this star! run fake_trigger again with /remake, if you want.'
+		return
+	endif
+
+	; setup fake directory, copying files necessary for plotting into it
+	file_mkdir, star_dir + fake_trigger_dir
+	file_copy, star_dir + 'raw_target_lc.idl', star_dir + fake_trigger_dir + 'raw_target_lc.idl', /over
+	file_copy, star_dir + 'raw_ext_var.idl', star_dir + fake_trigger_dir + 'raw_ext_var.idl', /over
+	file_copy, star_dir + 'ext_var.idl', star_dir + fake_trigger_dir + 'ext_var.idl', /over
+	file_copy, star_dir + 'sfit.idl', star_dir + fake_trigger_dir + 'sfit.idl', /over
+
+	; load up environment full of variables that were defined or restored into lc_to_pdf.pro
+	restore, star_dir + 'fakes_setup.idl'
+	restore, star_dir + 'ext_var.idl'
+		i_seasonwide_rescaling = where(strmatch(priors.name, 'UNCERTAINTY_RESCALING'), n_seasonwidematch)
+		if n_seasonwidematch eq 1 then seasonwide_rescaling = priors[i_seasonwide_rescaling].coef
+	; only look at the boxes that contain at least one data point
+	boxes = boxes[where(total(boxes.n, 1) gt 0)]
+
+	p_min = (5.0/4.2*lspm_info.radius/lspm_info.mass^(1.0/3.0)) > 0.5
+	pad = long((max(boxes.hjd) - min(boxes.hjd))/p_min)+1
+
+ 	boxes_nights = long(boxes.hjd -mearth_timezone())
+	flares_nights = long(flares.hjd -mearth_timezone())
+	initial_boxes = boxes
+	initial_flares = flares
+	lc = inflated_lc
+	nights = round(lc.hjd - mearth_timezone())
+	uniq_nights = nights[uniq(nights)]
+	struct = {period:0.0d, hjd0:0.0d, duration:0.0, t23:0.0, t14:0.0, b:0.0, radius:0.0, depth:0.0, depth_uncertainty:0.0, n_sigma:0.0,  n_points:0, n_nights:0, n_points_before:0,  rescaling:1.0, first_transit:0.0, timeleft:0.0}
+	injected = replicate(struct, n)
+	recovered = replicate(struct, n)
+	n_data = n_elements(lc)
+
+	; warm up the time machine (precalculate all the priors)
+	for i=1, n_elements(uniq_nights)-1 do begin
+		the_night_before = uniq_nights[i]
+		; figure out what priors we can use, that only include data up to the event we're looking at
+	 	priors_filename = star_dir + fake_trigger_dir + 'timemachine_priors_' + rw(the_night_before) + '.idl'
+		print, 'looking for ', priors_filename
+		if file_test(priors_filename) then begin
+			print, '    found it, loading it up!'
+		endif else begin
+			print, "    couldn't find it, rerunning lc_to_pdf in timemachine mode"
+			lc_to_pdf, /remake, timemachine=the_night_before
+		endelse
+		restore, priors_filename
+		if i eq 1 then begin
+			archive_of_priors = create_struct('UPTO'+rw(the_night_before), priors)
+		endif else begin
+			archive_of_priors = create_struct(archive_of_priors, 'UPTO'+rw(the_night_before), priors)
+		endelse
+	endfor
+	tags = tag_names(archive_of_priors)
+	archive_nights = long(stregex(/ex, tags, '[0-9]+'))
+	
+
+	; changing the star directory to the fake one - don't forget to change it back!
+;	star_dir = star_dir + fake_trigger_dir
+
+	; loop over how many iterations we want to run
+	for i=0L, n-1 do begin 
+
+		; inject the transit
+		if keyword_set(input_injected) then injected[i] = input_injected else begin
+			copy_struct, generate_fake(), struct
+			injected[i] = struct
+		endelse
+
+		; do some more calculations on the injected transit
+		a_over_rs = a_over_rs(lspm_info.mass, lspm_info.radius, injected[i].period)
+		injected[i].depth = (injected[i].radius*0.00917/lspm_info.radius)^2; (injected[i].radius*r_earth/r_sun/lspm_info.radius)^2
+		rp_over_rs = sqrt(injected[i].depth)
+		injected[i].t14 = (injected[i].period/!pi*asin(sqrt((1.0+rp_over_rs)^2 - injected[i].b^2)/sqrt(a_over_rs^2 - injected[i].b^2)))
+		injected[i].t23 = (injected[i].period/!pi*asin(sqrt((1.0-rp_over_rs)^2 - injected[i].b^2)/sqrt(a_over_rs^2 - injected[i].b^2)))
+		injected[i].duration = injected[i].t23
+		
+		; figure out which points are in-transit, set dial of time machine
+		i_intransit = where_intransit(lc, injected[i], i_oot=i_oot, n_intransit)
+		transit = fltarr(n_data)
+		if n_intransit gt 0 then begin
+			sinphi = sin(!pi*injected[i].t14/injected[i].period)
+			inclination = acos(sqrt(((1.0 + injected[i].radius*r_earth/lspm_info.radius/r_sun)^2/a_over_rs^2 - sinphi^2)/(1.0 - sinphi^2)))
+			transit = -2.5*alog10( zeroeccmodel(lc.hjd,injected[i].hjd0,injected[i].period,lspm_info.mass,lspm_info.radius,injected[i].radius*r_earth/r_sun,inclination,0.0,0.24,0.38) )
+			transit_numbers = round((lc[i_intransit].hjd - injected[i].hjd0)/injected[i].period)
+			uniq_transits = uniq(round(transit_numbers), sort(transit_numbers))
+			; figure out where the first transit is; set time machine to that date
+			first_transit_number = transit_numbers[uniq_transits[randomu(seed)*n_elements(uniq_transits)]]
+			the_night_before = min(round(injected[i].hjd0 + first_transit_number*injected[i].period - mearth_timezone()) - 1)
+			i_points_in_first_transit = i_intransit[where(transit_numbers eq first_transit_number)]
+			injected[i].depth_uncertainty = sqrt(1.0/total(1.0/lc[i_points_in_first_transit].fluxerr^2))
+			injected[i].n_nights = total(/int, uniq_nights le the_night_before)
+			injected[i].n_points_before = total(/int, lc.hjd le the_night_before)
+			injected[i].n_points = n_elements(i_points_in_first_transit)
+
+		endif else continue
+		if injected[i].n_nights le 1 then continue
+
+		; inject the transit, blank out all data after the transit
+		injected_lc = lc
+		injected_lc.flux += transit		
+		injected_lc.okay = injected_lc.okay and lc.hjd le max(lc[i_points_in_first_transit].hjd)
+
+		injected[i].timeleft = injected[i].hjd0 + first_transit_number*injected[i].period + injected[i].t14/2.0 - max(lc[i_points_in_first_transit].hjd)
+		
+		i_thisdate = value_locate(archive_nights, the_night_before)  
+		priors = archive_of_priors.(i_thisdate)
+		
+		injected[i].depth_uncertainty *= seasonwide_rescaling
+		injected[i].n_sigma = injected[i].depth/injected[i].depth_uncertainty
+
+		recovered[i].duration =  injected[i].duration
+		duration_bin = median(boxes[0].duration[1:*]  - boxes[0].duration)
+		i_duration = value_locate(boxes[0].duration-duration_bin/2, recovered[i].duration) > 0
+
+		; fit the in-transit box
+		this_event_center = (injected[i].hjd0 + injected[i].period*first_transit_number)
+		i_intransitbox = where(abs(initial_boxes.hjd - this_event_center) eq min(abs(initial_boxes.hjd - this_event_center)), n_intransitbox)
+		i_intransitbox = i_intransitbox[0]
+
+		boxes = initial_boxes[0:i_intransitbox]
+		fit =spliced_clipped_season_fit
+		boxes[i_intransitbox] =  fit_box(injected_lc, templates,fit, priors, boxes[i_intransitbox], demo_plot=demo_plot, i_duration=i_duration)	
+		injected[i].first_transit = boxes[i_intransitbox].hjd
+		i_rescaling = where(strmatch(fit.name, 'RESCALING'), n_rescalingmatch)
+		if n_rescalingmatch eq 1 then recovered[i].rescaling = fit[i_rescaling].coef else recovered[i].rescaling=-1
+
+		box_rednoise_variance = fltarr(n_elements(boxes[0].depth))
+		for iii=0, n_elements(boxes[0].depth)-1 do begin
+			temp_rednoise = -0.05	
+			converged = 0
+			while(~converged) do begin
+				temp_rednoise += 0.05
+				i_interesting = where(boxes.n[iii] gt 0, n_interesting)
+				rednoise_correction = sqrt(1.0 + boxes[i_interesting].n[iii]*temp_rednoise^2);/(1.0 + temp_rednoise^2)
+				converged = 1.48*mad(boxes[i_interesting].depth[iii]/boxes[i_interesting].depth_uncertainty[iii]/rednoise_correction) le 1.0 or temp_rednoise gt 2
+			endwhile
+			box_rednoise_variance[iii] = temp_rednoise^2
+			boxes[i_interesting].depth_uncertainty[iii] *= rednoise_correction
+		endfor
+
+
+		recovered[i].period = injected[i].period
+		recovered[i].hjd0 = injected[i].hjd0
+		recovered[i].radius = injected[i].radius
+		recovered[i].t23 = injected[i].t23
+		recovered[i].t14 = injected[i].t14
+		recovered[i].b = injected[i].b
+		recovered[i].depth = boxes[i_intransitbox].depth[i_duration]
+		recovered[i].depth_uncertainty = boxes[i_intransitbox].depth_uncertainty[i_duration]
+		recovered[i].n_nights = injected[i].n_nights
+		recovered[i].n_points = boxes[i_intransitbox].n[i_duration]
+
+		recovered[i].n_sigma = recovered[i].depth/recovered[i].depth_uncertainty
+;		recovered[i].affected_by_flare = total(boxeskilledbyflares[i_intransitboxes[uniq_intransit]])
+		if recovered[i].n_points eq 0 then recovered[i].n_sigma =0
+		; plot results			
+; 		if keyword_set(display) and keyword_set(not_fake) then begin
+; 			cleanplot, /silent
+; 			xplot, 3, title='S/N for "Box" Events', xsize=950, ysize=300
+; 			plot_boxes, boxes;, mark=i_intransitboxes[uniq_intransit]
+; 
+; 		endif
+; 			print, 'injected'
+; 			print_struct, injected[i]
+; 			print, 'recovered'
+; 			print_struct, recovered[i]
+		cleanplot
+		if i gt 10 and i mod 5000 eq 0 then begin
+			i_radius = where(injected.radius lt 10 and injected.b lt 0.3 and injected.n_points gt 0, n_rad)
+			if n_rad gt 1 then plot_binned, psym=1, injected[i_radius].n_nights, recovered[i_radius].n_sigma/injected[i_radius].n_sigma, yr=[-2, 2], n_bins=max(injected.n_nights)
+		endif
+
+
+		; if just playing around, then ask if you want to look at fake candidates
+		if question('curious', interactive=play) or keyword_set(input_injected) then begin
+			print, star_dir
+			inflated_lc = injected_lc
+			target_lc = injected_lc
+			save, filename=star_dir + fake_trigger_dir +'inflated_lc.idl', inflated_lc, templates
+			save, filename=star_dir + fake_trigger_dir +'box_pdf.idl', boxes,  priors, spliced_clipped_season_fit, box_rednoise_variance
+			save, filename=star_dir + fake_trigger_dir +'flares_pdf.idl', flares, flare_lc, necessary_flares, i_onflarenight
+
+			best_candidates = [injected[i], recovered[i]]
+			save, filename=star_dir + fake_trigger_dir +'candidates_pdf.idl', best_candidates
+			star_dir = star_dir + fake_trigger_dir
+			explore_pdf, /fake, 1, transit_number=first_transit_number
+			star_dir = stregex(/ext, star_dir, 'ls[0-9]+/ye[0-9]+/te[0-9]+/')
+
+		endif
+		if i mod 10 eq 0 then counter, i, n, /timeleft, starttime=starttime, tab_string + tab_string + tab_string+ 'fake #'
+	endfor
+
+	save, filename=star_dir + fake_trigger_dir +  'injected_and_recovered.idl', injected, recovered
+END

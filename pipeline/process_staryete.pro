@@ -29,10 +29,10 @@ PRO process_staryete, bulldoze=bulldoze, remake=remake, lenient=lenient,  baddat
 			rough_clean, /use_sin
 
 			; run lc_to_pdf
-			if has_data( days=1)  then begin
+			if has_data( days=3) then begin
 				lc_to_pdf, remake=remake;, highres=highres
-			endif
-			if has_data(days=2) and keyword_set(fake) then begin
+			endif else file_delete, star_dir() + 'needtomakemarple', /allow
+			if has_data(days=3) and keyword_set(fake) then begin
 				if keyword_set(display) then display, /off
 				if keyword_set(interactive) then interactive, /off
 			;	lc_to_pdf, /remake, /fake_setup
@@ -58,6 +58,6 @@ PRO process_staryete, bulldoze=bulldoze, remake=remake, lenient=lenient,  baddat
 			close, lun
 			free_lun, lun
 			close, /all
-		endif
+		endif else mprint, tab_string, skipping_string, star_dir() + 'inprogress.txt' + ' was found; skipping staryete'
 		
 END
