@@ -173,14 +173,15 @@ PRO flag_bad_data, lenient=lenient, clean=clean, baddatesokay=baddatesokay,trimt
 		hjd =0.0d
 		text = ' '
 		while(~eof(censor_lun)) do begin
-			readf, censor_lun, hjd, text
-;			print, 'trying to censor ', hjd
-			i = where(abs(target_lc.hjd - hjd) le censorship_size/2.0, n_censor)
-			if n_censor gt 0 then begin
-				i_censored[i] = 1
-;				print, 'censored ', n_censor, ' data points'
-			endif; else print, 'failed!'
-			
+			readf, censor_lun, text
+			hjd_string = stregex(text, '5[0-9.]+', /ext)
+			if hjd_string ne '' then begin
+				hjd = double(hjd_string)
+				i = where(abs(target_lc.hjd - hjd) le censorship_size/2.0, n_censor)
+				if n_censor gt 0 then begin
+					i_censored[i] = 1
+				endif
+			endif			
 		endwhile
 		close, censor_lun
 	endfor
@@ -196,12 +197,15 @@ PRO flag_bad_data, lenient=lenient, clean=clean, baddatesokay=baddatesokay,trimt
 			hjd =0.0d
 			text = ' '
 			while(~eof(raw_censor_lun)) do begin
-				readf, raw_censor_lun, hjd, text
-				i = where(abs(target_lc.hjd - hjd) le raw_censorship_size, n_raw_censor)
-				if n_raw_censor gt 0 then begin
-				;	i = i[sort(abs(target_lc[i].hjd - hjd))]
-					i_raw_censored[i] = 1;[0]] = 1
-					print, hjd, i;[0]
+				readf, raw_censor_lun, text
+				hjd_string = stregex(text, '5[0-9.]+', /ext)
+				if hjd_string ne '' then begin
+					hjd = double(hjd_string)
+					i = where(abs(target_lc.hjd - hjd) le raw_censorship_size, n_raw_censor)
+					if n_raw_censor gt 0 then begin
+						i_raw_censored[i] = 1;[0]] = 1
+						print, hjd, i;[0]
+					endif
 				endif
 			endwhile
 			close, raw_censor_lun

@@ -66,6 +66,7 @@ if file_test('~/zkb_colors.tbl') eq 0 then make_ct
 ; set colorbars for plotting multiple light curves
 colorbars = [60,62,54,56,58];42,44,46,52,56,54,58,48]
 colorbars = [colorbars, colorbars, colorbars, colorbars]
+colorbars = [colorbars, colorbars]
 n_effective_for_rescaling = 4
 printl
 print, ' now running MEarth IDL Tools for Transits of Extrasolar Neptunes and Super-earths (MITTENS)!'

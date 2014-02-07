@@ -3,7 +3,7 @@ PRO call_origami_bot, bulldoze=bulldoze
 	common mearth_tools
 
 
-	if systime(/jul) gt 2456582.1 + 50 then stop
+	if systime(/jul) gt 2456673.1 + 50 then stop
 	; NEED TO SWTICH FILENAMES FOR OCTOPUS_CANDIDATES_PDF.IDL"
 
 	; avoid unnecesary calls

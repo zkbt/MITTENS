@@ -5,8 +5,7 @@
 # =======================================================================
 
 # sets the directory where are all data (reprocessed LC's, search results, etc...) will be stored
-setenv MITTENS_DATA /pool/eddie1/zberta/mearth_data/
-
+setenv MITTENS_DATA /data/mearth2/marples/
 # a temporary kludge
 setenv IDLUTILS_DIR /home/zberta/idl_routines/sdss
 setenv IDL_PATH +/home/zberta/idl_routines:+$IDLUTILS_DIR/pro:+$IDLUTILS_DIR/goddard/pro:{$IDL_PATH}

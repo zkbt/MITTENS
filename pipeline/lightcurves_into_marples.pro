@@ -1,4 +1,4 @@
-PRO lightcurves_into_marples, remake=remake
+PRO lightcurves_into_marples, remake=remake, start=start
 
 	common mearth_tools
 	mprint, /line
@@ -12,7 +12,8 @@ PRO lightcurves_into_marples, remake=remake
 	interactive, /off
 
 	f = file_search('ls*/', /mark)
-	for i=0, n_elements(f)-1 do begin
+	if n_elements(start) eq 0 then start = 0
+	for i=start, n_elements(f)-1 do begin
 		lspmn = long(stregex(f[i], '[0-9]+', /ext))
 		marplify, lspmn, remake=remake
 	endfor

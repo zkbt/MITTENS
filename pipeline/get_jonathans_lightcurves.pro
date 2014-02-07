@@ -260,6 +260,8 @@ PRO get_jonathans_lightcurves, filename, remake=remake
 
 							endif
 						endif else mprint, '         lightcurve already made, not remaking'
+						all_files = file_search(star_dir + '*')
+						file_chmod, /u_read, /u_write, /u_execute, /g_read, /g_write, /g_execute, all_files
 					endfor
 				endfor
 			endif
