@@ -1,6 +1,6 @@
 PRO clean_everything
 	common mearth_tools
-	f = file_search('ls*/combined/', /mark_dir)
+	f = file_search('mo*/combined/', /mark_dir)
 	for i=0, n_elements(f)-1 do begin
 		set_star, f[i]
 		if file_test(star_dir() + 'box_pdf.idl') eq 0 then continue

@@ -1,4 +1,4 @@
-PRO test_cm, night, eps=eps, n_nights=n_nights, nights=nights, squashed=squashed, nomark=nomark, event=event
+PRO test_cm, night, observatory, eps=eps, n_nights=n_nights, nights=nights, squashed=squashed, nomark=nomark, event=event
 ; demonstrate the common mode, in one succinct plot
 ;marpleplot_cmdemo, nights=55987.0d +[0,2,5,7,9], /eps
 
@@ -31,7 +31,7 @@ PRO test_cm, night, eps=eps, n_nights=n_nights, nights=nights, squashed=squashed
 	caldat, 2400000l + night, m, d, y
 	str = strcompress(/remo, y) + '-' + strcompress(/remo, m) + '-' + strcompress(/remo, d)
 
-	f = file_search('ls*/combined/cleaned_lc.idl')
+	f = file_search('mo*/combined/cleaned_lc.idl')
 	if f[0] eq '' then begin
 		print, 'NO LIGHT CURVES FOUND!'
 		return
@@ -47,8 +47,7 @@ PRO test_cm, night, eps=eps, n_nights=n_nights, nights=nights, squashed=squashed
 	yrange=[0.035, -0.025]
 	smultiplot, /init, [n_nights, 1], xgap=0.0025
 
-	restore, 'observatory/cm.idl'
-
+	cm = load_common_mode(observatory)
 	
 	for j=0, n_nights-1 do begin
 		caldat, 2400000l + nights[j] , m, d, y
@@ -67,7 +66,7 @@ PRO test_cm, night, eps=eps, n_nights=n_nights, nights=nights, squashed=squashed
 
 		for i=0, n_elements(f)-1 do begin
 		
-			star_dir = stregex(/extr, f[i], 'ls[0-9]+/combined/')
+			star_dir = stregex(/extr, f[i], mo_prefix + mo_regex + '/combined/')
 			restore, star_dir + 'inflated_lc.idl'
 			restore, star_dir + 'cleaned_lc.idl'
 			restore, star_dir + 'variability_lc.idl'
@@ -77,8 +76,8 @@ PRO test_cm, night, eps=eps, n_nights=n_nights, nights=nights, squashed=squashed
 			if h[0] gt 1 then begin
 
 				
-				lspm =  long(stregex(/extr, stregex(/extr, star_dir, 'ls[0-9]+'), '[0-9]+'))
-				info = get_lspm_info(lspm)
+				mo = name2mo(star_dir)
+				info = get_mo_info(mo)
 			
 				lc = varfree_lc[ri[ri[0]:ri[0+1]-1]]
 ;				lc.flux -= median(lc.flux)

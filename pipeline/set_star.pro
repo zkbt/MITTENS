@@ -1,4 +1,4 @@
-PRO set_star, temp_lspm, year, tel, combined=combined, random=random, n=n, days=days, fake=fake
+PRO set_star, input_mo, year, tel, combined=combined, random=random, n=n, days=days, fake=fake
 ;+
 ; NAME:
 ;	SET_STAR
@@ -28,17 +28,25 @@ PRO set_star, temp_lspm, year, tel, combined=combined, random=random, n=n, days=
 ;	sometime between 2008 and 2011.
 ;-
 	common mearth_tools
-	common this_star, star_dir, lspm_info
+	common this_star, star_dir, mo_info
 
-	if n_elements(temp_lspm) eq 0 then random=1
+	; if no year is specified, you probably want the combined directory!
+	if n_elements(year) eq 0 then combined = 1
+
+	; if there's no input MO, then pick a random one
+	if n_elements(input_mo) eq 0 then random=1
+
+	; if necessary, pick a random star
 	if keyword_set(random) then begin
 			mprint,tab_string,doing_string, 'picking a random star'
 			combined = 1
-			f = file_search('ls*/combined/', /mark_dir) 
+			f = file_search(mo_prefix + '*/combined/', /mark_dir) 
 			star_dir = f[randomu(seed)*n_elements(f)]
-			lspm = long(stregex(/ext, stregex(/ext, star_dir ,'ls[0-9]+'), '[0-9]+'))
-			temp_lspm = star_dir
+			mo = name2mo(star_dir)
+			input_mo = mo
 	endif
+
+	; if a requirement has been placed on the number of data points or number of days, then check the star meets the requirement
 	if keyword_set(random) and has_data(n=n,days=days) eq 0 then begin
 		if n_elements(n) eq 0 then n = 0
 		if n_elements(days) eq 0 then days = 0
@@ -46,18 +54,24 @@ PRO set_star, temp_lspm, year, tel, combined=combined, random=random, n=n, days=
 		mprint, tab_string, tab_string, doing_string, 'trying again...'
 		set_star, random=random, n=n, days=days 
 	endif else begin
-		if typename(temp_lspm) eq 'STRING' then begin
-			star_dir = temp_lspm
-			lspm = long(stregex(/ext, stregex(/ext, star_dir, 'ls[0-9]+'), '[0-9]+'))
+		
+		if strmatch(input_mo, '*/*/') then begin
+			; if the input string is already a directory, just go with it
+			star_dir = input_mo
 		endif else begin
-			lspm = temp_lspm
-			star_dir = make_star_dir(lspm, year, tel, combined=combined)   ; modify this!
+			; set the star directory to match the input MO, (and maybe year and tel indicated)
+			mo = name2mo(input_mo)
+			star_dir = make_star_dir(mo, year, tel, combined=combined) 
 		endelse
-		lspm_info = get_lspm_info(lspm)
+		; set the mo_info structure by loading the one in the directory
+		restore, mo_dir() + 'mo_info.idl'
+	
+		
 		if keyword_set(fake) then star_dir += fake_dir
-		mprint, tab_string, '||||||||||||||||||||||||||||||||||||||'
+
+		mprint, tab_string, '||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||'
 		mprint, tab_string, tab_string, ' star set to ', star_dir
-		mprint, tab_string, '||||||||||||||||||||||||||||||||||||||'
 		!prompt = '|mittens{' + star_dir + '}| '
+		mprint, tab_string, '||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||'
 	endelse
 END

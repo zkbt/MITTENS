@@ -1,32 +1,35 @@
-PRO combine_boxes, lspm, remake=remake, now=now, year=year
+PRO combine_boxes, input_mo, remake=remake, now=now, year=year
 
 	common mearth_tools
-	lspm_dir = 'ls'+string(format='(I04)', lspm)+'/'
-	ls_string = 'ls'+string(format='(I04)', lspm)
+	mo_string = mo_prefix + name2mo(input_mo)
+	mo_dir =  mo_string + '/'
+
 	if keyword_set(year) then begin
 		ye_string = 'ye' + string(format='(I02)', year mod 2000)
-		f = file_search(lspm_dir +'/'+ ye_string + '/te*/', /mark_dir)
+		f = file_search(mo_dir +'/'+ ye_string + '/te*/', /mark_dir)
 	endif else begin
-		f = file_search(lspm_dir + 'ye*/te*/', /mark_dir)
+		f = file_search(mo_dir + 'ye*/te*/', /mark_dir)
 	endelse
 	if keyword_set(year) then begin
-		star_dir = ls_string + '/'+ye_string + '/combined/' 
-	endif else star_dir = ls_string + '/combined/'
+		star_dir = mo_string + '/'+ye_string + '/combined/' 
+	endif else star_dir = mo_string + '/combined/'
 
 
 	
 
 	; don't remake, if the combined PDF is more recent than the uncombined PDF's
 	if min(is_uptodate(star_dir + 'box_pdf.idl', f+'box_pdf.idl')) gt 0 and ~keyword_set(remake) then begin
-		mprint, 'the combined PDF is more recent than all of the uncombined ones!'
-		mprint, skipping_string, 'not merging!'
+		mprint, tab_string, skipping_string, 'the combined PDF is more recent than all of the uncombined ones!'
+		mprint, tab_string, skipping_string, 'not merging!'
+		set_star, mo, year, /comb
+
 		return
 	endif
 	
 	if file_test(star_dir) eq 0 then file_mkdir, star_dir
 
 	starttime = systime(/sec)
-	mprint, ' merging...'
+	mprint, tab_string, doing_string, ' merging...'
 ; 	if ~keyword_set(now) then begin
 ; 		for i=0, n_elements(f)-1 do begin
 ; 			star_dir = f[i]
@@ -39,7 +42,7 @@ PRO combine_boxes, lspm, remake=remake, now=now, year=year
 		; skip the astrometric only data
 		if file_test(this_star_dir + 'astonly.txt') then continue
 
-		mprint, tab_string, this_star_dir
+		mprint, tab_string, tab_string, this_star_dir
 		if file_test(this_star_dir+ 'box_pdf.idl') then begin
 			
 			restore, this_star_dir + 'box_pdf.idl'
@@ -58,16 +61,16 @@ PRO combine_boxes, lspm, remake=remake, now=now, year=year
 			restore, this_star_dir + 'raw_ext_var.idl'
 			if n_elements(raw_big_ext_var) eq 0 then raw_big_ext_var = ext_var else raw_big_ext_var = [raw_big_ext_var, ext_var]
 
-			mprint, tab_string, n_elements(ext_var), ' raw light curve points'
-			mprint, tab_string, n_elements(inflated_lc), ' binned light curve points'
-			mprint, tab_string, n_elements(boxes), ' boxes'
+			mprint, tab_string, tab_string, n_elements(ext_var), ' raw light curve points'
+			mprint, tab_string, tab_string, n_elements(inflated_lc), ' binned light curve points'
+			mprint, tab_string, tab_string, n_elements(boxes), ' boxes'
 
 
-			ls = long(stregex(/ext, stregex(/ext, this_star_dir, 'ls[0-9]+'), '[0-9]+'))	
+			mo = name2mo(this_star_dir)	
 			ye = long(stregex(/ext, stregex(/ext, this_star_dir, 'ye[0-9]+'), '[0-9]+'))
 			te = long(stregex(/ext, stregex(/ext, this_star_dir, 'te[0-9]+'), '[0-9]+'))
 
-			substar = {star_dir:this_star_dir, ls:ls[0], ye:ye[0], te:te[0], n_exposures:n_elements(ext_var), n_observations:n_elements(inflated_lc), n_boxes:n_elements(boxes)}
+			substar = {star_dir:this_star_dir, mo:mo[0], ye:ye[0], te:te[0], n_exposures:n_elements(ext_var), n_observations:n_elements(inflated_lc), n_boxes:n_elements(boxes)}
 			if n_elements(components) eq 0 then components = substar else components = [components, substar]
 	
 			
@@ -87,7 +90,7 @@ $`
 		return
 	end
 
-;	star_dir = lspm_dir + 'combined/'
+;	star_dir = mo_dir + 'combined/'
 	mprint, ' ... into ', star_dir
 
 	; resort, and combine overlapping box estimates
@@ -130,5 +133,5 @@ $`
 	target_lc = raw_big_target_lc[i]
 	save, filename=star_dir + 'raw_target_lc.idl', target_lc
 
-	set_star, lspm, year, /comb
+	set_star, mo, year, /comb
 END

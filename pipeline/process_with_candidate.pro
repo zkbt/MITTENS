@@ -4,6 +4,11 @@ PRO process_with_candidate, input_candidate
 	common this_star
 	candidate_star_dir = star_dir
 
+	if n_elements(input_candidate) eq 0 then begin
+		restore, star_dir() + 'phased_candidates.idl'
+		input_candidate = best_candidates[0]
+	endif
+
 	if tag_exist(input_candidate, 'PERIOD') then candidate = input_candidate else begin
 		candidate  = {period:1d8, hjd0:input_candidate.hjd, duration:input_candidate.duration, depth:input_candidate.depth, depth_uncertainty:input_candidate.depth_uncertainty, n_boxes:1, n_points:0, rescaling:1.0, ratio:0.0}
 	endelse
@@ -13,11 +18,11 @@ PRO process_with_candidate, input_candidate
 	if keyword_set(combined) then begin
 		combined_candidate = candidate
 
-		ls = long(stregex(/ext, stregex(/ext, star_dir, 'ls[0-9]+'), '[0-9]+'))
+		mo = name2mo(star_dir); = long(stregex(/ext, stregex(/ext, star_dir, 'ls[0-9]+'), '[0-9]+'))
 		if keyword_set(year_of_combination) then begin
-			f = file_search('ls'+string(format='(I04)', ls) +'/ye'+string(for='(I02)', year_of_combination mod 2000)+'/te*/', /mark)
+			f = file_search(mo_prefix + mo +'/ye'+string(for='(I02)', year_of_combination mod 2000)+'/te*/', /mark)
 		endif else begin
-			f = file_search('ls'+string(format='(I04)', ls) +'/ye*/te*/', /mark)
+			f = file_search(mo_prefix + mo +'/ye*/te*/', /mark)
 		endelse
 		f  = f[ where(file_test(f + 'box_pdf.idl'))]
 		file_copy, /over, f[0]+'jmi_file_prefix.idl', candidate_star_dir + 'jmi_file_prefix.idl'

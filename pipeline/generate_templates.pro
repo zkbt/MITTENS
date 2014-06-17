@@ -53,7 +53,7 @@ FUNCTION generate_templates, target_lc=target_lc, common_mode_lc=common_mode_lc,
 
 
 	; interpolate the common mode (where we trust it) onto the light curve
-	cm = load_common_mode()
+	cm = load_common_mode(observatory())
 	common_mode_lc = target_lc
 	i_reliable = where(cm.n gt cm_minimum_n and cm.n_fields gt cm_minimum_n_fields, n_reliable, complement=i_unreliable)
 

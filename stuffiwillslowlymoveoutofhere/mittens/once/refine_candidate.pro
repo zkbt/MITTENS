@@ -46,7 +46,7 @@ endif else xplot, xsize=1000, ysize=1000
 		smultiplot, /dox
 		levels = [-100.0, 0.0, 0.5, 1, 1.5, 2, 2.5 ,3, 3.5, 4, 4.5 ,5, 5.5,6,6.5,7,7.5]
 		if keyword_set(asof) then today = mjdtodate(asof) else today = mjdtodate(max(boxes.hjd))
-		contour, grid, periods - candidate.period, hjd0 - candidate.hjd0, levels=[levels, max(levels)+1], /fill, title='lspm' + rw(lspm_info.lspmn) + ' using data up to '+ rw(today) + '; Period = ' + rw(string(candidate.period, format='(D20.7)')) + ' days, modified HJD0 = ' + rw(string(candidate.hjd0, format='(D20.7)')) + ', duration = ' + rw(string(candidate.duration*24, format='(F4.2)')) + ' hours', xtitle='Period - ' + rw(string(candidate.period, format='(D20.7)'))  + ' (days)', ytitle='HJDo - '+string(format='(F13.5)', candidate.hjd0+2400000.5d)+ ' (days)', xs=3, ys=3
+		contour, grid, periods - candidate.period, hjd0 - candidate.hjd0, levels=[levels, max(levels)+1], /fill, title='lspm' + rw(mo_info.lspmn) + ' using data up to '+ rw(today) + '; Period = ' + rw(string(candidate.period, format='(D20.7)')) + ' days, modified HJD0 = ' + rw(string(candidate.hjd0, format='(D20.7)')) + ', duration = ' + rw(string(candidate.duration*24, format='(F4.2)')) + ' hours', xtitle='Period - ' + rw(string(candidate.period, format='(D20.7)'))  + ' (days)', ytitle='HJDo - '+string(format='(F13.5)', candidate.hjd0+2400000.5d)+ ' (days)', xs=3, ys=3
 
 
 		smultiplot

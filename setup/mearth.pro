@@ -18,12 +18,18 @@
 ;
 ;-
 
-common mearth_tools, display, verbose, done_string, doing_string, skipping_string, error_string, tab_string, tf, possible_years, reduced_dir, working_dir, radii, interactive, yearly_filters, fake_dir, fake_trigger_dir, n_effective_for_rescaling, colorbars, ensemble_lspm, username, typical_candidate_filename, fits_suffix
+common mearth_tools, display, verbose, done_string, doing_string, skipping_string, error_string, tab_string, tf, possible_years, reduced_dir, working_dir, radii, interactive, yearly_filters, fake_dir, fake_trigger_dir, n_effective_for_rescaling, colorbars, mo_ensemble, username, typical_candidate_filename, fits_suffix, mo_prefix, mo_regex, observatories
+
+; set up the structure of MEarth Objects, which will set their directory structure
+mo_prefix = 'mo'
+mo_regex = '[0-9]+[+-][0-9]+'
+
 
 ; define data directories in which to look for data for each year
-possible_years = [2008,2009,2010,2011,2012,2013] ; based on the year in which a season starts (= August/September/October); will need to modify for South
-reduced_dir = ['/data/mearth2/2008-2010-iz/reduced/','/data/mearth2/2008-2010-iz/reduced/', '/data/mearth2/2010-2011-I/reduced/', '/data/mearth1/reduced/', '/data/mearth1/reduced/', '/data/mearth1/reduced/']
-yearly_filters = ['iz', 'iz', 'I', 'iz','iz','iz']
+possible_years = [2008,2010,2013, 2013] ; based on the year in which a season starts (= August/September/October); will need to modify for South
+reduced_dir = ['/data/mearth2/2008-2010-iz/reduced/','/data/mearth2/2010-2011-I/reduced/', '/data/mearth1/reduced/',  '/data/mearth2/south/reduced/']
+observatories = ['N','N','N','S']
+yearly_filters = ['iz', 'I', 'iz',  'iz']
 fits_suffix = '_daily.fits'
 
 ; set working directory; on CfA network or on laptop?
@@ -34,7 +40,8 @@ working_dir = getenv('MITTENS_DATA');'/pool/eddie1/zberta/mearth_most_recent/'
 ;file_mkdir, working_dir
 file_mkdir, working_dir + 'nights'
 file_mkdir, working_dir + 'population'
-file_mkdir, working_dir + 'observatory'
+file_mkdir, working_dir + 'observatory_N'
+file_mkdir, working_dir + 'observatory_S'
 plot_dir = working_dir + 'plots/'
 
 ; fake_dir = 'fake_phased/'
@@ -45,6 +52,9 @@ fake_trigger_dir = 'final_fake_trigger/'
 typical_candidate_filename = 'phased_candidates.idl'
 ; move to working directory
 cd, working_dir
+
+if file_test('population/mo_ensemble.idl') eq 0 then load_stellar_properties
+if n_elements(mo_ensemble) eq 0 then restore, 'population/mo_ensemble.idl'
 
 ; initialize parameters
 ;radii = ;[4.0, 3.0, 2.5, 2.2, 2.0;, 1.7, 1.5]
@@ -85,7 +95,6 @@ print
 
 @psym_circle
 !prompt = '|mittens| '
-if file_test('ls0*') then set_star, /random
-if file_test('ls0*') then temp = star_dir()
-;if n_elements(file_search(working_dir + 'ls*/')) gt 100 then set_star, /random, n=50
+if file_test(mo_prefix+'*') then set_star, /random
+if file_test(mo_prefix+'*') then temp = star_dir()
 print

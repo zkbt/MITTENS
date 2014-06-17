@@ -97,7 +97,7 @@ PRO lc_to_pdf, test=test, redtest=redtest, remake=remake, grazing=grazing, highr
 		thinair_priors = generate_priors(initialized_fit, /thinair);/assume_star_is_constant);
 		season_fit = bayesfit(target_lc, templates, initialized_fit, thinair_priors, residuals=residuals)
 	
-		other_tel = ~strmatch(star_dir, '*te0*')
+		other_tel = ~strmatch(star_dir, '*te*')
 		; inflate the errors to include common mode uncertainty
 		i_cm =  where(strmatch(season_fit.name, 'COMMON_MODE') )
 		cm_scale = season_fit[i_cm].coef/season_fit[i_cm].rescaling

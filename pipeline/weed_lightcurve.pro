@@ -34,9 +34,9 @@ PRO weed_lightcurve, remake=remake, lenient=lenient, baddatesokay=baddatesokay, 
 	common mearth_tools
 	; skip this all, if not necessary	
 	everything_upto_date = 1B
-	ls_dir = stregex(star_dir(), 'ls[0-9]+', /ext) + '/'
+	mo_dir = stregex(star_dir(), mo_prefix + mo_regex, /ext) + '/'
 
-	files_to_check =[ file_search(ls_dir + '{*,*/*}/raw_image*censorship.log'),  file_search(ls_dir + '{*,*/*}/censorship.log'),  file_search(ls_dir + '{*,*/*}/xlc_*_censorship.log'),  star_dir() + 'raw_ext_var.idl']
+	files_to_check =[ file_search(mo_dir + '{*,*/*}/raw_image*censorship.log'),  file_search(mo_dir + '{*,*/*}/censorship.log'),  file_search(mo_dir + '{*,*/*}/xlc_*_censorship.log'),  star_dir() + 'raw_ext_var.idl']
 	for i=0, n_elements(files_to_check)-1 do if files_to_check[i] ne '' then everything_upto_date = everything_upto_date AND is_uptodate(star_dir() + 'target_lc.idl', files_to_check[i])
 
 	;if (is_uptodate(star_dir + 'target_lc.idl', star_dir + 'raw_ext_var.idl') and is_uptodate(star_dir + 'target_lc.idl', star_dir + 'censorship.log') and is_uptodate(star_dir + 'target_lc.idl', star_dir + 'raw_image_censorship.log'))$
@@ -136,10 +136,10 @@ new_comparisons_lc = comparisons_lc
 		if ~keyword_set(no_comparisons) then save, filename=star_dir + 'comparisons_lc.idl', comparisons_lc, comparisons_pointers
 		save, filename=star_dir + 'ext_var.idl', ext_var
 
-		ls = long(stregex(/ext, stregex(/ext, star_dir, 'ls[0-9]+'), '[0-9]+'))	
+		mo = name2mo(star_dir)
 		ye = long(stregex(/ext, stregex(/ext, star_dir, 'ye[0-9]+'), '[0-9]+'))
 		te = long(stregex(/ext, stregex(/ext, star_dir, 'te[0-9]+'), '[0-9]+'))
-		observation_summary = {star_dir:star_dir, ls:ls[0], ye:ye[0], te:te[0], n_exposures:n_exposures, n_goodexposures:n_goodexposures, n_observations:n_elements(target_lc), n_nights:n_elements(uniq(mjdtohopkinsnight(ext_var.mjd_obs), sort(ext_var.mjd_obs))), startnight:min(mjdtohopkinsnight(ext_var.mjd_obs)), endnight:max(mjdtohopkinsnight(ext_var.mjd_obs))}
+		observation_summary = {star_dir:star_dir, mo:mo[0], ye:ye[0], te:te[0], n_exposures:n_exposures, n_goodexposures:n_goodexposures, n_observations:n_elements(target_lc), n_nights:n_elements(uniq(mjdtohopkinsnight(ext_var.mjd_obs), sort(ext_var.mjd_obs))), startnight:min(mjdtohopkinsnight(ext_var.mjd_obs)), endnight:max(mjdtohopkinsnight(ext_var.mjd_obs))}
 		
 		save, observation_summary, filename=star_dir + 'observation_summary.idl'
 		mprint, tab_string, 'after squashing, ', strcompress(/remo, n_elements(target_lc)), ' points remain'

@@ -161,8 +161,8 @@ PRO flag_bad_data, lenient=lenient, clean=clean, baddatesokay=baddatesokay,trimt
 
 	; censorship
 	i_censored =bytarr(n_elements(ext_var.mjd_obs))
-	ls_dir = stregex(star_dir, 'ls[0-9]+', /ext) + '/'
-	censor_files = [file_search(ls_dir + '{*,*/*}/censorship.log'), file_search(ls_dir + '{*,*/*}/xlc_*_censorship.log')]
+	mo_dir = stregex(star_dir, mo_prefix + mo_regex, /ext) + '/'
+	censor_files = [file_search(mo_dir + '{*,*/*}/censorship.log'), file_search(mo_dir + '{*,*/*}/xlc_*_censorship.log')]
 	mprint, tab_string, doing_string, 'censoring data based on comments in:'
 
 	for i_file=0, n_elements(censor_files)-1 do begin
@@ -188,7 +188,7 @@ PRO flag_bad_data, lenient=lenient, clean=clean, baddatesokay=baddatesokay,trimt
 
 ; raw_censorship
 	i_raw_censored =bytarr(n_elements(ext_var.mjd_obs))
-	censor_files = file_search(ls_dir + '{*,*/*}/raw_image*censorship.log')
+	censor_files = file_search(mo_dir + '{*,*/*}/raw_image*censorship.log')
 
 	if censor_files[0] ne '' then begin
 		for i_file=0, n_elements(censor_files)-1 do begin
@@ -231,7 +231,7 @@ PRO flag_bad_data, lenient=lenient, clean=clean, baddatesokay=baddatesokay,trimt
 	endif
 
 
-;	i_jupiter = abs(target_lc.flux*(lspm_info.radius*109.04501)^2) gt radius_limit^2
+;	i_jupiter = abs(target_lc.flux*(mo_info.radius*109.04501)^2) gt radius_limit^2
 
 ; 	; .... fluxerr is very, very large
 ; 	fluxerr_filtered = median_filter(ext_var.mjd_obs, target_lc.fluxerr, filtering_time=observatory_change_time) 

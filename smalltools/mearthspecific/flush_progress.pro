@@ -1,6 +1,6 @@
 PRO flush_progress
 	
-	f = file_search(['ls*/ye*/*/inprogress.txt', 'ls*/*/inprogress.txt'])
+	f = file_search(['mo*/ye*/*/inprogress.txt', 'mo*/*/inprogress.txt'])
 	mprint, /line
 	mprint, f 
 	if f[0] eq '' then begin

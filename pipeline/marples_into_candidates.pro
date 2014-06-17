@@ -1,4 +1,4 @@
-PRO marples_into_candidates
+PRO marples_into_candidates, start=start
 	common mearth_tools
 	mprint, /line
 	mprint, tab_string, 'marples_into_candidates.pro is taking the MarPLES located in'
@@ -10,14 +10,13 @@ PRO marples_into_candidates
 	verbose, /on
 	interactive, /off
 
-	f = file_search('ls*/combined/box_pdf.idl')
+	f = file_search('mo*/combined/box_pdf.idl')
 ; ; 	run the phased search on the combined PDF timeseries
 
-
-
-	for i=0, n_elements(f)-1 do begin
-		ls = long(stregex(/ext, stregex(/ext, f, 'ls[0-9]+'), '[0-9]+'))
-		set_star, ls[i], /combine
+	if ~keyword_set(start) then start = 0
+	mo = name2mo(f)
+	for i=start*n_elements(f), n_elements(f)-1 do begin
+		set_star, mo[i], /combine
 		call_origami_bot
 	endfor
 END

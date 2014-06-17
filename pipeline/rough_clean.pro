@@ -43,7 +43,7 @@
 	i_cm =  where(strmatch(season_fit.name, 'COMMON_MODE') )
 	cm_scale = season_fit[i_cm].coef/season_fit[i_cm].rescaling
 	inflated_lc = target_lc
-	other_tel = ~strmatch(star_dir, '*te0*')
+	other_tel = ~strmatch(star_dir, '*te*')
 	if ~other_tel then inflated_lc.fluxerr = sqrt(target_lc.fluxerr^2 + (cm_scale*common_mode_lc.fluxerr)^2)
 
 	season_fit = bayesfit(inflated_lc, templates, initialized_fit, thinair_priors, residuals=residuals)

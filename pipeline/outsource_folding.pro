@@ -15,15 +15,14 @@ PRO outsource_folding, lspm, remake=remake, year=year
 	mprint, /line
 
 
-	f = file_search('ls*/combined/box_pdf.idl')
+	f = file_search('mo*/combined/box_pdf.idl')
 ; ; 	run the phased search on the combined PDF timeseries
 	file_delete, /recur, 'marples_to_send'
 	file_mkdir, 'marples_to_send'
 
-
+	mo = name2mo(f)
 	for i=0, n_elements(f)-1 do begin
-		ls = long(stregex(/ext, stregex(/ext, f, 'ls[0-9]+'), '[0-9]+'))
-		set_star, ls[i], /combine
+		set_star, mo[i], /combine
 		if file_test(star_dir() + 'box_pdf.idl') then begin
 			
 			; print the boxes to text, if necessary
@@ -33,7 +32,7 @@ PRO outsource_folding, lspm, remake=remake, year=year
 			if file_test(marples_filename) then begin
 				if ~is_uptodate(marples_filename +'.bls', marples_filename) then begin
 					mprint, tab_string, tab_string, doing_string, 'sending ', marples_filename, ' to MIT for phase-folding'
-					file_copy, marples_filename, working_dir + 'marples_to_send/'+'ls'+string(form='(I04)', ls[i]) + '_marples.txt',/over
+					file_copy, marples_filename, working_dir + 'marples_to_send/'+mo_prefix+mo[i] + '_marples.txt',/over
 				endif 
 			endif			
 		endif

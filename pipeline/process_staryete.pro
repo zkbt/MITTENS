@@ -19,7 +19,7 @@ PRO process_staryete, bulldoze=bulldoze, remake=remake, lenient=lenient,  baddat
 			free_lun, lun
 	
 			; print out basic information on the star to a text file
-			if file_test(ls_dir() + 'lspm_info.idl') eq 0 then print_star, /quick
+			if file_test(mo_dir() + 'mo_info.idl') eq 0 then print_star, /quick
 	
 			; remove obviously bad observations from consideration, bin exposure chunks
 			weed_lightcurve, remake=remake, lenient=lenient,  baddatesokay=baddatesokay, trimtransits=trimtransits

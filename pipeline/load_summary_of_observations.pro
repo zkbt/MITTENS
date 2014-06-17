@@ -2,7 +2,7 @@ PRO load_summary_of_observations, ensemble_observation_summary=ensemble_observat
 	
 	common mearth_tools
 	mprint, doing_string, 'loading observation summaries into population/ensemble_observation_summary.idl'
-	f = file_search('ls*/ye*/te*/observation_summary.idl')
+	f = file_search('mo*/ye*/te*/observation_summary.idl')
 	
 	for i=0, n_elements(f)-1 do begin
 		mprint, tab_string, tab_string, f[i]

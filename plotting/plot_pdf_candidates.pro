@@ -125,7 +125,7 @@ set_star, /random, n=50
 			if !mouse.x gt !d.x_size*0.85 then begin
 				common this_star
 				star_dir = c[i_selected].star_dir
-				lspm_info = get_lspm_info(c[i_selected].lspm)
+				mo_info = get_mo_info(c[i_selected].lspm)
 				explore_pdf, diag=diag, 0.01, octopus=octopus,vartools=vartools, /hide
 				xinspect
 				return

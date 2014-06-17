@@ -19,7 +19,7 @@ PRO predict_events,i, eps=eps, res=res, zoom=zoom, octopus=octopus, shorten=shor
 	restore, star_dir + candidates_filename
 	loadct, 39
 
-	n =10
+	n = 10 < n_elements(best_candidates)
 	if keyword_set(shorten) then best_candidates.duration *=shorten
 	if keyword_set(i) then begin
 			test = refine_candidate(best_candidates[i], eps=eps, res=res, zoom=zoom)

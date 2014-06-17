@@ -25,7 +25,7 @@ PRO load_image, input_filenames, save_image=save_image, master=master, pixels=pi
 		restore, star_dir + 'jmi_file_prefix.idl'
 		if n_elements(filenames) eq 0 then filenames = master_image_path(jmi_file_prefix + '_master.fit') else filenames = [master_image_path(jmi_file_prefix + '_master.fit'), filenames]
 	endif
-	if keyword_set(finder) then save_image ='lspm'+rw(lspm_info.lspmn)+'_finder_chart.jpg'
+	if keyword_set(finder) then save_image ='mo'+rw(mo_info.mo)+'_finder_chart.jpg'
 
 	command = 'ds9 -wcs align yes -scale mode zscale -scale squared -cmap invert yes -colorbar no -height '+strcompress(/remove_all, pixels)+' -width '+strcompress(/remove_all, pixels)+' -zoom to 1 ' 
 print
@@ -55,25 +55,25 @@ print
 		epoch = date[0] + date[1]/365.
 
 		; set target position
-		current_ra = double(lspm_info.ra) + (epoch-2000.0)*lspm_info.pmra/60./60./cos(lspm_info.dec*!pi/180)
+		current_ra = double(mo_info.ra) + (epoch-2000.0)*mo_info.pmra/60./60./cos(mo_info.dec*!pi/180)
 		rah = long(current_ra/15)
 		ram = long((current_ra/15 - rah)*60)
 		ras = ((current_ra/15 - rah)*60 - ram)*60
 	
-		current_dec = double(lspm_info.dec) + (epoch-2000.0)*lspm_info.pmdec/60./60.
+		current_dec = double(mo_info.dec) + (epoch-2000.0)*mo_info.pmdec/60./60.
 		decd = long(current_dec)
 		decm = long((current_dec - decd)*6	; set size of image to display
 		decm = long((current_dec - decd)*60)
 		decs = ((current_dec - decd)*60-decm)*60
 		pos_string = string(rah, format='(I02)') + ":"+ string(ram, format='(I02)')+ ":"+ string(ras, format='(F04.1)') + '  +'+string(decd, format='(I02)')+ ":"+ string(decm, format='(I02)')+ ":"+ string(decs, format='(F04.1)');+ "  (J2000)"
 
-		current_dec = double(lspm_info.dej2000) + (epoch-2000.0)*lspm_info.pmdec/60./60. - 4.0/60.0
+		current_dec = double(mo_info.dej2000) + (epoch-2000.0)*mo_info.pmdec/60./60. - 4.0/60.0
 		decd = long(current_dec)
 		decm = long((current_dec - decd)*60)
 		decs = ((current_dec - decd)*60-decm)*60
 		south_pos_string = string(rah, format='(I02)') + ":"+ string(ram, format='(I02)')+ ":"+ string(ras, format='(F04.1)') + '  +'+string(decd, format='(I02)')+ ":"+ string(decm, format='(I02)')+ ":"+ string(decs, format='(F04.1)');+ "  (J2000)"
 		label_string = string(format='(F10.4)', mjd) 
-		south_label_string ='lspm' + rw(lspm_info.n) + ' on ' + date_conv(mjd+2400000.5d - 7.0/24.0, 'S')
+		south_label_string ='lspm' + rw(mo_info.n) + ' on ' + date_conv(mjd+2400000.5d - 7.0/24.0, 'S')
 		print, label_string
 		if keyword_set(master) and i eq 0 then label_string += ' (MEarth master image)'
 		if keyword_set(finder) then label_string = "MEarth master image; 6 arcminutes"
@@ -105,13 +105,13 @@ END0)
 		decs = ((current_dec - decd)*60-decm)*60
 		pos_string = string(rah, format='(I02)') + ":"+ string(ram, format='(I02)')+ ":"+ string(ras, format='(F04.1)') + '  +'+string(decd, format='(I02)')+ ":"+ string(decm, format='(I02)')+ ":"+ string(decs, format='(F04.1)');+ "  ()"
 
-		current_dec = double(lspm_info.dec) + (epoch-2000.0)*lspm_info.pmdec/60./60. - 4.0/60.0
+		current_dec = double(mo_info.dec) + (epoch-2000.0)*mo_info.pmdec/60./60. - 4.0/60.0
 		decd = long(current_dec)
 		decm = long((current_dec - decd)*60)
 		decs = ((current_dec - decd)*60-decm)*60
 		south_pos_string = string(rah, format='(I02)') + ":"+ string(ram, format='(I02)')+ ":"+ string(ras, format='(F04.1)') + '  +'+string(decd, format='(I02)')+ ":"+ string(decm, format='(I02)')+ ":"+ string(decs, format='(F04.1)');+ "  ()"
 		label_string = string(format='(F10.4)', mjd) 
-		south_label_string ='lspm' + rw(lspm_info.lspmn) + ' on ' + date_conv(mjd+2400000.5d - 7.0/24.0, 'S')
+		south_label_string ='mo' + rw(mo_info.mo) + ' on ' + date_conv(mjd+2400000.5d - 7.0/24.0, 'S')
 		print, label_string
 		if keyword_set(master) and i eq 0 then label_string += ' (MEarth master image)'
 		if keyword_set(finder) then label_string = "MEarth master image; 6 arcminutes"

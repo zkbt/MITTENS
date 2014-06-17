@@ -1,4 +1,4 @@
-PRO plot_xinspect_population, input_lspm, counter=counter, summary_of_candidates=summary_of_candidates, interesting_marples=interesting_marples, ensemble_observation_summary=ensemble_observation_summary, stellar_sample=stellar_sample, coordinate_conversions=coordinate_conversions, data_click=data_click, selected_object=selected_object, xrange=xrange, yrange=yrange
+PRO plot_xinspect_population, input_mo, counter=counter, summary_of_candidates=summary_of_candidates, interesting_marples=interesting_marples, ensemble_observation_summary=ensemble_observation_summary, stellar_sample=stellar_sample, coordinate_conversions=coordinate_conversions, data_click=data_click, selected_object=selected_object, xrange=xrange, yrange=yrange, filtering_parameters=filtering_parameters
 
 	common mearth_tools
 	cleanplot
@@ -11,6 +11,8 @@ PRO plot_xinspect_population, input_lspm, counter=counter, summary_of_candidates
 	if n_elements(ensemble_observation_summary) eq 0 then restore, 'population/ensemble_observation_summary.idl'
 	if n_elements(interesting_marples) eq 0 then restore, 'population/summary_of_interesting_marples.idl'
 	if n_elements(stellar_sample) eq 0 then stellar_sample = compile_sample()
+
+	stellar_sample = stellar_sample[sort(stellar_sample.mo)]
 
 	; decide what the mode is going to be
 	possible_modes = ['candidates_period', 'candidates_ratio', 'candidates_nboxes', 'marple_hjd', 'marple_depth', 'marple_depthuncertainty', 'marple_npoints', 'sample_radial'] 
@@ -29,22 +31,23 @@ PRO plot_xinspect_population, input_lspm, counter=counter, summary_of_candidates
 			return
 		endif
 		summary_of_candidates = summary_of_candidates[i]
-		lspmnumbers =  summary_of_candidates.ls
+		mo_list =  summary_of_candidates.mo
 		labels = summary_of_candidates.star_dir
 		structure_name = 'candidate'
 	endif
 	if strmatch(mode, 'marple*') then begin
-		lspmnumbers =  interesting_marples.lspmn
-		labels = 'ls'+string(lspmnumbers, form='(I04)')+'/combined/'
+		mo_list =  interesting_marples.mo
+		labels = mo_prefix + mo_list+'/combined/'
 		structure_name = 'marple'
+		
 	endif
 	if strmatch(mode, 'sample*') then begin
-		lspmnumbers =  stellar_sample.lspmn
-		labels = 'ls'+string(lspmnumbers, form='(I04)')+'/combined/'
+		mo_list =  stellar_sample.mo
+		labels =  mo_prefix + mo_list+'/combined/'
 		structure_name = 'star'
 	endif
 
-; 
+
 
 	; set up the plotting variables, depending on the mode
 	case mode of
@@ -140,8 +143,8 @@ PRO plot_xinspect_population, input_lspm, counter=counter, summary_of_candidates
 		end
 		'sample_radial': begin
 			structure = stellar_sample
-			x = cos(stellar_sample.ra)*stellar_sample.distance
-			y = sin(stellar_sample.ra)*stellar_sample.distance
+			x = cos(stellar_sample.ra*!PI/180)*stellar_sample.distance
+			y = sin(stellar_sample.RA*!pi/180)*stellar_sample.distance
 			outer_radius = 33.0
 			!x.range = outer_radius*[-1,1]
 			!y.range = outer_radius*[-1,1]
@@ -158,6 +161,28 @@ PRO plot_xinspect_population, input_lspm, counter=counter, summary_of_candidates
 		end
 	endcase
 
+	; &*!#^&*!^ indices are messed up!!!!
+	matched_sample = stellar_sample[value_locate(stellar_sample.mo, structure.mo)]
+	if n_elements(filtering_parameters) gt 0 then begin
+		ra_hours = matched_sample.ra/15.0
+		if filtering_parameters.ra_min gt filtering_parameters.ra_max then begin
+			ra_mask = ra_hours ge filtering_parameters.ra_min or ra_hours le filtering_parameters.ra_max
+		endif else begin
+			ra_mask = ra_hours ge filtering_parameters.ra_min and ra_hours le filtering_parameters.ra_max
+		endelse
+		dec_mask = matched_sample.dec ge filtering_parameters.dec_min and matched_sample.dec le filtering_parameters.dec_max
+		size_mask = matched_sample.radius ge filtering_parameters.size_min and matched_sample.radius le filtering_parameters.size_max
+		distance_mask = matched_sample.distance ge filtering_parameters.distance_min and matched_sample.distance le filtering_parameters.distance_max
+		i_filter = where(ra_mask and dec_mask and size_mask and distance_mask, n_filter)
+	endif else i_filter = lindgen(n_elements(structure))
+
+	x = x[i_filter]
+	y = y[i_filter]
+	mo_list = mo_list[i_filter]
+	labels = labels[i_filter]
+	structure = structure[i_filter]
+	
+	
 	; allow for zooming
 	if n_elements(xrange) gt 0 then	if xrange[0] ne xrange[1] then !x.range = xrange
 	if n_elements(yrange) gt 0 then	if yrange[0] ne yrange[1] then !y.range = yrange
@@ -186,11 +211,11 @@ PRO plot_xinspect_population, input_lspm, counter=counter, summary_of_candidates
 
 
 	; if the density of points on the plot is small enough, print out the LSPM numbers
-	n_pointsinplot = total(x gt min(!x.range) and x lt max(!x.range) and y gt min(!y.range) and y lt max(!y.range), /int)
-	if n_pointsinplot lt 100 then begin
+	i_inplot = where(x gt min(!x.range) and x lt max(!x.range) and y gt min(!y.range) and y lt max(!y.range), n_pointsinplot)
+	if n_pointsinplot lt 100 and n_pointsinplot gt 0 then begin
 		loadct, 52, file='~/zkb_colors.tbl'
 
-		xyouts, x, y, rw(lspmnumbers), align=0.5, noclip=0, color=127
+		xyouts, x[i_inplot], y[i_inplot], rw(mo2name(mo_list[i_inplot]))+'!C ', align=0.5, noclip=0, color=127
 	endif
 
 	; if plot_xinspect_population has been supplied with a data_click structure, select the closest point in this plot
@@ -203,12 +228,12 @@ PRO plot_xinspect_population, input_lspm, counter=counter, summary_of_candidates
 
 		i_selected = where(r eq min(r))
 		i_selected = i_selected[0]
-		input_lspm = lspmnumbers[i_selected]
+		input_mo = mo_list[i_selected]
 		print, normal_click
 	endif
 
-	if keyword_set(input_lspm) then begin
-		i_possible = where(lspmnumbers eq input_lspm, n_possible)
+	if keyword_set(input_mo) then begin
+		i_possible = where(mo_list eq input_mo, n_possible)
 		if n_possible gt 0 then begin
 			loadct, 42, file='~/zkb_colors.tbl'
 			
@@ -229,8 +254,8 @@ PRO plot_xinspect_population, input_lspm, counter=counter, summary_of_candidates
 		plots, x[i_selected], y[i_selected], psym=8, symsize=3, color=0, thick=3
 		usersym, cos(theta), sin(theta), thick=1
 		
-		selected_object = create_struct('lspmn', lspmnumbers[i_selected], 'star_dir', labels[i_selected], structure_name, structure[i_selected])
-		text =   '  LSPM'+string(form='(I04)', selected_object.lspmn) + '  ' ; selected_object.star_dir
+		selected_object = create_struct('mo', mo_list[i_selected], 'star_dir', labels[i_selected], structure_name, structure[i_selected])
+		text =   '  '+ mo2name(selected_object.mo) + '  ' ; selected_object.star_dir
 
 		normal_select = convert_coord(x[i_selected], y[i_selected], /data, /to_normal)
 		floating_xyouts, x[i_selected], y[i_selected], text, align=normal_select[0] gt 0.5, charsize=2, charthick=2

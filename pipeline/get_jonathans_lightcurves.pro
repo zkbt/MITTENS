@@ -42,7 +42,6 @@ PRO get_jonathans_lightcurves, filename, remake=remake
 			lspm_section = strmid(jmi_file_prefix, start, length)
 			anything_left = strmid(jmi_file_prefix, start + length, 1000)
 			tel = uint(stregex(stregex(filename, 'tel[0-9]+', /extract), '[0-9]+', /extract))
-	
 		
 			if anything_left ne '' then suffix = anything_left else suffix = '' 
 	
@@ -90,20 +89,38 @@ PRO get_jonathans_lightcurves, filename, remake=remake
 				; make and store lightcurves for every LSPM in the field
 				for j=0, n_targets-1 do begin
 					i_target = i_targets[j]
-
 					; how long a lightcurve?
 					n_datapoints =  n_elements(fits_lc[i_target].hjd)
 				
 					; set up directories and prefixes
 					if not keyword_set(suffix) then suffix=''
 					if keyword_set(allow_all) then suffix += '_untrimmed'
-					if total(strmatch(tag_names(fits_lc), 'LSPM')) eq 0 then begin
-						lspm_string = stregex(jmi_file_prefix, 'lspm[0-9]+', /extract) 
-					endif else begin
-						lspm_string = 'lspm' + strcompress(/remove_all, fits_lc[i_target].lspm)
+					if tag_exist(fits_lc, '_2massid') then begin
+						; does the FITS structure have a 2MASS id?
+						mo_string = fits_lc[i_target]._2massid
+						if mo_string eq '00433561+28263437' then stop
+					endif else begin	
+						; does the FITS structure have an LSPM?
+						if tag_exist(fits_lc, 'lspm') then begin
+							lspm = fits_lc[i_target].lspm
+							mo_string = name2mo(lspm)
+						endif else begin
+							attempted_mo = strip_twomass(filename)
+							if strlen(attempted_mo) eq 16 then mo_string = name2mo(attempted_mo) else begin
+								lspm = stregex(stregex(/ext, filename, 'lspm[0-9]+'), '[0-9]+', /ext)
+								mo_string = name2mo(lspm)
+							endelse
+						endelse
 					endelse
-					lspm = long(stregex(lspm_string, '[0-9]+', /extract))
-					tel_string = 'tel0'+strcompress(/remove_all, tel)
+							 ;radians2mo(fits_lc[i_target]._2massra, fits_lc[i_target]._2massdec)
+					
+					;if total(strmatch(tag_names(fits_lc), 'LSPM')) eq 0 then begin
+					;	lspm_string = stregex(jmi_file_prefix, 'lspm[0-9]+', /extract) 
+					;endif else begin
+					;	lspm_string = 'lspm' + strcompress(/remove_all, fits_lc[i_target].lspm)
+					;endelse
+					;lspm = long(stregex(lspm_string, '[0-9]+', /extract))
+					tel_string = 'tel'+string(format='(I02)', tel)
 					tel = long(stregex(/ex, stregex(/ex, jmi_file_prefix, 'tel[0-9]+'), '[0-9]+'))
 
 					; split up years! (split in late august)
@@ -116,7 +133,7 @@ PRO get_jonathans_lightcurves, filename, remake=remake
 					for i_year=0, n_elements(year)-1 do begin
 						
 						ext_var = big_ext_var
-						star_dir = make_star_dir(lspm, year[i_year], tel)
+						star_dir = make_star_dir(mo_string, year[i_year], tel)
 						if file_test(star_dir) eq 0 then file_mkdir, star_dir
 						
 						; to make it easier to look things up later....
@@ -152,7 +169,7 @@ PRO get_jonathans_lightcurves, filename, remake=remake
 								; push down to fainter comparisons if there aren't enough bright ones
 								while (n_comparisons eq 0) and (limiting_mag_offset) lt 10 do begin
 									limiting_mag_offset += 0.5
-									i_comparisons = where((fits_lc.class eq -1 or (fits_lc.class eq 9 and fits_lc.lspm ne fits_lc[i_target].lspm))  and fits_lc.medflux lt fits_lc[i_target].medflux+ limiting_mag_offset, n_comparisons); and total(finite(/nan, fits_lc.flux), 1) lt (0.75*n_datapoints > 1)
+									i_comparisons = where((fits_lc.class eq -1 or (fits_lc.class eq 9 and fits_lc._2massra ne fits_lc[i_target]._2massra and fits_lc._2massdec ne fits_lc[i_target]._2massdec)) and fits_lc.medflux lt fits_lc[i_target].medflux+ limiting_mag_offset, n_comparisons); and total(finite(/nan, fits_lc.flux), 1) lt (0.75*n_datapoints > 1)
 								endwhile
 								comparison_weights = median(fits_lc[i_comparisons].weight, dim=1)
 								i_sorted_comps = reverse(sort(comparison_weights))

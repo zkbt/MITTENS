@@ -14,7 +14,7 @@ FUNCTION pdf_to_lc, candidate, vartools=vartools
 		candidate = best_candidates[which]	
 	endif
 
-	other_tel =  ~strmatch(star_dir, '*te0*')
+	other_tel =  ~strmatch(star_dir, '*te*')
 	; load up (this season of) this star
 	restore, star_dir + 'box_pdf.idl'
 	restore, star_dir + 'inflated_lc.idl'

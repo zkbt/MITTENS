@@ -19,7 +19,7 @@ PRO plot_boxes, boxes, mark=mark, red_variance=red_variance, log=log, eps=eps, c
 	endif
 		if n_elements(candidate) gt 0 then begin
 			i_intransitboxes = where_intransit(boxes, candidate, n_intransitboxes, buffer=-candidate.duration/4)
-			p_min = (5.0/4.2*lspm_info.radius/lspm_info.mass^(1.0/3.0)) > 0.5
+			p_min = (5.0/4.2*mo_info.radius/mo_info.mass^(1.0/3.0)) > 0.5
 			pad = long((max(boxes.hjd) - min(boxes.hjd))/p_min)+1
 			phased_time = (boxes.hjd - candidate.hjd0)/candidate.period + pad + 0.5
 			orbit_number = long(phased_time)

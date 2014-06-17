@@ -1,4 +1,4 @@
-PRO marplify, lspm, old=old, remake=remake, year=year, fake=fake, nofold=nofold, bulldoze=bulldoze, trimtransits=trimtransits
+PRO marplify, input_mo, old=old, remake=remake, fake=fake, nofold=nofold, bulldoze=bulldoze, trimtransits=trimtransits
 ;+
 ; NAME:
 ;	marplify
@@ -7,7 +7,7 @@ PRO marplify, lspm, old=old, remake=remake, year=year, fake=fake, nofold=nofold,
 ; CALLING SEQUENCE:
 ; 	marplify, lspm, [year, tel], remake=remake, combine=combine
 ; INPUTS:
-;	lspm = lspm number of the star to update
+;	mo = ID of the MEarth object to update
 ;	year = year, starting at the end of the monsoon (optional, defaults to current year)
 ;	tel = telescope (optional, defaults to tel0N with smallest N)
 ; KEYWORD PARAMETERS:
@@ -27,56 +27,53 @@ PRO marplify, lspm, old=old, remake=remake, year=year, fake=fake, nofold=nofold,
 ;		Extrasolar 
 ;		Neptunes and 
 ;		Super-earths
-;	sometime between 2008 and 2011.
+;	sometime between 2008 and 2041.
 ;-
 
 	; grab MEarth variables
 	common mearth_tools
 	clear
 
-	; if an LSPM wasn't specified, grab it from the current directory
-	if ~keyword_set(lspm) then lspm = long(stregex(ls_dir(), '[0-9]+', /ext))
+	; clean up the MO, convert if necessary
+	if keyword_set(input_mo) then desired_mo = name2mo(input_mo)
 
-;;;;;;;;;;;;;;;;;;!!!!!!!!!!!!!!!!!!!!!!
-	old = 1
-;;;;;;;;;;;;;;;;;;!!!!!!!!!!!!!!!!!!!!!!
+	; if mo wasn't specified, grab it from the current directory
+	if ~keyword_set(desired_mo) then desired_mo = name2mo(mo_dir())
 
 	; by default, just look at the star from within this year
-	if keyword_set(old) then begin
-		year_string = '*' 
-	endif else begin
-		if keyword_set(year) then year_to_consider = year else year_to_consider = max(possible_years)
-		year_string = string(form='(I02)', year_to_consider mod 2000)
-	endelse
+	year_string = '*' 
 
 	; pick out all directories that have data for this star (possibly confined to this star)
-	matching_directories = 'ls'+string(lspm, format='(I04)')+'/ye'+year_string+'/te0*/'
+	matching_directories = mo_prefix+desired_mo+'/ye'+year_string+'/te*/'
 	f = file_search(matching_directories, /mark_dir)
 
 	; make variables subdividing the relevent star_dirs
-	ls = long(stregex(/ext, stregex(/ext, f, 'ls[0-9]+'), '[0-9]+'))
+	mo = name2mo(f)
 	ye = long(stregex(/ext, stregex(/ext, f, 'ye[0-9]+'), '[0-9]+'))
 	te = long(stregex(/ext, stregex(/ext, f, 'te[0-9]+'), '[0-9]+'))
 
-	; loop over telescope(-years) to update MITTEN light curves, run a first pass of lc_to_pdf
-	for i=0, n_elements(f)-1 do begin
-		
-		; switch into this star
-		set_star, ls[i],  ye[i], te[i]
-		
-		thesubdirectoryneedsremaking = file_test(star_dir() + 'needtomakemarple') 
-		thecomboneedsremaking =  file_test(ls_dir() + 'combined/' + 'needtomakemarple') 
-		process_staryete, nofold=nofold, remake=keyword_set(remake) or thesubdirectoryneedsremaking or thecomboneedsremaking, bulldoze=bulldoze
-
-		if n_elements(radii) lt 6 then stop
-	endfor
+	if f[0] ne '' then begin
+		; loop over telescope(-years) to update MITTEN light curves, run a first pass of lc_to_pdf
+		for i=0, n_elements(f)-1 do begin
+			
+			if mo[i] eq '' then stop
+			; switch into this star
+			set_star, mo[i],  ye[i], te[i]
+			
+			thesubdirectoryneedsremaking = file_test(star_dir() + 'needtomakemarple') 
+			thecomboneedsremaking =  file_test(mo_dir() + 'combined/' + 'needtomakemarple') 
+			process_staryete, nofold=nofold, remake=keyword_set(remake) or thesubdirectoryneedsremaking or thecomboneedsremaking, bulldoze=bulldoze
+	
+			if n_elements(radii) lt 6 then stop
+		endfor
+	endif
 
 	; stop here, if just doing fakes -- a bit of a hack
 	if keyword_set(nofold) and keyword_set(fake) then return ;(won't write a new last_reprocessed!)
 
 	; take the MarPLEs that were just calculated and combine them into one 
-	combine_boxes, lspm, year=year_to_consider
-	set_star, lspm, year_to_consider, /comb
+	combine_boxes, desired_mo, year=year_to_consider
+	set_star, desired_mo, year_to_consider, /comb
 	
 	; if there's no combined PDF, then skip to next star
 	if file_test(star_dir() + 'box_pdf.idl') eq 0 then begin

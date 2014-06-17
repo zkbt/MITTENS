@@ -43,7 +43,7 @@
 PRO xinspect_ev, event
 
 	; set up common variables, to keep track of throughout xinspect process
-	common xinspect_common, child_ids, whatarewelookingat, xinspect_coordinate_conversions, xinspect_camera, selected_object, last_clicked_object
+	common xinspect_common, child_ids, whatarewelookingat, xinspect_coordinate_conversions, xinspect_camera, selected_object, last_clicked_object, filtering_parameters, filter_box
 	COMPILE_OPT hidden	; prevent this sub-procedure from showing up in HELP
 	common this_star
 	; find the uservalue of the widget where the event happened
@@ -54,7 +54,7 @@ PRO xinspect_ev, event
 
 	; debug
 	;help, event, eventval, /st
-	lspm = lspm_info.lspmn
+	mo = mo_info.mo
 	; decide what to do, based on what kind of event it is
 	CASE tag_names(event, /struct) of 
 
@@ -90,8 +90,34 @@ PRO xinspect_ev, event
 				if event.release gt 0 then return
 				whatwasclicked = eventval
 				end
+		else: print, ''
 	ENDCASE
-	
+	if total(strmatch(tag_names(event, /st), 'WIDGET_TEXT*')) then whatwasclicked = eventval	
+
+	widget_control, filter_box.classification, get_value=filter_class
+	filtering_parameters.unmarked = filter_class[0]
+	filtering_parameters.known = filter_class[1]
+	filtering_parameters.variability = filter_class[2]
+	filtering_parameters.ignore = filter_class[3]
+	widget_control, filter_box.ra_min, get_value=val
+	filtering_parameters.ra_min = val
+	widget_control, filter_box.ra_max, get_value=val
+	filtering_parameters.ra_max = val
+	widget_control, filter_box.dec_min, get_value=val
+	filtering_parameters.dec_min = val
+	widget_control, filter_box.dec_max, get_value=val
+	filtering_parameters.dec_max = val	
+	widget_control, filter_box.size_min, get_value=val
+	filtering_parameters.size_min = val
+	widget_control, filter_box.size_max, get_value=val
+	filtering_parameters.size_max = val	
+	widget_control, filter_box.distance_min, get_value=val
+	filtering_parameters.distance_min = val
+	widget_control, filter_box.distance_max, get_value=val
+	filtering_parameters.distance_max = val	
+
+	help, filtering_parameters
+	print, whatwasclicked
 
 	; skip event handling if nothing was clicked
 	if n_elements(whatwasclicked) gt 0 then begin
@@ -119,10 +145,10 @@ PRO xinspect_ev, event
 				; selecting an object and highlight it in on the population plot
 				;===========================================
 				; if the left button is pressed, select a point and replot
-				if event.press eq 1 then begin
+				if event.press eq 1 and xinspect_camera.setting_zoom_left eq 0 and  xinspect_camera.setting_zoom_right eq 0  then begin
 				
 					; plot the population, feeding in the data click, which will be converted into a selected object
-					plot_xinspect_population,lspm, data_click=data_click, counter=xinspect_camera.counter, coordinate_conversions=xinspect_coordinate_conversions, selected_object=selected_object, xrange=xinspect_camera.zoom_xrange, yrange=xinspect_camera.zoom_yrange
+						wset, xinspect_camera.draw_window & plot_xinspect_population, filtering_parameters=filtering_parameters,mo, data_click=data_click, counter=xinspect_camera.counter, coordinate_conversions=xinspect_coordinate_conversions, selected_object=selected_object, xrange=xinspect_camera.zoom_xrange, yrange=xinspect_camera.zoom_yrange
 
 					; set the current star directory to be the selected object
 					set_star, selected_object.star_dir
@@ -133,17 +159,7 @@ PRO xinspect_ev, event
 					xinspect_remake_plots
 				endif
 			
-				;===========================================
-				; setting custom zoom range
-				;===========================================
-				; use middle mouse button to zoom in
-				if event.press eq 2 then begin
-					if xinspect_camera.setting_zoom_left eq 0 and xinspect_camera.setting_zoom_right eq 0 then begin
-						; zoom is pressed for the first time
-						xinspect_camera.setting_zoom_left = 1
-						xinspect_camera.setting_zoom_right = 0
-					endif
-				endif
+
 
 				; if the left edge of the zoom window has already be set, then ask for the right side
 				if xinspect_camera.setting_zoom_right then begin
@@ -169,7 +185,7 @@ PRO xinspect_ev, event
 						wait, 0.3
 						xinspect_camera.setting_zoom_left=0
 						xinspect_camera.setting_zoom_right=0
-						plot_xinspect_population, lspm,counter=xinspect_camera.counter, coordinate_conversions=xinspect_coordinate_conversions,  xrange=xinspect_camera.zoom_xrange, yrange=xinspect_camera.zoom_yrange
+							wset, xinspect_camera.draw_window & plot_xinspect_population, filtering_parameters=filtering_parameters, mo,counter=xinspect_camera.counter, coordinate_conversions=xinspect_coordinate_conversions,  xrange=xinspect_camera.zoom_xrange, yrange=xinspect_camera.zoom_yrange
 					endif
 				endif
 	
@@ -194,19 +210,37 @@ PRO xinspect_ev, event
 					endif
 				endif
 
-				;===========================================
-				; change what aspects of the population are plotted
-				;===========================================
-				; use right mouse button to change views
-				if event.press eq 4 then begin
-					xinspect_camera.counter += 1
-					plot_xinspect_population, lspm, counter=xinspect_camera.counter, coordinate_conversions=xinspect_coordinate_conversions
-					xinspect_camera.zoom_xrange = [0,0]
-					xinspect_camera.zoom_yrange = [0,0]
-				endif
+
 			end
 			
-			
+				
+			'switch':	begin
+						;===========================================
+						; change what aspects of the population are plotted
+						;===========================================
+						; use right mouse button to change views
+						xinspect_camera.counter += 1
+							wset, xinspect_camera.draw_window & plot_xinspect_population, filtering_parameters=filtering_parameters, mo, counter=xinspect_camera.counter, coordinate_conversions=xinspect_coordinate_conversions
+						xinspect_camera.zoom_xrange = [0,0]
+						xinspect_camera.zoom_yrange = [0,0]
+					end
+			'reset':	begin
+							wset, xinspect_camera.draw_window & plot_xinspect_population, filtering_parameters=filtering_parameters, mo, counter=xinspect_camera.counter, coordinate_conversions=xinspect_coordinate_conversions
+						xinspect_camera.zoom_xrange = [0,0]
+						xinspect_camera.zoom_yrange = [0,0]
+					end
+			'custom':	begin
+					;===========================================
+					; setting custom zoom range
+					;===========================================
+					; use middle mouse button to zoom in
+						if xinspect_camera.setting_zoom_left eq 0 and xinspect_camera.setting_zoom_right eq 0 then begin
+							; zoom is pressed for the first time
+							xinspect_camera.setting_zoom_left = 1
+							xinspect_camera.setting_zoom_right = 0
+						endif
+
+					end
 			;===========================================
 			; toggle all the various possible plots on and off
 			;===========================================			
@@ -281,21 +315,27 @@ PRO xinspect_ev, event
 					wdelete, 5
 				endif
 			end
+			
 
 			;===========================================
 			; quit when done
 			;===========================================
 			"Done": WIDGET_CONTROL, event.top, /DESTROY		
 			
-			ELSE: print, "no event handler yet!"		
+			ELSE: begin
+						wset, xinspect_camera.draw_window & plot_xinspect_population, filtering_parameters=filtering_parameters, mo, counter=xinspect_camera.counter, coordinate_conversions=xinspect_coordinate_conversions
+					end
 		ENDCASE
+
 	endif
 
 END
 
 
-PRO xinspect, input_lspm, GROUP = GROUP, BLOCK=block
+PRO xinspect, input_mo, GROUP = GROUP, BLOCK=block
 
+
+	if keyword_set(input_mo) then set_star, input_mo, /combined
 
 	; load up lots of necessary common blocks
 	common xinspect_common
@@ -314,10 +354,15 @@ PRO xinspect, input_lspm, GROUP = GROUP, BLOCK=block
 	xinspectbase = WIDGET_BASE(TITLE = "xinspect", /column)	
 		; create a frame that will contain the draw window for plotting the population of stars (and maybe other stuff too)
 		plotting_base = widget_base(xinspectbase, /row, /frame)
-			; create the draw window that will contain plots
-			skymap_draw = widget_draw(plotting_base, xsize=500, ysize=500, uval='draw', /button_event)
+			skymap_view_base = widget_base(plotting_base, /col, /frame)
+				; visualize
+				visualize_base = widget_base(skymap_view_base, /row, /base_align_center, /align_center)
+				; create the draw window that will contain plots
+				skymap_draw = widget_draw(skymap_view_base, xsize=500, ysize=500, uval='draw', /button_event)
+				
+
 			; create an information panel to print text about the star (basic parameters, observations gathered, etc...)
-			information_panel = widget_text(plotting_base, xsize=20, ysize=15)
+			information_panel = widget_text(plotting_base, xsize=30, ysize=15)
 		; create a frame to contain options for exploring different single-transits/candidates
 		explore_base = widget_base(plotting_base, col=1, /frame, /base_align_cent)
 			text = widget_label(explore_base, value='How do you want to explore?')
@@ -331,12 +376,59 @@ PRO xinspect, input_lspm, GROUP = GROUP, BLOCK=block
 				text = widget_label(exploresingle_base, value='Interesting Single Events')
 				boxes_list = widget_list(exploresingle_base, ysize=10, xsize=40)
 
+				filter_base = widget_base(xinspectbase, /row)
+
+
+	vis_base = widget_base(visualize_base, /row, /frame)
+		vis_button = widget_button(vis_base, value='switch views', uvalue='switch' )
+	space_text = widget_label(visualize_base, value= '   ')
+	zoom_base  = widget_base(visualize_base ,/row, /frame)
+		zoom_text = widget_label(zoom_base, value='zoom:')
+		zoom_custom = widget_button(zoom_base, value='custom', uvalue='custom')
+		zoom_rest = widget_button(zoom_base, value='reset', uvalue='reset')
+
+
+	class_base = widget_base(filter_base, /col, /frame)
+		classifications= {	values:['unmarked', 'known objects', 'variability', 'weirdos'], setvalues:[1,1,1,1]}
+		class_buttons = cw_bgroup(class_base, classifications.values, /row, /NONEXCLUSIVE, label_left='including stars that are', /FRAME, uvalue=classifications.values, uname='classifications', set_val=classifications.setvalues)
+
+	pos_base = widget_base(filter_base, /row, /frame)
+		ra_base  = widget_base(pos_base ,/row, /frame)
+			ra_text = widget_label(ra_base, value='R.A.:')
+			ra_min = widget_text(ra_base, value='0', uvalue='ra_min', /edit, xsize=4)
+			ra_text = widget_label(ra_base, value=' to ')
+			ra_max = widget_text(ra_base, value='24', uvalue='ra_max', /edit, xsize=4)
+	
+		dec_base  = widget_base(pos_base ,/row, /frame)
+			dec_text = widget_label(dec_base, value='Dec.:')
+			dec_min = widget_text(dec_base, value='-90', uvalue='dec_min', /edit, xsize=4)
+			dec_text = widget_label(dec_base, value=' to ')
+			dec_max = widget_text(dec_base, value='90', uvalue='dec_max', /edit, xsize=4)
+
+	star_base = widget_base(filter_base, /row, /frame)
+		size_base  = widget_base(star_base ,/row, /frame)
+			size_text = widget_label(size_base, value='radius:')
+			size_min = widget_text(size_base, value='0.08', uvalue='size_min', /edit, xsize=4)
+			size_text = widget_label(size_base, value=' to ')
+			size_max = widget_text(size_base, value='0.35', uvalue='size_max', /edit, xsize=4)
+	
+		distance_base  = widget_base(star_base ,/row, /frame)
+			distance_text = widget_label(distance_base, value='distance:')
+			distance_min = widget_text(distance_base, value='0', uvalue='distance_min', /edit, xsize=4)
+			distance_text = widget_label(distance_base, value=' to ')
+			distance_max = widget_text(distance_base, value='33', uvalue='distance_max', /edit, xsize=4)
+
+	filter_box = {classification:class_buttons, ra_min:ra_min, ra_max:ra_max, dec_min:dec_min, dec_max:dec_max, size_min:size_min, size_max:size_max, distance_min:distance_min, distance_max:distance_max}
+	filtering_parameters = {unmarked:1, known:1, variability:1, ignore:1, ra_min:0.0, ra_max:24.0, dec_min:-90.0, dec_max:90.0, size_min:0.08, size_max:0.35, distance_min:0.0, distance_max:33.0}
+
+
+
 	; a structure that keeps track of various plotting options
 	thingstoplot= {	values:['individual events', 'orbital phase', 'rotational phase', 'time', '#', 'D/sigma', 'correlations'], setvalues:[0,0,0,0,0,0,0]}
 	thingstoplot_buttons = cw_bgroup(plotting_base, thingstoplot.values, /COLUMN, /NONEXCLUSIVE, LABEL_TOP='What do you want to plot?', /FRAME, uvalue=thingstoplot.values, uname='thingstoplot', set_val=thingstoplot.setvalues)
 
 	; a big button to close down xinspect when finished
-	done = WIDGET_BUTTON(xinspectbase, value='Done', uvalue='Done') 
+	;done = WIDGET_BUTTON(xinspectbase, value='Done', uvalue='Done') 
 
 	; realize the widgety window 	
 	WIDGET_CONTROL, xinspectbase, /REALIZE
@@ -352,13 +444,13 @@ PRO xinspect, input_lspm, GROUP = GROUP, BLOCK=block
 	child_ids = {xlc_orbit:0, xlc_event:0, xlc_time:0, xlc_obsn:0, xlc_rotation:0, xinspect:xinspectbase}
 
 
-	if keyword_set(input_lspm) then set_star, input_lspm, /combined
 
 	
 	; grab the lspm number from the current directory
-	lspm = fix(stregex(/ext, stregex(/ext, star_dir(), 'ls[0-9]+'), '[0-9]+')) 
-	lspm = lspm[0]
-	plot_xinspect_population, lspm, coordinate_conversions=xinspect_coordinate_conversions, selected_object=selected_object
+	mo = name2mo(mo_dir()); = fix(stregex(/ext, stregex(/ext, star_dir(), 'ls[0-9]+'), '[0-9]+')) 
+	mo = mo[0]
+	wset, xinspect_camera.draw_window
+		wset, xinspect_camera.draw_window & plot_xinspect_population, filtering_parameters=filtering_parameters, mo, coordinate_conversions=xinspect_coordinate_conversions, selected_object=selected_object
 
 
 

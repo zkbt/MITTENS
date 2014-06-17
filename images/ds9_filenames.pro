@@ -14,7 +14,7 @@ PRO ds9_filenames, input_filenames, save_image=save_image,  pixels=pixels, xpa_n
 	; define place to save images, if saving
 	image_path = star_dir + 'field.jpg'
 
-	if keyword_set(finder) then save_image ='lspm'+rw(lspm_info.lspmn)+'_finder_chart.jpg'
+	if keyword_set(finder) then save_image ='mo'+rw(mo_info.mo)+'_finder_chart.jpg'
 
 	; set up the basics of ds9
 	command = 'ds9 -wcs align yes -scale mode zscale -scale squared -cmap invert yes -colorbar no -height '+strcompress(/remove_all, pixels)+' -width '+strcompress(/remove_all, pixels)+' -zoom to 1 ' 
@@ -42,24 +42,24 @@ PRO ds9_filenames, input_filenames, save_image=save_image,  pixels=pixels, xpa_n
 		epoch = date[0] + date[1]/365.
 
 		; set target position
-		current_ra = double(lspm_info.ra) + (epoch-2000.0)*lspm_info.pmra/60./60./cos(lspm_info.dec*!pi/180)
+		current_ra = double(mo_info.ra) + (epoch-2000.0)*mo_info.pmra/60./60./cos(mo_info.dec*!pi/180)
 		rah = long(current_ra/15)
 		ram = long((current_ra/15 - rah)*60)
 		ras = ((current_ra/15 - rah)*60 - ram)*60
-		current_dec = double(lspm_info.dec) + (epoch-2000.0)*lspm_info.pmdec/60./60.
+		current_dec = double(mo_info.dec) + (epoch-2000.0)*mo_info.pmdec/60./60.
 		decd = long(current_dec)
 		decm = long((current_dec - decd)*60)
 		decs = ((current_dec - decd)*60-decm)*60
 		pos_string = string(rah, format='(I02)') + ":"+ string(ram, format='(I02)')+ ":"+ string(ras, format='(F04.1)') + '  +'+string(decd, format='(I02)')+ ":"+ string(decm, format='(I02)')+ ":"+ string(decs, format='(F04.1)');+ "  (J2000)"
 
 		; define a position a little south of the target, for labeling purposes
-		south_dec = double(lspm_info.dec) + (epoch-2000.0)*lspm_info.pmdec/60./60. - 4.0/60.0
+		south_dec = double(mo_info.dec) + (epoch-2000.0)*mo_info.pmdec/60./60. - 4.0/60.0
 		decd = long(south_dec)
 		decm = long((south_dec - decd)*60)
 		decs = ((south_dec - decd)*60-decm)*60
 		south_pos_string = string(rah, format='(I02)') + ":"+ string(ram, format='(I02)')+ ":"+ string(ras, format='(F04.1)') + '  +'+string(decd, format='(I02)')+ ":"+ string(decm, format='(I02)')+ ":"+ string(decs, format='(F04.1)');+ "  (J2000)"
 		label_string = string(format='(F10.4)', mjd) 
-		south_label_string ='lspm' + rw(lspm_info.lspmn) + ' on ' + date_conv(mjd+2400000.5d - 7.0/24.0, 'S')
+		south_label_string ='mo' + rw(mo_info.mo) + ' on ' + date_conv(mjd+2400000.5d - 7.0/24.0, 'S')
 		print, label_string
 
 		if keyword_set(finder) then label_string = "MEarth master image; 6 arcminutes"

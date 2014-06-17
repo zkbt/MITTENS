@@ -9,12 +9,12 @@ PRO savetoascii
 
 	if n_elements(inflated_lc) ne n_elements(variability_lc) or n_elements(inflated_lc) ne n_elements(cleaned_lc) or n_elements(cleaned_lc) ne n_elements(variability_lc) then stop
 	
-	filename=star_dir() + 'lspm' + string(lspm_info.lspmn, form='(I04)') + '_mearth_lightcurve.ascii'
+	filename=star_dir() + 'lspm' + string(mo_info.lspmn, form='(I04)') + '_mearth_lightcurve.ascii'
 	openw, lun, filename, /get_lun
 
-	que = "select * from nc where lspmn = "+ rw(string(form='(I)', lspm_info.lspmn))+";"
+	que = "select * from nc where lspmn = "+ rw(string(form='(I)', mo_info.lspmn))+";"
 	sql = pgsql_query(que)
-	printf, lun, '# MEarth identifier: lspm' + string(lspm_info.lspmn, form='(I04)')
+	printf, lun, '# MEarth identifier: lspm' + string(mo_info.lspmn, form='(I04)')
 	if n_tags(sql) gt 0 then begin
 		printf, lun, '# LHS number: ' + rw(sql.lhs)
 		printf, lun, '# NLTT number: ' + rw(sql.nltt)

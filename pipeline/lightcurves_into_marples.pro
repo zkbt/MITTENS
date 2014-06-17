@@ -11,10 +11,10 @@ PRO lightcurves_into_marples, remake=remake, start=start
 	verbose, /on
 	interactive, /off
 
-	f = file_search('ls*/', /mark)
+	f = file_search('mo*/', /mark)
 	if n_elements(start) eq 0 then start = 0
-	for i=start, n_elements(f)-1 do begin
-		lspmn = long(stregex(f[i], '[0-9]+', /ext))
-		marplify, lspmn, remake=remake
+	for i=start*n_elements(f), n_elements(f)-1 do begin
+		mo = name2mo(f[i])
+		marplify, mo, remake=remake
 	endfor
 END

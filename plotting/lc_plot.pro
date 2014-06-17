@@ -110,7 +110,7 @@ PRO lc_plot, time=time, night=night, transit=transit, eps=eps, phased=phased, ca
 
 	restore, star_dir + 'cleaned_lc.idl'
 	if ~keyword_set(no_cleaned) then begin													; sometimes, might not want to plot cleaned light curve
-		lc_titles = [lc_titles, 'Residuals!C(mag.)']												; set up everything else as below
+		lc_titles = [lc_titles, 'Relative Flux!C(mag.)']												; set up everything else as below
 		lc = replicate(lc_point, n_elements(cleaned_lc))
 		copy_struct, cleaned_lc, lc
 		lcs = create_struct(lcs, 'cleaned', lc)

@@ -145,6 +145,7 @@ PRO origami_to_candidates, remake=remake, n_save=n_save
 			plot, multiduration_SN[i, *], new_SN[i,*], psym=3, xtitle='Pre-Constraint S/N'
 			oplot, [0,100], [0,100], linestyle=2, color=250
 			smultiplot, /def
+
 		endif
 	endfor
 	sn = peak_candidates.depth/peak_candidates.depth_uncertainty

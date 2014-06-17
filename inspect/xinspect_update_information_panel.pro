@@ -9,32 +9,32 @@ END
 
 PRO xinspect_update_information_panel
 	common xinspect_common
-	root_directory = stregex(star_dir(), 'ls[0-9]+/', /ext)
+	root_directory = mo_dir()
 
-	if file_test(root_directory + 'lspm_info.idl') eq 0 then begin
+	if file_test(root_directory + 'mo_info.idl') eq 0 then begin
 		info_on_star = ["don't seem to have", "data on this", "this star"]
 	endif else begin
-		restore, root_directory + 'lspm_info.idl'
+		restore, root_directory + 'mo_info.idl'
 
 	
-		info_on_star = ['ls'+string(form='(I04)', lspm_info.lspmn) + ' = ' + lspm_info.bestname, $
-				lspm_info.ra_string + ' ' +  lspm_info.dec_string, $
-				rw(string(lspm_info.ra, form='(F9.5)')) + ' ' + rw(string(lspm_info.dec, form='(F+9.5)')), $
-				'pm = ' + rw(string(lspm_info.pmra, form='(F+9.3)')) + ' ' + rw(string(lspm_info.pmdec, form='(F+9.3)')), $
-				'pi_lit = ' + stringify_pi(lspm_info.lit_plx, lspm_info.lit_e_plx), $
-				'pi_jas = ' + stringify_pi(lspm_info.jason_plx, lspm_info.jason_e_plx), $
-				'V_est = ' + stringify_mag(lspm_info.vest)	, $
-				'V = ' + stringify_mag(lspm_info.v)	, $
-				'R = ' + stringify_mag(lspm_info.r)	, $
-				'J = ' + stringify_mag(lspm_info.j)	, $
-				'H = ' + stringify_mag(lspm_info.h)	, $
-				'K = ' + stringify_mag(lspm_info.k)	, $
-				'mass = ' + string(lspm_info.mass, form='(F4.2)'), $
-				'radius = ' + string(lspm_info.radius, form='(F4.2)'), $
-				'teff = ' + string(lspm_info.teff, form='(I4)')] 
-		;t = tag_names(lspm_info)
+		info_on_star = ['ls'+string(form='(I04)', mo_info.lspmn) + ' = ' + mo_info.bestname, $
+				mo_info.ra_string + ' ' +  mo_info.dec_string, $
+				rw(string(mo_info.ra, form='(F9.5)')) + ' ' + rw(string(mo_info.dec, form='(F+9.5)')), $
+				'pm = ' + rw(string(mo_info.pmra, form='(F+9.3)')) + ' ' + rw(string(mo_info.pmdec, form='(F+9.3)')), $
+				'pi_lit = ' + stringify_pi(mo_info.lit_plx, mo_info.lit_e_plx), $
+				'pi_jas = ' + stringify_pi(mo_info.jason_plx, mo_info.jason_e_plx), $
+				'V_est = ' + stringify_mag(mo_info.vest)	, $
+				'V = ' + stringify_mag(mo_info.v)	, $
+				'R = ' + stringify_mag(mo_info.r)	, $
+				'J = ' + stringify_mag(mo_info.j)	, $
+				'H = ' + stringify_mag(mo_info.h)	, $
+				'K = ' + stringify_mag(mo_info.k)	, $
+				'mass = ' + string(mo_info.mass, form='(F4.2)'), $
+				'radius = ' + string(mo_info.radius, form='(F4.2)'), $
+				'teff = ' + string(mo_info.teff, form='(I4)')] 
+		;t = tag_names(mo_info)
 		;info_on_star = strarr(n_elements(t))
-		;for i=0, n_elements(t) -1 do info_on_star[i] = string(t[i]) + ' = ' + rw(string(lspm_info.(i)) )
+		;for i=0, n_elements(t) -1 do info_on_star[i] = string(t[i]) + ' = ' + rw(string(mo_info.(i)) )
 	endelse
 
 	if strmatch(star_dir(), '*combined*') then begin
