@@ -29,7 +29,9 @@ PRO load_stellar_properties
 	common mearth_tools
 
 	; get basic parameters from nc_adopt_best
-	north_query = "select n.lspmn as lspmn, n.lspmname as pmname, n.hip, n.tycho, n.lhs, n.nltt, n.gliese, lspmn2name(n.lspmn) AS bestname, n.twomass as mo, n.catra*180.0/3.1415926535 as ra, n.catdec*180.0/3.1415926535 as dec,  base10_to_60(n.catra, 'rad', ':', '', 2, 'hr') AS ra_string, base10_to_60(n.catdec, 'rad', ':', '+', 1, 'deg') AS dec_string, n.pmra, n.pmdec, n.vest, n.vmag as v, n.rsdss AS r, n.jmag AS j, n.hmag AS h, n.kmag AS k, n.spectype, n.distmod, 10^(0.2*(n.distmod+5)) as distance, n.plx as lit_plx, n.e_plx as lit_e_plx, p.plx as jason_plx, p.e_plx as jason_e_plx , n.mass, n.radius, n.lbol as lum FROM nc_adopt_best n LEFT OUTER JOIN prelim_plx p ON n.lspmn = p.lspmn ORDER BY lspmn;"
+	; original, before Jonathan cleaned up in summer 2014: north_query = "select n.lspmn as lspmn, n.lspmname as pmname, n.hip, n.tycho, n.lhs, n.nltt, n.gliese, lspmn2name(n.lspmn) AS bestname, n.twomass as mo, n.catra*180.0/3.1415926535 as ra, n.catdec*180.0/3.1415926535 as dec,  base10_to_60(n.catra, 'rad', ':', '', 2, 'hr') AS ra_string, base10_to_60(n.catdec, 'rad', ':', '+', 1, 'deg') AS dec_string, n.pmra, n.pmdec, n.vest, n.vmag as v, n.rsdss AS r, n.jmag AS j, n.hmag AS h, n.kmag AS k, n.spectype, n.distmod, 10^(0.2*(n.distmod+5)) as distance, n.plx as lit_plx, n.e_plx as lit_e_plx, p.plx as jason_plx, p.e_plx as jason_e_plx , n.mass, n.radius, n.lbol as lum FROM nc_adopt_best n LEFT OUTER JOIN prelim_plx p ON n.lspmn = p.lspmn ORDER BY lspmn;"
+	north_query = "select n.lspmn as lspmn, n.lspmname as pmname, n.hip, n.tycho, n.lhs, n.nltt, n.gliese, lspmn2name(n.lspmn) AS bestname, n.twomass as mo, n.catra*180.0/3.1415926535 as ra, n.catdec*180.0/3.1415926535 as dec,  base10_to_60(n.catra, 'rad', ':', '', 2, 'hr') AS ra_string, base10_to_60(n.catdec, 'rad', ':', '+', 1, 'deg') AS dec_string, n.pmra, n.pmdec, n.vest, n.vmag as v, n.rsdss AS r, n.jmag AS j, n.hmag AS h, n.kmag AS k, n.spectype, n.distmod, 10^(0.2*(n.distmod+5)) as distance, n.plx as plx, n.e_plx as e_plx, n.r_plx as r_plx, n.mass, n.radius, n.lbol as lum FROM nc_adopt_best n ORDER BY lspmn;"
+
 	mprint, doing_string, 'querying the northern catalog out of the database'
 	north_sql = pgsql_query(north_query, /verb) 
 
@@ -56,36 +58,39 @@ PRO load_stellar_properties
 		plot, north_sql.mass, north_sql.k - north_sql.distmod, psym=1, xtitle='Mass', ytitle='absolute k'
 		x = north_sql.mass
 		oplot, north_sql.mass, absk_fit[0] + absk_fit[1]*x + absk_fit[2]*x^2 + absk_fit[3]*x^3 + absk_fit[4]*x^4+ absk_fit[5]*x^5, color=150, psym=3
-		summaryfiles = '/home/jirwin/mearth/newsouth/'+['summary-lspmsouth.txt', 'summary-pmsu.txt', 'summary-recons.txt']
+		summaryfiles = '/home/jirwin/mearth/newsouth/'+['summary-lspmsouth.txt', 'summary-pmsu.txt', 'summary-recons.txt', 'summary-misc.txt']
+		restore, working_dir + 'summary_files.template'
+		
 		for i=0, n_elements(summaryfiles)-1 do begin
-			readcol, summaryfiles[i], twomassid, rah, ram, ras, decd, decm, decs, epoch, pm_ra, pm_dec, parallax, vmag, jmag, hmag, kmag, mass, radius, mearthmag, mearthexptime, exposurespervisit, snrrequested, snrexpected, timepervisit, expectedplanetradius, numberofreferencestars, nameinoriginalcatalog, format='A,A,A,A,A,A,A,D,D,D,D,D,D,D,D,D,D,D,D,D,D,D,D,D,D,A1000'
-			this = replicate(north_sql[0], n_elements(twomassid))
+			;readcol, summaryfiles[i], twomassid, rah, ram, ras, decd, decm, decs, epoch, pm_ra, pm_dec, parallax, vmag, jmag, hmag, kmag, mass, radius, teff, mearthmag, mearthexptime, exposurespervisit, snrrequested, snrexpected, timepervisit, expectedplanetradius, numberofreferencestars, nameinoriginalcatalog, format='A,A,A,A,A,A,A,D,D,D,D,D,D,D,D,D,D,D,D,D,D,D,D,D,D,D,A1000'
+			data = read_ascii(summaryfiles[i], template=template)
+			this = replicate(north_sql[0], n_elements(data.twomassid))
 			clear_struct, this
-			this.mo = name2mo(twomassid)
+			this.mo = name2mo(data.twomassid)
 			for j=0, n_elements(this)-1 do begin
-				this[j].ra = ten(rah[j] + ':' + ram[j] + ':' + ras[j])*15.0
-				this[j].dec = ten(decd[j] + ':' + decm[j] + ':' + decs[j])
+				this[j].ra = ten(data.rah[j] + ':' + data.ram[j] + ':' + data.ras[j])*15.0
+				this[j].dec = ten(data.decd[j] + ':' + data.decm[j] + ':' + data.decs[j])
 			endfor
-			this.ra_string = rah + ':' + ram + ':' + ras
-			this.dec_string = decd + ':' + decm + ':' + decs
-			this.pmra = pm_ra
-			this.pmdec = pm_dec
-			this.lit_plx = parallax
-			this.v = vmag
-			this.vest = vmag
-			this.j = jmag
-			this.h = hmag
-			this.k = kmag
-			this.mass = mass
-			this.radius = radius
-			x = radius
+			this.ra_string = data.rah + ':' + data.ram + ':' + data.ras
+			this.dec_string = data.decd + ':' + data.decm + ':' + data.decs
+			this.pmra = data.pm_ra
+			this.pmdec = data.pm_dec
+			this.plx = data.parallax
+			this.v = data.vmag
+			this.vest = data.vmag
+			this.j = data.jmag
+			this.h = data.hmag
+			this.k = data.kmag
+			this.mass = data.mass
+			this.radius = data.radius
+			x = data.radius
 			this.lum = lum_fit[0] + lum_fit[1]*x + lum_fit[2]*x^2 + lum_fit[3]*x^3
 
 			x = this.mass
 			absk = absk_fit[0] + absk_fit[1]*x + absk_fit[2]*x^2 + absk_fit[3]*x^3 + absk_fit[4]*x^4+ absk_fit[5]*x^5
 			this.distmod = this.k - absk
 			this.distance = 10^(0.2*(this.distmod+5))
-			this.bestname = nameinoriginalcatalog
+			this.bestname = data.nameinoriginalcatalog
 			if n_elements(south) eq 0 then south = this else south = [south, this]
 		endfor
 	endelse

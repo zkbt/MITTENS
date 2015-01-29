@@ -64,7 +64,7 @@ PRO set_star, input_mo, year, tel, combined=combined, random=random, n=n, days=d
 			star_dir = make_star_dir(mo, year, tel, combined=combined) 
 		endelse
 		; set the mo_info structure by loading the one in the directory
-		restore, mo_dir() + 'mo_info.idl'
+		if file_test(mo_dir() + 'mo_info.idl') then restore, mo_dir() + 'mo_info.idl'
 	
 		
 		if keyword_set(fake) then star_dir += fake_dir

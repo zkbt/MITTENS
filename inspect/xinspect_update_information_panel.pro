@@ -21,8 +21,8 @@ PRO xinspect_update_information_panel
 				mo_info.ra_string + ' ' +  mo_info.dec_string, $
 				rw(string(mo_info.ra, form='(F9.5)')) + ' ' + rw(string(mo_info.dec, form='(F+9.5)')), $
 				'pm = ' + rw(string(mo_info.pmra, form='(F+9.3)')) + ' ' + rw(string(mo_info.pmdec, form='(F+9.3)')), $
-				'pi_lit = ' + stringify_pi(mo_info.lit_plx, mo_info.lit_e_plx), $
-				'pi_jas = ' + stringify_pi(mo_info.jason_plx, mo_info.jason_e_plx), $
+				'pi = ' + stringify_pi(mo_info.plx, mo_info.e_plx), $
+				' ref = ' + mo_info.r_plx, $
 				'V_est = ' + stringify_mag(mo_info.vest)	, $
 				'V = ' + stringify_mag(mo_info.v)	, $
 				'R = ' + stringify_mag(mo_info.r)	, $

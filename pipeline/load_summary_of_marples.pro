@@ -6,7 +6,7 @@ PRO load_summary_of_marples, all=all
 	f = file_search('mo*/combined/box_pdf.idl')
 	mo = name2mo(f)
 	restore, f[0]
-	starting_size = 10000000l
+	starting_size = 20000000l
 	ensemble_of_boxes = replicate(boxes[0], starting_size)
 	ensemble_of_mos = strarr(starting_size)
 ;	ensemble_of_star_dirs = strarr(starting_size)
