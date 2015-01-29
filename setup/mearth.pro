@@ -18,8 +18,9 @@
 ;
 ;-
 
-common mearth_tools, display, verbose, done_string, doing_string, skipping_string, error_string, tab_string, tf, possible_years, reduced_dir, working_dir, radii, interactive, yearly_filters, fake_dir, fake_trigger_dir, n_effective_for_rescaling, colorbars, mo_ensemble, username, typical_candidate_filename, fits_suffix, mo_prefix, mo_regex, observatories
+common mearth_tools, display, verbose, done_string, doing_string, skipping_string, error_string, tab_string, tf, possible_years, reduced_dir, working_dir, radii, interactive, yearly_filters, fake_dir, fake_trigger_dir, n_effective_for_rescaling, colorbars, mo_ensemble, username, typical_candidate_filename, fits_suffix, mo_prefix, mo_regex, observatories, procedure_prefix
 
+procedure_prefix = '[setup]'
 ; set up the structure of MEarth Objects, which will set their directory structure
 mo_prefix = 'mo'
 mo_regex = '[0-9]+[+-][0-9]+'
@@ -58,7 +59,7 @@ if n_elements(mo_ensemble) eq 0 then restore, 'population/mo_ensemble.idl'
 
 ; initialize parameters
 ;radii = ;[4.0, 3.0, 2.5, 2.2, 2.0;, 1.7, 1.5]
-radii = [4.0 ,  3.3 ,     2.7 ,     2.2   ,   1.8    ,  1.5];s = 10^(-findgen(6)*.5);print, s^(1./6.)*4.0
+radii = [4.0 ,  3.3 ,     2.7 ,     2.2   ,   1.8    ,  1.5];s = 10^(-findgen(6)*.5);print, procedure_prefix,  s^(1./6.)*4.0
 
 display = 1
 verbose = 1
@@ -70,7 +71,7 @@ tf = ['false', 'true']
 username = getenv('USER')
 
 ; create new colorbar file, if need be
-if file_test('~/zkb_colors.tbl') eq 0 then print, "MITTENS require Zach's custom color tables; making them now (this should only happen once)"
+if file_test('~/zkb_colors.tbl') eq 0 then print, procedure_prefix,  "MITTENS require Zach's custom color tables; making them now (this should only happen once)"
 if file_test('~/zkb_colors.tbl') eq 0 then make_ct
 
 ; set colorbars for plotting multiple light curves
@@ -79,13 +80,13 @@ colorbars = [colorbars, colorbars, colorbars, colorbars]
 colorbars = [colorbars, colorbars]
 n_effective_for_rescaling = 4
 printl
-print, ' now running MEarth IDL Tools for Transits of Extrasolar Neptunes and Super-earths (MITTENS)!'
-print, '   working_dir   = ', working_dir
-print, '   username      = ', username
-print, '   plotting?     = ', tf[display]
-print, '   interactive?  = ', tf[interactive]
-print, '   verbose?      = ', tf[verbose]
-;print, '   !quiet?       = ', tf[!quiet]
+print, procedure_prefix,  ' now running MEarth IDL Tools for Transits of Extrasolar Neptunes and Super-earths (MITTENS)!'
+print, procedure_prefix,  '   working_dir   = ', working_dir
+print, procedure_prefix,  '   username      = ', username
+print, procedure_prefix,  '   plotting?     = ', tf[display]
+print, procedure_prefix,  '   interactive?  = ', tf[interactive]
+print, procedure_prefix,  '   verbose?      = ', tf[verbose]
+;print, procedure_prefix,  '   !quiet?       = ', tf[!quiet]
 printl
 print
 
