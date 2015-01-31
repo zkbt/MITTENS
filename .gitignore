@@ -1,5 +1,6 @@
 # kwrite's backup files saved with ~ on their ends
 *~
+*.DS_Store
 
 docs/
 =======
