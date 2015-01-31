@@ -8,14 +8,14 @@
 setenv MITTENS_DATA /data/mearth2/marples/
 
 # a temporary kludge
-setenv IDLUTILS_DIR /home/zberta/idl_routines/sdss
-setenv IDL_PATH +/home/zberta/idl_routines:+$IDLUTILS_DIR/pro:+$IDLUTILS_DIR/goddard/pro:{$IDL_PATH}
+#setenv IDLUTILS_DIR /home/zberta/idl_routines/sdss
+#setenv IDL_PATH +/home/zberta/idl_routines:+$IDLUTILS_DIR/pro:+$IDLUTILS_DIR/goddard/pro:{$IDL_PATH}
 
-# set the PATH to the MITTENS routines, and add it to the IDL PATH
-setenv MITTENS_PATH ~/idl_routines/zkb/mearth-tools
+# add the MITTENS code directories to the IDL path
 setenv IDL_PATH +{$MITTENS_PATH}:{$IDL_PATH}
 
 # define an alias, so you can type "mittens" from the UNIX prompt
+#  (the umask is an attempt to make sure any changes you make will be group readable/editable
 alias mittens "umask 0007; idl mearth.pro"
 
 # the next two lines are needed to allow IDL to access the database

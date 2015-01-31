@@ -1,7 +1,6 @@
 This document describes how to install the MITTENS, the MEarth IDL Tools for Transits of Extrasolar Neptunes and Super-earths. This assumes that you are a member of Dave's "exoplanet" group on the CF Unix network. If you're not a member, become a member!
 
 
-
 ================================
 INSTALLING THE IDL-SQL INTERFACE
 ================================
@@ -35,7 +34,13 @@ For the most part, MITTENS is just big group of IDL *.pro files that can be used
 #  MEarth IDL Tools for Transits of Extrasolar Neptunes and Super-earths   #
 #                                                                          #
 # ----__--------__--------__--------__--------__--------__--------__------ #
-source /home/zberta/idl_routines/zkb/mearth-tools/mittens_setup.sh
+
+
+# set the PATH to the MITTENS routines, which you can set to whereever you want the code
+setenv MITTENS_PATH ~/MITTENS
+
+# run the mittens setup script
+source $MITTENS_PATH/mittens_setup.sh
 
 
 
