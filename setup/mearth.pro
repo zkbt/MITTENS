@@ -1,15 +1,15 @@
 ;+
 ; sets up IDL to run in MITTENS (MEarth IDL Tools for Transits of Extrasolar Neptunes and Super-earths!) mode.
-;  
+;
 ;
 ; :description:
 ; :examples:
 ;
 ;  1) run "@mearth" from within IDL ::
-;  2) run "idl mearth.pro" from UNIX shell :: 
+;  2) run "idl mearth.pro" from UNIX shell ::
 ;  3) define a shortcut in ~/.myrc file ('alias mittens "idl mearth.pro"') ::
 ;
-; :categories: 
+; :categories:
 ; :params: none
 ; :returns: an IDL prompt ready for playing with MEarth data
 ; :uses: star_dir()
@@ -20,7 +20,7 @@
 
 common mearth_tools, display, verbose, done_string, doing_string, skipping_string, error_string, tab_string, tf, possible_years, reduced_dir, working_dir, radii, interactive, yearly_filters, fake_dir, fake_trigger_dir, n_effective_for_rescaling, colorbars, mo_ensemble, username, typical_candidate_filename, fits_suffix, mo_prefix, mo_regex, observatories, procedure_prefix
 
-procedure_prefix = '[setup]'
+procedure_prefix = '[mearth]'
 ; set up the structure of MEarth Objects, which will set their directory structure
 mo_prefix = 'mo'
 mo_regex = '[0-9]+[+-][0-9]+'
@@ -34,7 +34,7 @@ yearly_filters = ['iz', 'I', 'iz',  'iz']
 fits_suffix = '_daily.fits'
 
 ; set working directory; on CfA network or on laptop?
-;if getenv('HOME') eq '/Users/zachoryberta' then working_dir = '/Users/zachoryberta/mearth/' else 
+;if getenv('HOME') eq '/Users/zachoryberta' then working_dir = '/Users/zachoryberta/mearth/' else
 
 ; set up directory structure; assumes a $MEARTH_DATA environment variable has been set
 working_dir = getenv('MITTENS_DATA');'/pool/eddie1/zberta/mearth_most_recent/'

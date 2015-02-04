@@ -11,7 +11,7 @@ cp /data/mearth1/db/CLIENT-SETUP.tar ~/.
 cd ~/
 tar -xvf CLIENT-SETUP.tar	
 
-# (2) open ~/.postgresql in your favorite text editor and change the "user=" field to your CF account name (this works because Jonathan already created SQL accounts for all of us)
+# (2) open ~/.postgresql/pg_service in your favorite text editor and change the "user=" field to your CF account name (this works because Jonathan already created SQL accounts for all of us)
 
 # add the following two lines to your .myrc file:
 setenv IDL_DLM_PATH /data/mearth1/db/idl
@@ -71,8 +71,6 @@ Once the raw data have been processed through into MarPLEs and candidates, run t
 load_summary_of_observations
 load_summary_of_marples
 load_summary_of_candidates
-;load_ensemble_of_marples
-;load_ensemble_of_lightcurves
 
 ---
 [monthly?}

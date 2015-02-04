@@ -30,6 +30,8 @@ PRO set_star, input_mo, year, tel, combined=combined, random=random, n=n, days=d
 	common mearth_tools
 	common this_star, star_dir, mo_info
 
+	procedure_prefix = '[set_star]'
+	
 	; if no year is specified, you probably want the combined directory!
 	if n_elements(year) eq 0 then combined = 1
 
