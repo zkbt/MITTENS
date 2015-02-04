@@ -1,4 +1,4 @@
-PRO mprint, procedure_prefix, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, line=line
+PRO mprint, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, line=line
 ;+
 ; NAME:
 ;	mprint
