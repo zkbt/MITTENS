@@ -4,6 +4,10 @@ FUNCTION add_templates, input_templates, residuals
 	; setup environment
 	common this_star
 	common mearth_tools
+	
+	; make text displayed within this procedure is labeled
+	procedure_prefix = '[add_templates]'
+
 	@data_quality
 	@filter_parameters
 
