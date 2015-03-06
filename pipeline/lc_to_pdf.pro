@@ -33,6 +33,10 @@ PRO lc_to_pdf, test=test, redtest=redtest, remake=remake, grazing=grazing, highr
 	; load up star
 	common this_star
 	common mearth_tools
+
+	; make text displayed within this procedure is labeled
+	procedure_prefix = '[lc_to_pdf]'
+
 	
 	; avoid duplication of effort
 	if (is_uptodate(star_dir + 'box_pdf.idl', star_dir  + 'target_lc.idl') and ~keyword_set(remake)) then begin
