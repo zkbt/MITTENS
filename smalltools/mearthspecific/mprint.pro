@@ -7,8 +7,8 @@ PRO mprint, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, line=line
 ;	exactly the same as "print", but will remain quiet if mearth_tools /verbose keyword is not set
 ;
 ; CALLING SEQUENCE:
-;	mprint, procedure_prefix, 'knitting', 'is', 'fun'
-;	mprint, procedure_prefix, 'yowzers!'
+;	mprint, 'knitting', 'is', 'fun'
+;	mprint, 'yowzers!'
 ;
 ; INPUTS:
 ;	up to 15 seperate strings
@@ -29,21 +29,21 @@ PRO mprint, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, line=line
 	endif
   case n_params() of
    0: print
-   1: print, procedure_prefix, a
-   2: print, procedure_prefix, a, b
-   3: print, procedure_prefix, a, b, c
-   4: print, procedure_prefix, a, b, c, d
-   5: print, procedure_prefix, a, b, c, d, e
-   6: print, procedure_prefix, a, b, c, d, e, f
-   7: print, procedure_prefix, a, b, c, d, e, f, g
-   8: print, procedure_prefix, a, b, c, d, e, f, g, h
-   9: print, procedure_prefix, a, b, c, d, e, f, g, h, i
-   10: print, procedure_prefix, a, b, c, d, e, f, g, h, i, j
-   11: print, procedure_prefix, a, b, c, d, e, f, g, h, i, j, k
-   12: print, procedure_prefix, a, b, c, d, e, f, g, h, i, j, k, l
-   13: print, procedure_prefix, a, b, c, d, e, f, g, h, i, j, k, l, m
-   14: print, procedure_prefix, a, b, c, d, e, f, g, h, i, j, k, l, m, n
-   15: print, procedure_prefix, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o
+   1: print, '['+currentname() + ']' + ' ', a
+   2: print, '['+currentname() + ']' + ' ', a, b
+   3: print, '['+currentname() + ']' + ' ', a, b, c
+   4: print, '['+currentname() + ']' + ' ', a, b, c, d
+   5: print, '['+currentname() + ']' + ' ', a, b, c, d, e
+   6: print, '['+currentname() + ']' + ' ', a, b, c, d, e, f
+   7: print, '['+currentname() + ']' + ' ', a, b, c, d, e, f, g
+   8: print, '['+currentname() + ']' + ' ', a, b, c, d, e, f, g, h
+   9: print, '['+currentname() + ']' + ' ', a, b, c, d, e, f, g, h, i
+   10: print, '['+currentname() + ']' + ' ', a, b, c, d, e, f, g, h, i, j
+   11: print, '['+currentname() + ']' + ' ', a, b, c, d, e, f, g, h, i, j, k
+   12: print, '['+currentname() + ']' + ' ', a, b, c, d, e, f, g, h, i, j, k, l
+   13: print, '['+currentname() + ']' + ' ', a, b, c, d, e, f, g, h, i, j, k, l, m
+   14: print, '['+currentname() + ']' + ' ', a, b, c, d, e, f, g, h, i, j, k, l, m, n
+   15: print, '['+currentname() + ']' + ' ', a, b, c, d, e, f, g, h, i, j, k, l, m, n, o
   endcase 
   
 END

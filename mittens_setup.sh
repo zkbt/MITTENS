@@ -4,6 +4,10 @@
 #  MEarth IDL Tools for Transits of Extrasolar Neptunes and Super-earths
 # =======================================================================
 
+setenv PYTHONPATH ${PYTHONPATH}:{$MITTENS_PATH}/python
+
+
+
 # sets the directory where are all data (reprocessed LC's, search results, etc...) will be stored
 setenv MITTENS_DATA /data/mearth2/marples/
 

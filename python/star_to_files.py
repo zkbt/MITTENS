@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -*- coding: iso-8859-1 -*-
 """
 Created on Thu Jan 29 12:03:26 2015
 
@@ -14,6 +14,8 @@ import os
 global mittens_data
 mittens_data='/data/mearth2/marples/'
 
+db = pgdb.connect()
+
 #####
 ## get the field name and 2mass id for a given LSPM star
 def read_by_db(lspm, get_lspm=False):
@@ -23,7 +25,7 @@ def read_by_db(lspm, get_lspm=False):
     except: ## if not integer, had better be string
         star = lspm
 
-    db = pgdb.connect() ## connect to database
+    #db = pgdb.connect() ## connect to database
 
     # try query
     try:
@@ -123,9 +125,9 @@ def get_files(star,
     return twomass, files       
 
 # run query and make files for one star
-def one_star(star):
+def one_star(star, verbose=0):
     
-    twomass, files = get_files(star)
+    twomass, files = get_files(star, verbose=verbose)
     stardir = mittens_data+'mo'+twomass
     starfile = 'files.txt'
     if os.path.isdir(stardir) is False:
@@ -136,18 +138,21 @@ def one_star(star):
     fo.close()
     print "Wrote to dir", stardir
             
-# run for all northern stars
+# run for all northern stars 
 def all_north():
-
-    try:
-        db = pgdb.connect() ## connect to database
-        cmd = 'select lspmn from observed'
+    print "looping through all northern stars, populating their directories with filename lists"
+  
+    if True:
+    #db = pgdb.connect() ## connect to database
+        cmd = 'select twomass from observed'
         cur = db.cursor()       ## set up
         cur.execute(cmd)        ## execute command
         rows = cur.fetchall()   ## get answer
         
         for i in rows:
-            one_star(i)
-    except:
+            print
+            print i
+            one_star(i[0])
+    if False:#	except:
         db.rollback()       ## have to stop db execution
        

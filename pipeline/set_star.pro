@@ -28,9 +28,8 @@ PRO set_star, input_mo, year, tel, combined=combined, random=random, n=n, days=d
 ;	sometime between 2008 and 2011.
 ;-
 	common mearth_tools
-	common this_star, star_dir, mo_info
+	common this_star;, star_dir, mo_info
 
-	procedure_prefix = '[set_star]'
 	
 	; if no year is specified, you probably want the combined directory!
 	if n_elements(year) eq 0 then combined = 1
@@ -71,9 +70,7 @@ PRO set_star, input_mo, year, tel, combined=combined, random=random, n=n, days=d
 		
 		if keyword_set(fake) then star_dir += fake_dir
 
-		mprint, tab_string, '||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||'
-		mprint, tab_string, tab_string, ' star set to ', star_dir
-		!prompt = '|mittens{' + star_dir + '}| '
-		mprint, tab_string, '||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||'
+		mprint, 'star set to ' + star_dir +  ' = ' + currentname()
+		!prompt = '|mittens{' + currentname() + '}| '
 	endelse
 END

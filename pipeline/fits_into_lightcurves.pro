@@ -56,18 +56,8 @@ PRO fits_into_lightcurves, desired_mo, remake=remake, all=all, old=old, k_start=
 		search_string = '*'
 	endif else begin
 		; try to pull out just the files that you need (tricky for the few fields that are unlabeled multiples
-		
-		; if the object is in the northern hemisphere
-		if hemisphere(desired_mo) eq 'N' then begin
-			desired_lspm = mo2lspm(desired_mo)
-			lspm = desired_lspm + indgen(5)-2
-			search_string = '*lspm'+strcompress(/remo, lspm)
-		endif
-	
-		if hemisphere(desired_mo) eq 'S' then begin
-			search_string = '*' + mo_prefix + '*' 
-		endif
-
+		mo = desired_mo
+		search_string = '*' + mo_prefix + '*' 
 	endelse
 
 	; loop over the possible years
@@ -109,11 +99,13 @@ PRO fits_into_lightcurves, desired_mo, remake=remake, all=all, old=old, k_start=
 			if lspm gt 0 then mo = name2mo(lspm) else mo = name2mo(jmi_this_year[i])
 			if mo eq '' then continue
 			mitten_filename = make_star_dir(mo, year, tel)+'raw_ext_var.idl'
+			set_star, mo
 			; if it's not up-to-date, load the light curves
+			mprint, ' checking ', jmi_this_year[i], ' for new data'
 			if is_uptodate(mitten_filename, jmi_this_year[i]) eq 0 or keyword_set(remake) then begin	
 ;				if question(jmi_this_year[i],/int) then stop
 				get_jonathans_lightcurves, jmi_this_year[i], remake=remake
-			endif else mprint, skipping_string, ' raw lightcurves in ', jmi_this_year[i], ' are up to date! '
+			endif else mprint, ' raw lightcurves in ', jmi_this_year[i], ' are up to date! '
 		endfor
 	endfor
 END

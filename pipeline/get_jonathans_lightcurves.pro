@@ -28,7 +28,12 @@ PRO get_jonathans_lightcurves, filename, remake=remake
 ;-
 
 	common mearth_tools
+	
 
+	
+	
+	
+	procedure_prefix = '';	[get_jonathans_lightcurves]'
 	; read in FITS
 	fi = file_info(filename)
 

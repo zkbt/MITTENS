@@ -36,13 +36,13 @@ FUNCTION name2mo, input
 			attempted_mo = strip_twomass(this)
 			if strlen(attempted_mo) eq 16 then begin 
 				mo[i] = attempted_mo
-				mprint, tab_string, 'interpreting ', attempted_mo, ' as a valid 2MASS MEarth identifier'
+				;mprint, tab_string, 'interpreting ', attempted_mo, ' as a valid 2MASS MEarth identifier'
 			endif else begin
 				mprint, tab_string, 'interpreting ', this, " as a name other than a 2MASS identifier, but name2mo.pro doesn't know what to do with it yet!"
 			endelse
 		endif
 		if typename(this) eq 'INT' or typename(this) eq 'LONG' or typename(this) eq 'FLOAT' or typename(this) eq 'DOUBLE' then begin
-			mprint, tab_string, 'interpreting ', rw(this), ' as an old-school LSPM number'
+			;mprint, tab_string, 'interpreting ', rw(this), ' as an old-school LSPM number'
 			i_match = where(mo_ensemble.lspmn eq long(this), n_match)
 			if n_match eq 0 then begin
 				mprint, tab_string, error_string, 'but no matching MEarth Objects were found!'
@@ -53,7 +53,7 @@ FUNCTION name2mo, input
 					mo[i] = mo_ensemble[i_match[0]].mo
 				endif else begin
 					mo[i] = mo_ensemble[i_match].mo
-					mprint, tab_string, tab_string, this, ' --> ', mo[i]
+					;mprint, tab_string, tab_string, this, ' --> ', mo[i]
 				endelse
 			endelse
 		endif

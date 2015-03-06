@@ -19,7 +19,9 @@
 ;-
 
 common mearth_tools, display, verbose, done_string, doing_string, skipping_string, error_string, tab_string, tf, possible_years, reduced_dir, working_dir, radii, interactive, yearly_filters, fake_dir, fake_trigger_dir, n_effective_for_rescaling, colorbars, mo_ensemble, username, typical_candidate_filename, fits_suffix, mo_prefix, mo_regex, observatories, procedure_prefix
+common this_star, star_dir, mo_info
 
+star_dir = ''
 procedure_prefix = '[mearth]'
 ; set up the structure of MEarth Objects, which will set their directory structure
 mo_prefix = 'mo'
