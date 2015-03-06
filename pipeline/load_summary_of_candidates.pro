@@ -2,7 +2,8 @@ PRO load_summary_of_candidates, summary_of_candidates
 
 	common mearth_tools
 	common this_star
-
+	procedure_prefix = '[load_summary_of_candidates]'
+	
 	original_star_dir = star_dir
 	f = file_search('mo*/combined/'+typical_candidate_filename)
 
