@@ -135,8 +135,9 @@ def one_star(star, verbose=0):
     fo = open(stardir+'/'+starfile, "wb")
     for f in files:
         fo.write(f +'\n')
+        print '             ' + f
     fo.close()
-    print "Wrote to dir", stardir
+    print "          have been written to dir", stardir
             
 # run for all northern stars 
 def all_north():

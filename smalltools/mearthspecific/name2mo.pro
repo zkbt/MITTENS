@@ -38,7 +38,12 @@ FUNCTION name2mo, input
 				mo[i] = attempted_mo
 				;mprint, tab_string, 'interpreting ', attempted_mo, ' as a valid 2MASS MEarth identifier'
 			endif else begin
-				mprint, tab_string, 'interpreting ', this, " as a name other than a 2MASS identifier, but name2mo.pro doesn't know what to do with it yet!"
+				imatch = where(strmatch(mo_ensemble.bestname, this, /fold_case), nmatch)
+				if nmatch eq 1 then begin
+				  mo[i] = mo_ensemble[imatch].mo
+				endif else begin
+				  mprint, tab_string, 'name2mo.pro could not find a unique match for ', this
+				endelse
 			endelse
 		endif
 		if typename(this) eq 'INT' or typename(this) eq 'LONG' or typename(this) eq 'FLOAT' or typename(this) eq 'DOUBLE' then begin

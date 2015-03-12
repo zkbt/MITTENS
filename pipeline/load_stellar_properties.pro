@@ -101,7 +101,8 @@ PRO load_stellar_properties
 	copy_struct, combined, mo_ensemble
 	mo_ensemble.teff = (mo_ensemble.lum/mo_ensemble.radius^2)^0.25*5780.0
 	mo_ensemble.mo = strip_twomass(mo_ensemble.mo)
-
+	bad = where(mo_ensemble.bestname eq '', nbad)
+	if nbad > 0 then mo_ensemble[bad].bestname = mo_ensemble[bad].mo
 	; save the IDL structure in a central spot
 	save, mo_ensemble, filename='population/mo_ensemble.idl'
 
@@ -122,15 +123,15 @@ PRO load_stellar_properties
 			endif else mprint, skipping_string, "couldn't find stellar parameters for ", this_mo_dir
 		endif
 		; hopefully, this should only be used once, to move files from old "lsNNNN" directories into newer "moNNNNNNN+NNNNN" directories based on 2MASS names
-		lspmn = mo_ensemble[i].lspmn
-		this_ls_dir = 'ls'+string(lspmn, form='(I04)') +'/'
-		if lspmn gt 0 then begin
-			if file_test(this_ls_dir) then begin
-				mprint, doing_string, 'moving all files from ', this_ls_dir, ' to ', this_mo_dir
-				file_move, this_ls_dir+'*', this_mo_dir, /verbose
-				file_delete, this_ls_dir
-			endif else mprint, tab_string, skipping_string, this_ls_dir + "doesn't exist!"
-		endif
+;		lspmn = mo_ensemble[i].lspmn
+;		this_ls_dir = 'ls'+string(lspmn, form='(I04)') +'/'
+;		if lspmn gt 0 then begin
+;			if file_test(this_ls_dir) then begin
+;				mprint, doing_string, 'moving all files from ', this_ls_dir, ' to ', this_mo_dir
+;				file_move, this_ls_dir+'*', this_mo_dir, /verbose
+;				file_delete, this_ls_dir
+;			endif else mprint, tab_string, skipping_string, this_ls_dir + "doesn't exist!"
+;		endif
 	endfor
 	
 ; ;	a test to see how bolometric luminosity estimates are working 

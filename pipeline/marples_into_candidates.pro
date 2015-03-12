@@ -1,5 +1,15 @@
-PRO marples_into_candidates, start=start
+PRO marples_into_candidates, desired_mo, start=start
 	common mearth_tools
+	
+	if keyword_set(desired_mo) then begin
+		;pass the MO through name2mo to make sure it becomes a valid MEarth Object
+		desired_mo = name2mo(desired_mo)
+		for i=0, n_elements(desired_mo)-1 do begin
+		  set_star, desired_mo[i]
+		  call_origami_bot
+		endfor 
+		return
+	endif
 	mprint, /line
 	mprint, tab_string, 'marples_into_candidates.pro is taking the MarPLES located in'
 	mprint, tab_string, tab_string, getenv('MITTENS_DATA')
