@@ -21,7 +21,7 @@ class hemisphere(Talker):
     
   @property
   def filename(self):
-    return mittens_data + self.__class__.__name__ + '_progress.dat'
+    return mittens_data + 'population/'+self.__class__.__name__ + '_progress.dat'
     
   def save(self):
     astropy.io.ascii.write(self.table, self.filename)
@@ -39,20 +39,21 @@ class hemisphere(Talker):
       self.loadmo()
       self.populatemodifiedtimes()
       self.save()
+  
     
   @property
   def lags(self):
+    self.speak('calculating how out-of-date each component of each star is')
     temp = self.table.copy()
+    now = astropy.time.Time.now().unix
     for c in temp.columns:
-      if c == 'mo':
+      if c == 'mo' or c[0] == 'n':
 	continue
       #ok = np.array((temp[c] != None)).nonzero()[0]
       ok = np.arange(len(temp[c]))
       t = astropy.time.Time(temp[c][ok], format='unix')
       lag = (t.now() - t)
-      for i in ok:
-	t = astropy.time.Time(temp[c][i], format='unix')
-	temp[c][i] = (t.now() - t).jd
+      temp[c] = (self.table[c] - now)/24.0/60.0/60.0
       temp[c].format='{0:0.2f}'
     return temp
 
@@ -63,22 +64,28 @@ class hemisphere(Talker):
       star_to_files.one_star(mo)
 
   def populatemodifiedtimes(self):
-    self.check('filenames', 'files.txt')
     self.check('info', 'mo_info.idl')
+    self.check('filenames', 'files.txt')
+    self.check('lightcurves', 'lastloadedfiles.txt')
     self.check('marples', 'combined/box_pdf.idl')
     self.check('periodic', 'combined/phased_candidates.idl')
+ 
  
   
   def check(self,  label, filename ):
     self.speak('checking {0} to see when {1} files were last modified'.format(label, filename))
     
     self.table[label] = astropy.table.MaskedColumn(np.zeros(self.n),mask=np.zeros(self.n).astype(np.bool))
-    
+    count = label == 'filenames' or label == 'lightcurves'
+    if count:
+      self.table['n' + label] =  astropy.table.MaskedColumn(np.zeros(self.n).astype(np.int), mask=np.zeros(self.n).astype(np.bool))
     for i in range(len(self.table)):
       f = mittens_data + 'mo{0}/{1}'.format(self.table['mo'][i], filename)
       try:
 	self.table[label][i] = (astropy.time.Time(os.stat(f).st_mtime, format='unix')).unix
 	#self.speak('{0} {1}'.format(self.table[i]['mo'], self.table[label][i]))s
+	if count:
+	  self.table['n'+label][i] = len(open(f).readlines())
       except OSError:
 	self.table[label].mask[i] == True
 

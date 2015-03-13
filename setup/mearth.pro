@@ -18,7 +18,7 @@
 ;
 ;-
 
-common mearth_tools, display, verbose, done_string, doing_string, skipping_string, error_string, tab_string, tf, possible_years, reduced_dir, working_dir, radii, interactive, yearly_filters, fake_dir, fake_trigger_dir, n_effective_for_rescaling, colorbars, mo_ensemble, username, typical_candidate_filename, fits_suffix, mo_prefix, mo_regex, observatories, procedure_prefix
+common mearth_tools, display, verbose, done_string, doing_string, skipping_string, error_string, tab_string, tf, possible_years, reduced_dir, working_dir, radii, interactive, yearly_filters, fake_dir, fake_trigger_dir, n_effective_for_rescaling, colorbars, mo_ensemble, username, typical_candidate_filename, fits_suffix, mo_prefix, mo_regex, observatories, procedure_prefix, progress
 common this_star, star_dir, mo_info
 
 star_dir = ''
@@ -26,7 +26,6 @@ procedure_prefix = '[mearth]'
 ; set up the structure of MEarth Objects, which will set their directory structure
 mo_prefix = 'mo'
 mo_regex = '[0-9]+[+-][0-9]+'
-
 
 ; define data directories in which to look for data for each year
 possible_years = [2008,2010,2013, 2013] ; based on the year in which a season starts (= August/September/October); will need to modify for South
@@ -56,8 +55,12 @@ typical_candidate_filename = 'phased_candidates.idl'
 ; move to working directory
 cd, working_dir
 
+
 if file_test('population/mo_ensemble.idl') eq 0 then load_stellar_properties
 if n_elements(mo_ensemble) eq 0 then restore, 'population/mo_ensemble.idl'
+
+; this relies on progress.py having been run recently
+progress = loadprogress()
 
 ; initialize parameters
 ;radii = ;[4.0, 3.0, 2.5, 2.2, 2.0;, 1.7, 1.5]

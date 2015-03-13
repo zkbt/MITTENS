@@ -42,12 +42,13 @@ PRO get_jonathans_lightcurves, filename, remake=remake
 		; if successfully read in, then continue to generate an IDL lightcurve		
 		if status eq 0 then begin
 			mprint, doing_string, ' extracting all M dwarf light curves from ', filename
-			jmi_file_prefix = strmid(filename, 0, strpos(filename, fits_suffix))
+			jmi_file_prefix = strmid(filename, 0, strpos(filename, '_daily.fits'))
+			if jmi_file_prefix eq '' then jmi_file_prefix = strmid(filename, 0, strpos(filename, '_lc.fits'))
 			start = stregex(jmi_file_prefix, '(lspm[0-9]+)+', length=length)
 			lspm_section = strmid(jmi_file_prefix, start, length)
 			anything_left = strmid(jmi_file_prefix, start + length, 1000)
 			tel = uint(stregex(stregex(filename, 'tel[0-9]+', /extract), '[0-9]+', /extract))
-		
+			if tel eq 0 then stop
 			if anything_left ne '' then suffix = anything_left else suffix = '' 
 	
 			if n_elements(fits_lc[0].flux) gt 1 then begin
@@ -134,11 +135,13 @@ PRO get_jonathans_lightcurves, filename, remake=remake
 		
 					; throw out the tiny bit with bad old filters at the star of the 2010-2011 season
 					if strmatch(jmi_file_prefix, '*2008-2010-iz*') then year = year[where(year ne 2010)]
-
+					if (tel ge 11) and (tel le 18) then year = year[0]
+					
 					for i_year=0, n_elements(year)-1 do begin
 						
 						ext_var = big_ext_var
 						star_dir = make_star_dir(mo_string, year[i_year], tel)
+						if ((tel ge 1) and (tel le 18)) eq 0 then stop
 						if file_test(star_dir) eq 0 then file_mkdir, star_dir
 						
 						; to make it easier to look things up later....
