@@ -42,7 +42,7 @@ For the most part, MITTENS is just big group of IDL *.pro files that can be used
 Make sure you have the following Python dependencies:
 
 * `astropy` (0.4.4), can install with `pip`
-* `pg` install with `python setup.py install` from MITTENS/include/PyGreSQL-3.8.1
+* `pg`, can install with `python setup.py install` from MITTENS/include/PyGreSQL-3.8.1
 
 
 ### TESTING THE INSTALLATION
