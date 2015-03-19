@@ -1,6 +1,6 @@
 ;+
 ; NAME:
-;	xinspect
+;	inspect
 ;
 ; PURPOSE:
 ;	This routine is a template for widgets that use the XManager.  Use
@@ -8,28 +8,28 @@
 ;	"scratch".
 ;
 ;	This documentation should be altered to reflect the actual 
-;	implementation of the xinspect widget.  Use a global search and 
-;	replace to replace the word "xinspect" with the name of the routine 
+;	implementation of the inspect widget.  Use a global search and 
+;	replace to replace the word "inspect" with the name of the routine 
 ;	you would like to use. 
 ;
 ;	All the comments with a "***" in front of them should be read, decided 
-;	upon and removed for your final copy of the xinspect widget
+;	upon and removed for your final copy of the inspect widget
 ;	routine.
 ;
 ; CATEGORY:
 ;	Widgets.
 ;
 ; CALLING SEQUENCE:
-;	xinspect
+;	inspect
 ;
 ; INPUTS:
 ;
 ; OPTIONAL INPUT PARAMETERS:
 ;
 ; KEYWORD PARAMETERS:
-;	GROUP:	The widget ID of the widget that calls xinspect.  When this
+;	GROUP:	The widget ID of the widget that calls inspect.  When this
 ;		ID is specified, the death of the caller results in the death
-;		of xinspect.
+;		of inspect.
 ;
 ;	BLOCK:  Set this keyword to have XMANAGER block when this
 ;		application is registered.  By default the Xmanager
@@ -62,17 +62,17 @@ PRO zkb_kill_widget, widget_name
 stop
 END
 ;------------------------------------------------------------------------------
-;	procedure xinspect_ev
+;	procedure inspect_ev
 ;------------------------------------------------------------------------------
 ; This procedure processes the events being sent by the XManager.
-;*** This is the event handling routine for the xinspect widget.  It is 
+;*** This is the event handling routine for the inspect widget.  It is 
 ;*** responsible for dealing with the widget events such as mouse clicks on
-;*** buttons in the xinspect widget.  The tool menu choice routines are 
-;*** already installed.  This routine is required for the xinspect widget to
+;*** buttons in the inspect widget.  The tool menu choice routines are 
+;*** already installed.  This routine is required for the inspect widget to
 ;*** work properly with the XManager.
 ;------------------------------------------------------------------------------
-PRO xinspect_ev, event
-common xinspect_common, child_ids
+PRO inspect_ev, event
+common inspect_common, child_ids
 COMPILE_OPT hidden					; Don't appear in HELP
 							; output unless HIDDEN
 							; keyword is specified.
@@ -97,7 +97,7 @@ CASE thebuttonclicked OF
 
   "orb. phase":	begin
 				if event.select eq 1 then begin
-					xlc_orbit, id=xlc_orbitbase, group=child_ids.xinspect
+					xlc_orbit, id=xlc_orbitbase, group=child_ids.inspect
 					child_ids.xlc_orbit = xlc_orbitbase
 				endif
 				if event.select eq 0 then begin
@@ -107,7 +107,7 @@ CASE thebuttonclicked OF
 
   "time":	begin
 				if event.select eq 1 then begin
-					xlc_time, id=xlc_timebase, group=child_ids.xinspect
+					xlc_time, id=xlc_timebase, group=child_ids.inspect
 					child_ids.xlc_time = xlc_timebase
 				endif
 				if event.select eq 0 then begin
@@ -117,7 +117,7 @@ CASE thebuttonclicked OF
 
   "rot. phase":	begin
 				if event.select eq 1 then begin
-					xlc_rotation, id=xlc_rotationbase, group=child_ids.xinspect
+					xlc_rotation, id=xlc_rotationbase, group=child_ids.inspect
 					child_ids.xlc_rotation = xlc_rotationbase
 				endif
 				if event.select eq 0 then begin
@@ -143,28 +143,28 @@ CASE thebuttonclicked OF
 ENDCASE
 
 
-END ;============= end of xinspect event handling routine task =============
+END ;============= end of inspect event handling routine task =============
 
 
 
 ;------------------------------------------------------------------------------
-;	procedure xinspect
+;	procedure inspect
 ;------------------------------------------------------------------------------
 ; This routine creates the widget and registers it with the XManager.
-;*** This is the main routine for the xinspect widget.  It creates the
+;*** This is the main routine for the inspect widget.  It creates the
 ;*** widget and then registers it with the XManager which keeps track of the 
 ;*** currently active widgets.  
 ;------------------------------------------------------------------------------
-PRO xinspect, GROUP = GROUP, BLOCK=block
-common xinspect_common
+PRO inspect, GROUP = GROUP, BLOCK=block
+common inspect_common
 
-;*** If xinspect can have multiple copies running, then delete the following
+;*** If inspect can have multiple copies running, then delete the following
 ;*** line and the comment for it.  Often a common block is used that prohibits
 ;*** multiple copies of the widget application from running.  In this case, 
 ;*** leave the following line intact.
 
-IF(XRegistered("xinspect") NE 0) THEN RETURN		;only one instance of
-							;the xinspect widget
+IF(XRegistered("inspect") NE 0) THEN RETURN		;only one instance of
+							;the inspect widget
 							;is allowed.  If it is
 							;already managed, do
 							;nothing and return
@@ -174,64 +174,64 @@ IF N_ELEMENTS(block) EQ 0 THEN block=0
 ;*** Next the main base is created.  You will probably want to specify either
 ;*** a ROW or COLUMN base with keywords to arrange the widget visually.
 
-xinspectbase = WIDGET_BASE(TITLE = "xinspect", /column)	;create the main base
+inspectbase = WIDGET_BASE(TITLE = "inspect", /column)	;create the main base
 
 ;*** Here some default controls are built in a menu.  The descriptions of these
-;*** procedures can be found in the xinspect_ev routine above.  If you would
+;*** procedures can be found in the inspect_ev routine above.  If you would
 ;*** like to add other routines or remove any of these, remove them both below
-;*** and in the xinspect_ev routine.
+;*** and in the inspect_ev routine.
 
-outputs = widget_base(xinspectbase, row=1, /frame)
+outputs = widget_base(inspectbase, row=1, /frame)
 eps = widget_button(outputs, uvalue='eps', value='save to EPS')
 png = widget_button(outputs, uvalue='png', value='save to PNG')
 blog = widget_button(outputs, uvalue='blog', value='post to blog')
 
-thingstoplot = widget_base(xinspectbase, row=2, /frame, /nonexclusive)
+thingstoplot = widget_base(inspectbase, row=2, /frame, /nonexclusive)
 thingstoplot_values = ['event', 'orb. phase', 'rot. phase', 'time', '#', 'D/sigma', 'correlations', 'periodogram', 'MarPLE']
 thingstoplot_setvalues = [0,1,0,0,0,0,0,0,0]
-thingstoplot = cw_bgroup(xinspectbase, thingstoplot_values, /COLUMN, /NONEXCLUSIVE, LABEL_TOP='Plots to Show', /FRAME, uvalue=thingstoplot_values, uname='thingstoplot', set_val=thingstoplot_setvalues)
+thingstoplot = cw_bgroup(inspectbase, thingstoplot_values, /COLUMN, /NONEXCLUSIVE, LABEL_TOP='Plots to Show', /FRAME, uvalue=thingstoplot_values, uname='thingstoplot', set_val=thingstoplot_setvalues)
 
 
 
-; opends9 = widget_base(xinspectbase, /column)
+; opends9 = widget_base(inspectbase, /column)
 ; imagepernight = widget_button(opends9, uvalue='ds9 [1 image]/night', value='ds9 [1 image]/night')
 ; imagesintransit = widget_button(opends9, uvalue='ds9 in-transit images', value='ds9 in-transit images')
 ; imagesneartransit = widget_button(opends9, uvalue='ds9 near-transit images', value='ds9 near-transit images')
 
 
 opends9_values = ['[1 image]/night', 'in-transit', 'near-transit']
-opends9 = cw_bgroup(xinspectbase, opends9_values, /COLUMN, LABEL_TOP='Open Images in ds9?', /FRAME, uvalue=opends9_values)
+opends9 = cw_bgroup(inspectbase, opends9_values, /COLUMN, LABEL_TOP='Open Images in ds9?', /FRAME, uvalue=opends9_values)
 
-done = WIDGET_BUTTON(xinspectbase, value='Done', uvalue='Done') 
+done = WIDGET_BUTTON(inspectbase, value='Done', uvalue='Done') 
 
-;draw = WIDGET_DRAW(xinspectbase, XSIZE = 256, YSIZE = 256) 
+;draw = WIDGET_DRAW(inspectbase, XSIZE = 256, YSIZE = 256) 
  
-xinspect_variables = {xinspectbase:xinspectbase}
+inspect_variables = {inspectbase:inspectbase}
 
 
 ;*** Typically, any widgets you need for your application are created here.
-;*** Create them and use xinspectbase as their base.  They will be realized
+;*** Create them and use inspectbase as their base.  They will be realized
 ;*** (brought into existence) when the following line is executed.
 
-WIDGET_CONTROL, xinspectbase, /REALIZE			;create the widgets
+WIDGET_CONTROL, inspectbase, /REALIZE			;create the widgets
 							;that are defined
 
 ;orb. phase
 
-; ;Obtain the window index. if thingstoplot_setvalues[1] then xlc_orbit, group=child_ids.xinspect
+; ;Obtain the window index. if thingstoplot_setvalues[1] then xlc_orbit, group=child_ids.inspect
 
 ; WIDGET_CONTROL, draw, GET_VALUE = index 
 ;  
 ; ;Set the new widget to be the current graphics window 
 ; WSET, index 
 
-child_ids = {xlc_orbit:0, xlc_time:0, xlc_rotation:0, xinspect:xinspectbase}
+child_ids = {xlc_orbit:0, xlc_time:0, xlc_rotation:0, inspect:inspectbase}
 
 
 
 
-XManager, "xinspect", xinspectbase, $			;register the widgets
-		EVENT_HANDLER = "xinspect_ev", $	;with the XManager
+XManager, "inspect", inspectbase, $			;register the widgets
+		EVENT_HANDLER = "inspect_ev", $	;with the XManager
 		GROUP_LEADER = GROUP, $			;and pass through the
 		NO_BLOCK=(NOT(FLOAT(block)))		;group leader if this
 							;routine is to be 
@@ -239,16 +239,16 @@ XManager, "xinspect", xinspectbase, $			;register the widgets
 							;leader.
 
 if thingstoplot_setvalues[1] then begin
-	xlc_orbit, id=xlc_orbitbase, group=child_ids.xinspect
+	xlc_orbit, id=xlc_orbitbase, group=child_ids.inspect
 	child_ids.xlc_orbit = xlc_orbitbase
 endif
 if thingstoplot_setvalues[2] then begin
-	xlc_rotation, id=xlc_rotationbase, group=child_ids.xinspect
+	xlc_rotation, id=xlc_rotationbase, group=child_ids.inspect
 	child_ids.xlc_rotation = xlc_rotationbase
 endif
 if thingstoplot_setvalues[3] then begin
-	xlc_time, id=xlc_timebase, group=child_ids.xinspect
+	xlc_time, id=xlc_timebase, group=child_ids.inspect
 	child_ids.xlc_time = xlc_timebase
 endif
 
-END ;==================== end of xinspect main routine =======================
+END ;==================== end of inspect main routine =======================

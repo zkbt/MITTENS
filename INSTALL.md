@@ -55,4 +55,4 @@ Here are two quick tests of the installation:
 
 * 2) type "res=pgsql_query('select 1')" from the IDL prompt. If you have everything set up correctly with the IDL SQL interface, this should work.
 
-* 3) type "xinspect" from the IDL prompt. This should open the main exploratory tool! By default, xinspect will open on a random star. If you're interested in starting up on some in particular, for example one with LSPM# 1725, then run it as "xinspect, 1725".
+* 3) type "inspect" from the IDL prompt. This should open the main exploratory tool! By default, inspect will open on a random star. If you're interested in starting up on some in particular, for example one with LSPM# 1725, then run it as "inspect, 1725".

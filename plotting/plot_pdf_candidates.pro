@@ -127,7 +127,7 @@ set_star, /random, n=50
 				star_dir = c[i_selected].star_dir
 				mo_info = get_mo_info(c[i_selected].lspm)
 				explore_pdf, diag=diag, 0.01, octopus=octopus,vartools=vartools, /hide
-				xinspect
+				inspect
 				return
 				!mouse.button = 0
 				xplot, xsize=750, ysize=350, /top, xpos=0

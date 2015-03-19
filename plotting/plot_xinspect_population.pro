@@ -1,4 +1,4 @@
-PRO plot_xinspect_population, input_mo, counter=counter, summary_of_candidates=summary_of_candidates, interesting_marples=interesting_marples, ensemble_observation_summary=ensemble_observation_summary, stellar_sample=stellar_sample, coordinate_conversions=coordinate_conversions, data_click=data_click, selected_object=selected_object, xrange=xrange, yrange=yrange, filtering_parameters=filtering_parameters
+PRO plot_inspect_population, input_mo, counter=counter, summary_of_candidates=summary_of_candidates, interesting_marples=interesting_marples, ensemble_observation_summary=ensemble_observation_summary, stellar_sample=stellar_sample, coordinate_conversions=coordinate_conversions, data_click=data_click, selected_object=selected_object, xrange=xrange, yrange=yrange, filtering_parameters=filtering_parameters
 
 	common mearth_tools
 	cleanplot
@@ -218,7 +218,7 @@ PRO plot_xinspect_population, input_mo, counter=counter, summary_of_candidates=s
 		xyouts, x[i_inplot], y[i_inplot], rw(mo2name(mo_list[i_inplot]))+'!C ', align=0.5, noclip=0, color=127
 	endif
 
-	; if plot_xinspect_population has been supplied with a data_click structure, select the closest point in this plot
+	; if plot_inspect_population has been supplied with a data_click structure, select the closest point in this plot
 	if n_elements(data_click) gt 0 then begin
 		normal_points = convert_coord(x, y, /data, /to_normal)
 		normal_x = reform(normal_points[0,*])

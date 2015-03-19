@@ -30,7 +30,7 @@ Here are two quick tests of the installation:
 
 1) type "mittens" from the UNIX prompt. If the code is available, this should open an IDL prompt and run some setup scripts (if you're running it for the first time, it will create a new set of IDL color tables in your home directory). If it fails or if files keep streaming by, it's broken.
 2) type "res=pgsql_query('select 1')" from the IDL prompt. If you have everything set up correctly with the IDL SQL interface, this should work.
-3) type "xinspect" from the IDL prompt. This should open the main exploratory tool!
+3) type "inspect" from the IDL prompt. This should open the main exploratory tool!
 
 ====================================
 SCHEDULE FOR RUNNING VARIOUS MITTENS
@@ -66,7 +66,7 @@ marples_into_candidates
 
 [weekly]
 
-Once the raw data have been processed through into MarPLEs and candidates, run the following commands to summarize the results. They will save files that will be read in by xinspect for navigating throughout the sample.
+Once the raw data have been processed through into MarPLEs and candidates, run the following commands to summarize the results. They will save files that will be read in by inspect for navigating throughout the sample.
 
 load_summary_of_observations
 load_summary_of_marples

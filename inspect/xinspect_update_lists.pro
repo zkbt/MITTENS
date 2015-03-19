@@ -13,10 +13,10 @@ FUNCTION stringify_box, box
 END
 
 
-PRO xinspect_update_lists, input_object=input_object
+PRO inspect_update_lists, input_object=input_object
 
 	; load common blocks
-	common xinspect_common
+	common inspect_common
 	common this_star
 	common mearth_tools
 
@@ -88,12 +88,12 @@ PRO xinspect_update_lists, input_object=input_object
 	n_boxes = n_elements(whatarewelookingat.best_boxes)
 
 	; update the items in the selectable list of candidates
-	widget_control, xinspect_camera.candidates_list, set_value = stringify_candidate(whatarewelookingat.best_candidates)
-	widget_control, xinspect_camera.candidates_list, set_uvalue = 'phased'+rw(indgen(n_candidates))
+	widget_control, inspect_camera.candidates_list, set_value = stringify_candidate(whatarewelookingat.best_candidates)
+	widget_control, inspect_camera.candidates_list, set_uvalue = 'phased'+rw(indgen(n_candidates))
 
 	; update the items in the selectable list of boxes
-	widget_control, xinspect_camera.boxes_list, set_value = stringify_box(whatarewelookingat.best_boxes)
-	widget_control, xinspect_camera.boxes_list, set_uvalue = 'single'+rw(indgen(n_boxes))
+	widget_control, inspect_camera.boxes_list, set_value = stringify_box(whatarewelookingat.best_boxes)
+	widget_control, inspect_camera.boxes_list, set_uvalue = 'single'+rw(indgen(n_boxes))
 
 
 	; if an object was entered as an input (e.g. something that was clicked on in the plot window), select that object 
@@ -106,8 +106,8 @@ PRO xinspect_update_lists, input_object=input_object
 			if n_match gt 0 then begin
 				i_match = i_match[0]
 				; make sure that candidate is selected in the list, and unselect everything from the boxes list
-				widget_control, xinspect_camera.candidates_list, set_list_select = i_match
-				widget_control, xinspect_camera.boxes_list, set_list_select = -1
+				widget_control, inspect_camera.candidates_list, set_list_select = i_match
+				widget_control, inspect_camera.boxes_list, set_list_select = -1
 				whatarewelookingat.mode = 'candidate'
 				whatarewelookingat.i_candidate = i_match
 				process_with_candidate, whatarewelookingat.best_candidates[whatarewelookingat.i_candidate]
@@ -117,8 +117,8 @@ PRO xinspect_update_lists, input_object=input_object
 			i_match = where(whatarewelookingat.best_boxes.hjd eq input_object.marple.hjd and whatarewelookingat.best_boxes.duration eq input_object.marple.duration, n_match)
 			if n_match gt 0 then begin
 				i_match = i_match[0]
-				widget_control, xinspect_camera.candidates_list, set_list_select = -1
-				widget_control, xinspect_camera.boxes_list, set_list_select = i_match
+				widget_control, inspect_camera.candidates_list, set_list_select = -1
+				widget_control, inspect_camera.boxes_list, set_list_select = i_match
 				whatarewelookingat.mode = 'marple'
 				whatarewelookingat.i_box = i_match			
 				process_with_candidate, whatarewelookingat.best_boxes[whatarewelookingat.i_box]
@@ -127,15 +127,15 @@ PRO xinspect_update_lists, input_object=input_object
 		if tag_exist(input_object, 'STAR') then begin
 			if best_candidates[0].period lt 1e3 then begin
 				i_match = 0
-				widget_control, xinspect_camera.candidates_list, set_list_select = i_match
-				widget_control, xinspect_camera.boxes_list, set_list_select = -1
+				widget_control, inspect_camera.candidates_list, set_list_select = i_match
+				widget_control, inspect_camera.boxes_list, set_list_select = -1
 				whatarewelookingat.mode = 'candidate'
 				whatarewelookingat.i_candidate = i_match
 				process_with_candidate, whatarewelookingat.best_candidates[whatarewelookingat.i_candidate]
 			endif else if tag_exist(best_boxes[0], 'HJD') then begin
 				i_match = 0
-				widget_control, xinspect_camera.candidates_list, set_list_select = -1
-				widget_control, xinspect_camera.boxes_list, set_list_select = i_match
+				widget_control, inspect_camera.candidates_list, set_list_select = -1
+				widget_control, inspect_camera.boxes_list, set_list_select = i_match
 				whatarewelookingat.mode = 'marple'
 				whatarewelookingat.i_box = i_match			
 				process_with_candidate, whatarewelookingat.best_boxes[whatarewelookingat.i_box]
