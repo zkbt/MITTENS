@@ -25,7 +25,8 @@ class hemisphere(Talker):
     
   def save(self):
     astropy.io.ascii.write(self.table, self.filename)
-    self.speak('saved to {0}'.format(self.filename))
+    astropy.io.ascii.write(self.lags, self.filename.replace('progress', 'lags'))
+    self.speak('saved to {0} and {1}'.format(self.filename, self.filename.replace('progress', 'lags')))
     
   def load(self, remake=False):
     try:
@@ -53,9 +54,9 @@ class hemisphere(Talker):
       ok = np.arange(len(temp[c]))
       t = astropy.time.Time(temp[c][ok], format='unix')
       lag = (t.now() - t)
-      temp[c] = (self.table[c] - now)/24.0/60.0/60.0
+      temp[c] = (now - self.table[c])/24.0/60.0/60.0
       temp[c].format='{0:0.2f}'
-    return temp
+    return temp[temp['nfilenames'] > 0]
 
   def populatefilenames(self):
     self.speak("looping through all northern stars, populating their directories with filename lists")
