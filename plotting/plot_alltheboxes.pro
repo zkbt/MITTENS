@@ -1,12 +1,12 @@
 PRO plot_alltheboxes, ensemble, eps=eps
 	common mearth_tools
-	
+
 	if file_test('alltheboxes.idl') eq 0 then begin
 		for i=0, n_elements(possible_years) -1 do if n_elements(ensemble) eq 0 then ensemble = create_struct('YE'+string(format='(I02)', possible_years[i] mod 100), load_ensemble_boxes(year=possible_years[i])) else ensemble = create_struct(ensemble, 'YE'+string(format='(I02)', possible_years[i] mod 100), load_ensemble_boxes(year=possible_years[i]))
 		save, filename='alltheboxes.idl', ensemble
 	endif else restore, 'alltheboxes.idl'
-	if ~keyword_set(ensemble) then ensemble = load_ensemble_boxes() 
-	cleanplot
+	if ~keyword_set(ensemble) then ensemble = load_ensemble_boxes()
+	cleanplot, /silent
 	erase
 
 	!p.charsize=0.8
@@ -34,11 +34,11 @@ PRO plot_alltheboxes, ensemble, eps=eps
 			loadct, 0, /silent
 			if i eq (n_durations-1) then xtitle =goodtex('D/\sigma') else xtitle = ' '
 			if i eq 4 then ytitle ="# of epochs" else ytitle = ' '
-			if i eq 0 then title = string(possible_years[j], form='(I4)') else title = ' ' 
+			if i eq 0 then title = string(possible_years[j], form='(I4)') else title = ' '
 			plot, [0], xtitle=xtitle, ytitle=ytitle, title=title, /ylog, ys=3, xs=3, xr=[-1,1]*14, yr=[0.9, 1e6]
 			plothist, ensemble.(j)[i_all].depth[i]/ensemble.(j)[i_all].depth_uncertainty[i], bin=0.1, /overplot, color=175
 			plothist, ensemble.(j)[i_notflare].depth[i]/ensemble.(j)[i_notflare].depth_uncertainty[i], bin=0.1, /overplot
-		
+
 			loadct, 39, /sil
 	;		plothist, ensemble[i_golden].depth[i]/ensemble[i_golden].depth_uncertainty[i], bin=0.1, /overplot, color=70
 			oplot_gaussian, ensemble.(j)[i_notflare].depth[i]/ensemble.(j)[i_notflare].depth_uncertainty[i], bin=0.1, pdf=[0,1], color=250

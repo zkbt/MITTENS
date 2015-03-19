@@ -344,7 +344,7 @@ PRO inspect, input_mo, GROUP = GROUP, BLOCK=block
 	common this_star
 
 	; tidy up plotting
-	cleanplot
+	cleanplot, /silent
 	device, decomposed=0
 
 	; only allow one instance of inspect to be running at time

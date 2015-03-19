@@ -11,14 +11,14 @@ FUNCTION pdf_to_lc, candidate, vartools=vartools
 		restore, star_dir + 'candidates_pdf.idl'
 		print_struct, best_candidates
 		if not keyword_set(which) then which = question(/number, /int, 'which candidate would you like to explore?')
-		candidate = best_candidates[which]	
+		candidate = best_candidates[which]
 	endif
 
 	other_tel =  ~strmatch(star_dir, '*te*')
 	; load up (this season of) this star
 	restore, star_dir + 'box_pdf.idl'
 	restore, star_dir + 'inflated_lc.idl'
-	
+
 
 	; create decorrelation/variability templates
 	;templates = generate_templates()
@@ -35,12 +35,12 @@ FUNCTION pdf_to_lc, candidate, vartools=vartools
 	uncertainty_overall_model = fltarr(n_elements(inflated_lc))
 	if ~other_tel then nightly_fits = replicate(spliced_clipped_season_fit[0], n_elements(spliced_clipped_season_fit), n_elements(nothings))
 
-	if ~other_tel then begin	
+	if ~other_tel then begin
 		restore, star_dir + 'flares_pdf.idl'
 
 		; mask out points that have been idenified as being on flaring nights
 		if i_onflarenight[0] ge 0 then inflated_lc[i_onflarenight].okay = 0
-	endif	
+	endif
 	; find the appropriate duration bin to match the candidate
 	duration_bin = median(boxes[0].duration[1:*]  - boxes[0].duration)
 	i_duration = value_locate(boxes[0].duration-duration_bin/2, candidate.duration)
@@ -48,7 +48,7 @@ FUNCTION pdf_to_lc, candidate, vartools=vartools
 	i_interesting = where(boxes.n[i_duration] gt 0)
 	; find the in-transit boxes (for this candidate)
 
-	pad = long((max(boxes.hjd) - min(boxes.hjd))/candidate.period)+1 > long((max(candidate.hjd0) - min(boxes.hjd))/candidate.period)+1 > long((max(candidate.hjd0) - min(candidate.hjd0))/candidate.period)+1 
+	pad = long((max(boxes.hjd) - min(boxes.hjd))/candidate.period)+1 > long((max(candidate.hjd0) - min(boxes.hjd))/candidate.period)+1 > long((max(candidate.hjd0) - min(candidate.hjd0))/candidate.period)+1
 
 	i_interestingintransit = where_intransit(boxes[i_interesting], candidate, i_oot=i_oot, /box, n_intransit, pad=pad);buffer=-candidate.duration/4
 
@@ -65,11 +65,11 @@ FUNCTION pdf_to_lc, candidate, vartools=vartools
 		h = histogram(orbit_number[i_intransit], reverse_indices=ri)
 		ri_firsts = ri[uniq(ri[0:n_elements(h)-1])]
 		uniq_intransit =(ri[ri_firsts]); + ri[ri_firsts])/2; ri[((ri_firsts +ri_lasts)/2.)]
-		print, star_dir
+		mprint, 'pulling data near each individual transit'
 		event_hjds = boxes[i_intransit[uniq_intransit]].hjd
-		for i=0, n_elements(event_hjds)-1 do begin
-			print, 'HJD ' + string(event_hjds[i], format='(F9.3)') + ' = ' + rw(string(date_conv(event_hjds[i]+2400000.5d, 'R'))) + ' UT'
-		endfor
+		;for i=0, n_elements(event_hjds)-1 do begin
+		;	print, 'HJD ' + string(event_hjds[i], format='(F9.3)') + ' = ' + rw(string(date_conv(event_hjds[i]+2400000.5d, 'R'))) + ' UT'
+		;endfor
 
 		; fit transit nights
 		for i=0, n_elements(uniq_intransit)-1 do begin
@@ -119,7 +119,7 @@ FUNCTION pdf_to_lc, candidate, vartools=vartools
 ;	loadct, 39
 ;	plot, inflated_lc.flux
 ;	oplot, color=150, systematics_model+variability_model
-	
+
 	variability_lc.flux = inflated_lc.flux - systematics_model
 	cleaned_lc.flux = variability_lc.flux - variability_model
 ; 	restore, star_dir + 'flares_pdf.idl'
@@ -130,7 +130,7 @@ FUNCTION pdf_to_lc, candidate, vartools=vartools
 		restore, star_dir + 'roughly_cleaned_toward_flat_lc.idl'
 		cleaned_lc = roughly_cleaned_lc
 		cleaned_lc.flux = median_filter(filtering_time = 3.0, cleaned_lc.hjd, cleaned_lc.flux)
-	endif	
+	endif
 	save, filename=star_dir + 'cleaned_lc.idl', cleaned_lc, candidate, in_an_intransit_box
 	save, filename=star_dir + 'variability_lc.idl', variability_lc, candidate, uncertainty_variability_model, uncertainty_overall_model
 	save, filename=star_dir + 'nightly_fits.idl', nightly_fits, nothings
@@ -143,7 +143,7 @@ END
 ; 	; find in-transit light curve points
 ; 	pad = long((max(boxes.hjd) - min(boxes.hjd))/candidate.period)+1
 ; 	duration_bin = median(boxes[0].duration[1:*]  - boxes[0].duration)
-; 	i_duration = value_locate(boxes[0].duration-duration_bin/2, candidate.duration)	
+; 	i_duration = value_locate(boxes[0].duration-duration_bin/2, candidate.duration)
 ;  	nights = round(boxes.hjd -timezone)
 ; 	i_interesting = where(boxes.n[i_duration] gt 0, n_interesting)
 ; 	i_intransit = i_interesting[where_intransit(boxes[i_interesting], candidate, n_it, buffer=-candidate.duration/4)]
@@ -163,5 +163,5 @@ END
 ; 		temp = boxes[i_intransit[uniq_intransit[i]]]
 ; 		fit = spliced_clipped_season_fit
 ; 		temp = fit_box(inflated_lc, templates, fit, priors, temp);, /display )
-; 
+;
 ; 	endfor
