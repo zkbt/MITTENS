@@ -286,7 +286,13 @@ PRO get_jonathans_lightcurves, filename, remake=remake
 							endif
 						endif else mprint, '         lightcurve already made, not remaking'
 						all_files = file_search(star_dir + '*')
-						file_chmod, /u_read, /u_write, /u_execute, /g_read, /g_write, /g_execute, all_files
+						catch, error_status
+						if error_status ne 0 then begin
+						  mprint, "   couldn't modify the file permissions"
+						endif else begin
+						  file_chmod, /u_read, /u_write, /u_execute, /g_read, /g_write, /g_execute, all_files
+						  catch, /cancel
+						endelse
 					endfor
 				endfor
 			endif

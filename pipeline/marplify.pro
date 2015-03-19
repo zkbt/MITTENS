@@ -59,7 +59,7 @@ PRO marplify, input_mo, old=old, remake=remake, fake=fake, nofold=nofold, bulldo
 			if mo[i] eq '' then stop
 			; switch into this star
 			set_star, mo[i],  ye[i], te[i]
-			
+			if file_test(mo_dir() + 'mo_info.idl') eq 0 then continue
 			thesubdirectoryneedsremaking = file_test(star_dir() + 'needtomakemarple') 
 			thecomboneedsremaking =  file_test(mo_dir() + 'combined/' + 'needtomakemarple') 
 			process_staryete, nofold=nofold, remake=keyword_set(remake) or thesubdirectoryneedsremaking or thecomboneedsremaking, bulldoze=bulldoze
