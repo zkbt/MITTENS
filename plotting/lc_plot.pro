@@ -10,43 +10,43 @@ FUNCTION trimlongdate, axis, index, value, level
 		return, str
 	endif
 	return, label_date(Axis, Index, Value, level)
-END	
+END
 
 
 PRO lc_plot, time=time, night=night, transit=transit, eps=eps, phased=phased, candidate=candidate, fixed=fixed, wtitle=wtitle, lcs=lcs, sin=sin, number=transit_number, diagnosis=diagnosis, comparisons=comparisons, xrange=xrange, pdf=pdf, no_basic=no_basic, no_variability=no_variability, no_cleaned=no_cleaned, box=box, xmargin=xmargin, ymargin=ymargin, censorship=censorship, top=top, png=png, event=event, anonymous=anonymous, externalformatting=externalformatting, charsize=charsize, noleft=noleft, noright=noright, symsize=symsize, replacementtitle=replacementtitle, addspace=addspace, noxtitle=noxtitle, offset=offset, fake=fake, n_durations=n_durations, zoom=zoom, shift=shift, scale=scale, binned=binned, n_bins=n_bins, xpos=xpos, ypos=ypos, hatlen=hatlen, label=label, no_model=no_model, no_raw=no_raw, no_outliers=no_outliers, no_intransit=no_intransit, coordinate_conversions=coordinate_conversions, failed=failed, select_xrange=select_xrange, select_yrange=select_yrange, select_which=select_which, selected_times=selected_times, perform_censoring=perform_censoring
 
 ;+
 ; NAME:
-;    
+;
 ;	lc_plot
-; 
+;
 ; PURPOSE:
-; 
+;
 ;	a plotting engine, to load up a MEarth light curve, and plot it with lots of different options
-; 
+;
 ; CALLING SEQUENCE:
-; 
+;
 ;	set_star, 1186, /comb
 ;	plot_lc, no_outliers=no_outliers, [many options]
-; 
+;
 ; INPUTS:
-; 
+;
 ; KEYWORD PARAMETERS:
-; 
-;	
-; 
+;
+;
+;
 ; OUTPUTS:
-; 
-;	
-; 
+;
+;
+;
 ; RESTRICTIONS:
-; 
-;	
-; 
+;
+;
+;
 ; EXAMPLE:
-; 
-;	
-; 
+;
+;
+;
 ; MODIFICATION HISTORY:
 ;
 ; 	Written by ZKB.
@@ -167,7 +167,7 @@ PRO lc_plot, time=time, night=night, transit=transit, eps=eps, phased=phased, ca
 	endif else begin
 		for i=0, n_lc-1 do begin
 			lcs.(i).x = interpol(indgen(n_elements(lcs.(0))), lcs.(0)[sort(lcs.(0).hjd)].hjd, lcs.(i).hjd)
-			raw_lcs.(i).x = interpol(lcs.(i).x,  lcs.(i)[sort(lcs.(i).hjd)].hjd, raw_lcs.(i).hjd) 
+			raw_lcs.(i).x = interpol(lcs.(i).x,  lcs.(i)[sort(lcs.(i).hjd)].hjd, raw_lcs.(i).hjd)
 			raw_lcs.(i).x = raw_lcs.(i).x > 0
 			raw_lcs.(i).x = raw_lcs.(i).x < (n_elements(lcs.(0))-1)
 		endfor
@@ -176,7 +176,7 @@ PRO lc_plot, time=time, night=night, transit=transit, eps=eps, phased=phased, ca
 		for i=0, n_lc-1 do begin
 			; unbinned light curves
 			pad = long((max(raw_lcs.(i).hjd) - min(raw_lcs.(i).hjd))/candidate.period) + 1
-			if keyword_set(sin) then begin 
+			if keyword_set(sin) then begin
 				phased_time = (raw_lcs.(i).hjd-sin.hjd0)/sin.period + pad + 0.5
 				orbit_number = long(phased_time)
 				if keyword_set(phased) then raw_lcs.(i).x = (phased_time - orbit_number - 0.5)*sin.period*24
@@ -196,14 +196,14 @@ PRO lc_plot, time=time, night=night, transit=transit, eps=eps, phased=phased, ca
 				if keyword_set(phased) then lcs.(i).x = (phased_time - orbit_number - 0.5)*candidate.period*24
 			endelse
 			lcs.(i).intransit = in_an_intransit_box;abs((phased_time - orbit_number - 0.5)*candidate.period) lt candidate.duration/2
-		endfor		
-		transit = {hjd0:0.0, duration:candidate.duration, depth:candidate.depth, depth_uncertainty:candidate.depth_uncertainty}		
+		endfor
+		transit = {hjd0:0.0, duration:candidate.duration, depth:candidate.depth, depth_uncertainty:candidate.depth_uncertainty}
 		xtickunits = ''
 	endif
 	if ~keyword_set(zoom) then zoom = 1.0
 	if ~keyword_set(shift) then shift = 0.0
-	
-	
+
+
 	if keyword_set(box) and keyword_set(event) then begin
 		for i=0, n_lc-1 do begin
 			raw_lcs.(i).x = (raw_lcs.(i).hjd - box.hjd)*24
@@ -211,11 +211,11 @@ PRO lc_plot, time=time, night=night, transit=transit, eps=eps, phased=phased, ca
 		endfor
 		if ~keyword_set(xrange) then xrange = ([-0.5, 0.5] + shift)*transit.duration*10*24 *zoom
 	endif
-	
+
 	; set xrange
 	if keyword_set(xrange) then !x.range = xrange else begin
 		center = mean(range(raw_lcs.(0).x))
-		span = max(raw_lcs.(0).x) - min(raw_lcs.(0).x) 
+		span = max(raw_lcs.(0).x) - min(raw_lcs.(0).x)
 		if ~keyword_set(xrange) then xrange = center + [-1, 1]*0.5*span*zoom
 		if ~keyword_set(n_durations) then n_durations = 5
 		if keyword_set(phased) or keyword_set(event) then begin
@@ -242,12 +242,12 @@ PRO lc_plot, time=time, night=night, transit=transit, eps=eps, phased=phased, ca
 			endelse
 		endif else return
 	endif
- 
+
 
 	if keyword_set(xrange) then !x.range = xrange
 
 	if keyword_set(phased) or keyword_set(box) then begin
-		x_vertices = [min(!x.range), -candidate.duration/2.0*24, -candidate.duration/2.0*24, candidate.duration/2.0*24, candidate.duration/2.0*24, max(!x.range)] 
+		x_vertices = [min(!x.range), -candidate.duration/2.0*24, -candidate.duration/2.0*24, candidate.duration/2.0*24, candidate.duration/2.0*24, max(!x.range)]
 		y_vertices = candidate.depth*[0,0,1,1,0, 0]
 	endif
 
@@ -285,7 +285,7 @@ PRO lc_plot, time=time, night=night, transit=transit, eps=eps, phased=phased, ca
 		raw_ext_var = ext_var
 		restore, star_dir + 'ext_var.idl'
 		diagnosis_tags = ['AIRMASS', 'EXTC', 'RMS', 'SEE', 'ELLIPTICITY', 'SKY', 'COMMON_MODE', 'HUMIDITY', 'SKYTEMP', 'RIGHT_XLC', 'LEFT_XLC', 'RIGHT_YLC', 'LEFT_XLC']
-	
+
 		n_diagnosis = n_elements(diagnosis_tags)
 		ygap=0.004
 	endif else begin
@@ -298,7 +298,7 @@ PRO lc_plot, time=time, night=night, transit=transit, eps=eps, phased=phased, ca
 
 	if keyword_set(comparisons) then begin
 		restore, star_dir + 'comparisons_lc.idl'
-		n_comparisons = n_elements(comparisons_lc[0,*]) 
+		n_comparisons = n_elements(comparisons_lc[0,*])
 		comp_scatters = fltarr(n_comparisons)
 		for i=0, n_comparisons-1 do comp_scatters[i] = stddev(comparisons_lc[*,i].flux)
 		comparisons_lc = comparisons_lc[*,sort(comp_scatters)]
@@ -322,7 +322,7 @@ PRO lc_plot, time=time, night=night, transit=transit, eps=eps, phased=phased, ca
  		if keyword_set(sin) then filename +='_sin'
 		if keyword_set(phased) then filename +='_phased'
 		if keyword_set(binned) then filename +='_binned'
-		if keyword_set(event) then filename += '_' + string(box.hjd, format='(F9.3)') 
+		if keyword_set(event) then filename += '_' + string(box.hjd, format='(F9.3)')
 		if keyword_set(label) then filename += label
 ; 		if keyword_set(transit_number) then filename +='_transit'+strcompress(/remo, transit_number)
 		filename += '.eps'
@@ -359,7 +359,7 @@ PRO lc_plot, time=time, night=night, transit=transit, eps=eps, phased=phased, ca
 			endif
 		endif
 		if ~keyword_set(time) and ~keyword_set(phased) and ~keyword_set(box) then begin
-			wtitle += ' + season in datapoints'	
+			wtitle += ' + season in datapoints'
 		endif
 		if keyword_set(phased) then begin
 			wtitle += ' + phased'
@@ -462,7 +462,7 @@ PRO lc_plot, time=time, night=night, transit=transit, eps=eps, phased=phased, ca
 			!p.title=''
 			!y.title=''
 			!x.tickunits = oldxtickunits
-		
+
 			; plot histograms of the binned diagnostics
 			smultiplot
 			if ~keyword_set(noright) then begin
@@ -499,7 +499,7 @@ PRO lc_plot, time=time, night=night, transit=transit, eps=eps, phased=phased, ca
 ; 			!x.tickunits=''
 ; 			xtickunits = !x.tickunits
 ; 			!p.color = 0
-; 			
+;
 ; 			@psym_circle
 ; 			plot_lc, no_outliers=no_outliers, xaxis=xaxis,xtickunits=xtickunits, lc, symsize=symsize, time=time, /noax
 ; 			if keyword_set(transit) then begin
@@ -509,7 +509,7 @@ PRO lc_plot, time=time, night=night, transit=transit, eps=eps, phased=phased, ca
 ; 			!p.title=''
 ; 			!y.title=''
 ; 			!x.tickunits = oldxtickunits
-; 			
+;
 ; 			smultiplot
 ; 			old_xrange = !x.range
 ; 			bin = (max(!y.range) - min(!y.range))/20.0
@@ -652,12 +652,12 @@ PRO lc_plot, time=time, night=night, transit=transit, eps=eps, phased=phased, ca
 				endif else begin
 				endelse
 			endelse
-			
+
 		endif else begin
 			n_selected = 0
-			
+
 		endelse
-		help, n_selected, select_which
+		;help, n_selected, select_which
 
 		if i eq select_which then begin
 			if n_raw_selected gt 0 then begin
@@ -668,15 +668,15 @@ PRO lc_plot, time=time, night=night, transit=transit, eps=eps, phased=phased, ca
 ; 		if keyword_set(box) or keyword_set(phased) then begin
 ; 			xvert = [-candidate.period/2, -candidate.duration/2, -candidate.duration/2, candidate.duration/2, candidate.duration/2, candidate.period/2]
 ; 			units = 24
-; 	
+;
 ; ; 			if keyword_set(phased) then begin
 ; ; 				polyfill, units*candidate.duration/2*[-1,1,1,-1], [(candidate.depth + candidate.depth_uncertainty), (candidate.depth + candidate.depth_uncertainty), (candidate.depth - candidate.depth_uncertainty), (candidate.depth - candidate.depth_uncertainty)], color=200
 ; ; 				oplot, units*xvert, [0,0,1,1,0,0]*(candidate.depth + candidate.depth_uncertainty), color=100, thick=3
 ; ; 				oplot, units*xvert, [0,0,1,1,0,0]*(candidate.depth - candidate.depth_uncertainty), color=100, thick=3
 ; ; 			endif else begin
-; ; 
+; ;
 ; ; 			endelse
-; 
+;
 ; ; 			loadct, 0, /silent
 ; ; 			offset=0;if keyword_set(phased) then offset=0 else offset = median(target_lc[i_night].flux)
 ; ; 			oplot, x_vertices, y_vertices+offset, linestyle=2, color=125, thick=2
@@ -698,9 +698,9 @@ PRO lc_plot, time=time, night=night, transit=transit, eps=eps, phased=phased, ca
 						if ~keyword_set(offset) then offset = 0
 						if keyword_set(phased) then str = 'phased !C'+goodtex('D/\sigma=' + strcompress(/remo, string(format='(F5.1)', candidate.depth/candidate.depth_uncertainty))) else str = 'event #' + rw(round((box.hjd - candidate.hjd0)/candidate.period) - offset) + '!C'+ goodtex('D/\sigma=' + strcompress(/remo, string(format='(F5.1)', box.depth/box.depth_uncertainty)))
 						xyouts, 0, !y.range[1], '!C'+str, align=0.5
-					endif 
+					endif
 
-				endif		
+				endif
 				i_superintransit = where_intransit(struct_conv({hjd:hjdsupersampled}), candidate, n_superintransit)
 				if n_superintransit gt 0 then begin
 					if keyword_set(box) then begin
@@ -711,8 +711,8 @@ PRO lc_plot, time=time, night=night, transit=transit, eps=eps, phased=phased, ca
 						model_uncertainty[i_superintransit] = sqrt(candidate.depth_uncertainty^2 + model_uncertainty[i_superintransit]^2)
 					endelse
 				endif
-				
-				
+
+
 ;				polyfill, units*box.duration/2*[-1,1,1,-1], [(box.depth + box.depth_uncertainty), (box.depth + box.depth_uncertainty), (box.depth - box.depth_uncertainty), (box.depth - box.depth_uncertainty)], color=200
 ;				oplot, units*xvert, [0,0,1,1,0,0]*(box.depth + box.depth_uncertainty), color=100, thick=3
 ;				oplot, units*xvert, [0,0,1,1,0,0]*(box.depth - box.depth_uncertainty), color=100, thick=3
@@ -726,11 +726,11 @@ PRO lc_plot, time=time, night=night, transit=transit, eps=eps, phased=phased, ca
 					pad = long((max(hjdsupersampled) - min(hjdsupersampled))/candidate.period) + 1
 					phased_time = (hjdsupersampled-candidate.hjd0)/candidate.period + pad + 0.5
 					orbit_number = long(phased_time)
-					xsupersampled = (phased_time - orbit_number - 0.5)*candidate.period*24		
+					xsupersampled = (phased_time - orbit_number - 0.5)*candidate.period*24
 				endelse
 
 			endif else xsupersampled =  interpol(lc.x, lc.hjd, hjdsupersampled)
-	
+
 			dt = xsupersampled[1:*] - xsupersampled[0:*]
 			gap_definition = 3*median(dt)
 			starts_of_gaps = [where(abs(dt) gt gap_definition), n_elements(xsupersampled) -1 ]
@@ -742,11 +742,11 @@ PRO lc_plot, time=time, night=night, transit=transit, eps=eps, phased=phased, ca
 					top = model_middle[ends_of_gaps[j]:starts_of_gaps[j]] + model_uncertainty[ends_of_gaps[j]:starts_of_gaps[j]]
 					bottom =model_middle[ends_of_gaps[j]:starts_of_gaps[j]] - model_uncertainty[ends_of_gaps[j]:starts_of_gaps[j]]
 					xvert = [ oneway,  reverse(oneway)];xsupersampled[ends_of_gaps[j]],
-					yvert = [top, reverse(bottom) ];model_middle[ends_of_gaps[j]] - model_uncertainty[ends_of_gaps[j]], 
+					yvert = [top, reverse(bottom) ];model_middle[ends_of_gaps[j]] - model_uncertainty[ends_of_gaps[j]],
 					polyfill, xvert, yvert, color=220, noclip=0
 					oplot, oneway, top, color=150, thick=3
 					oplot, oneway, bottom, color=150, thick=3
-	
+
 				endfor
 			endif
 
@@ -783,14 +783,14 @@ PRO lc_plot, time=time, night=night, transit=transit, eps=eps, phased=phased, ca
 			print, 'binsize is ', binwidth
 			;if ~keyword_set(n_bins) then n_bins = 5*candidate.period/candidate.duration
 			plot_binned, lcs.(i).x, lcs.(i).flux,  lcs.(i).fluxerr, binwidth=binwidth, /sem,  psym=8, /overplot, color=180, symsize=0.3, thick=5*keyword_set(eps), /justbins, hatlen=hatlen, xrange=!x.range
-		endif 
+		endif
 
 
 		if n_intransit gt 0 and (~keyword_set(binned) or ~(keyword_set(phased) or keyword_set(event))) and ~keyword_set(no_intransit) then begin
 ; 			if keyword_set(phased) then begin
 ; 				plots, candidate.duration/2.0*24*[1,1], [1, 0.5]*!y.range[1], thick=1;, color=255
 ; 				plots, -candidate.duration/2.0*24*[1,1], [1, 0.5]*!y.range[1], thick=1;, color=255
-; 			endif; else 
+; 			endif; else
 			usersym, cos(theta), sin(theta), thick=2
 			loadct, /silent, 58, file='~/zkb_colors.tbl'
 			plots, lcs.(i)[i_intransit].x, lcs.(i)[i_intransit].flux, psym=8, symsize=2*symsize, color=50, thick=2, noclip=0
@@ -813,7 +813,7 @@ PRO lc_plot, time=time, night=night, transit=transit, eps=eps, phased=phased, ca
 ; 		endif
 		!p.title=''
 		loadct, 43, file='~/zkb_colors.tbl', /silent
-		; plot histogram		
+		; plot histogram
 		smultiplot
 		loadct, 0, /silent
 		!y.title=''
@@ -848,5 +848,3 @@ PRO lc_plot, time=time, night=night, transit=transit, eps=eps, phased=phased, ca
 	!x= xvariable
 	!y= yvariable
 END
-
-

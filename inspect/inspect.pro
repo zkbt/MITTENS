@@ -116,7 +116,7 @@ PRO inspect_ev, event
 	widget_control, filter_box.distance_max, get_value=val
 	filtering_parameters.distance_max = val
 
-	help, filtering_parameters
+;	help, filtering_parameters
 	print, whatwasclicked
 
 	; skip event handling if nothing was clicked
@@ -158,7 +158,7 @@ PRO inspect_ev, event
 					inspect_update_information_panel
 					inspect_remake_plots
 				endif
-			
+
 
 
 				; if the left edge of the zoom window has already be set, then ask for the right side

@@ -15,7 +15,7 @@ PRO plot_inspect_population, input_mo, counter=counter, summary_of_candidates=su
 	stellar_sample = stellar_sample[sort(stellar_sample.mo)]
 
 	; decide what the mode is going to be
-	possible_modes = ['candidates_period', 'candidates_ratio', 'candidates_nboxes', 'marple_hjd', 'marple_depth', 'marple_depthuncertainty', 'marple_npoints', 'sample_radial'] 
+	possible_modes = ['candidates_period', 'candidates_ratio', 'candidates_nboxes', 'marple_hjd', 'marple_depth', 'marple_depthuncertainty', 'marple_npoints', 'sample_radial']
 	if n_elements(counter) eq 0  then begin
 		counter = 0
 	endif
@@ -39,7 +39,7 @@ PRO plot_inspect_population, input_mo, counter=counter, summary_of_candidates=su
 		mo_list =  interesting_marples.mo
 		labels = mo_prefix + mo_list+'/combined/'
 		structure_name = 'marple'
-		
+
 	endif
 	if strmatch(mode, 'sample*') then begin
 		mo_list =  stellar_sample.mo
@@ -181,14 +181,14 @@ PRO plot_inspect_population, input_mo, counter=counter, summary_of_candidates=su
 	mo_list = mo_list[i_filter]
 	labels = labels[i_filter]
 	structure = structure[i_filter]
-	
-	
+
+
 	; allow for zooming
 	if n_elements(xrange) gt 0 then	if xrange[0] ne xrange[1] then !x.range = xrange
 	if n_elements(yrange) gt 0 then	if yrange[0] ne yrange[1] then !y.range = yrange
 
 
-	
+
 	; make an open circle to plot
 	theta = findgen(22)/10*!pi
 	usersym, cos(theta), sin(theta)
@@ -236,16 +236,16 @@ PRO plot_inspect_population, input_mo, counter=counter, summary_of_candidates=su
 		i_possible = where(mo_list eq input_mo, n_possible)
 		if n_possible gt 0 then begin
 			loadct, 42, file='~/zkb_colors.tbl'
-			
+
 			plots, x[i_possible], y[i_possible], psym=8, symsize=1.5, thick=1, color=100
-		
+
 			if n_elements(i_selected) eq 0 then begin
 				highest = where(y[i_possible] eq max(y[i_possible]), n_high)
 				if n_high gt 0 then i_selected = i_possible[highest[0]]
 			endif
 		endif
 	endif
-	
+
 	; if one of the objects has been selected, mark it
 	if n_elements(i_selected) gt 0 then begin
 		loadct, 42, file='~/zkb_colors.tbl'
@@ -253,21 +253,21 @@ PRO plot_inspect_population, input_mo, counter=counter, summary_of_candidates=su
 		usersym, cos(theta), sin(theta), thick=3
 		plots, x[i_selected], y[i_selected], psym=8, symsize=3, color=0, thick=3
 		usersym, cos(theta), sin(theta), thick=1
-		
+
 		selected_object = create_struct('mo', mo_list[i_selected], 'star_dir', labels[i_selected], structure_name, structure[i_selected])
 		text =   '  '+ mo2name(selected_object.mo) + '  ' ; selected_object.star_dir
 
 		normal_select = convert_coord(x[i_selected], y[i_selected], /data, /to_normal)
 		floating_xyouts, x[i_selected], y[i_selected], text, align=normal_select[0] gt 0.5, charsize=2, charthick=2
 
-
-		help, /st, selected_object
+		
+		;help, /st, selected_object
 	endif
-; 
+;
 ; 	case mode of
 ; 		'signaltonoise': begin
 ; 			x = summary_of_candidates.depth
-; 			y =  summary_of_candidates.depth/summary_of_candidates.depth_uncertainty	
+; 			y =  summary_of_candidates.depth/summary_of_candidates.depth_uncertainty
 ; 			!x.range=range(x) > 0.0001
 ; 			!y.range=range(y) > 1;[min(y), 20]
 ; 			plot, x, y, psym=3, /xlog, xs=3, ys=3, /ylog, xtitle='Depth (mag.)', ytitle=goodtex('D/\sigma_{MarPLE}')
@@ -276,16 +276,16 @@ PRO plot_inspect_population, input_mo, counter=counter, summary_of_candidates=su
 ; 			oplot, d, d/0.0005
 ; 			oplot, d, d/0.001
 ; 			oplot, d, d/0.002
-; 		end		
-; 
+; 		end
+;
 ; 		'period': begin
 ; 			x = summary_of_candidates.period
-; 			y =  summary_of_candidates.depth/summary_of_candidates.depth_uncertainty	
+; 			y =  summary_of_candidates.depth/summary_of_candidates.depth_uncertainty
 ; 			!x.range=range(x) > 0.0001
 ; 			!y.range=range(y) > 1;[min(y), 20]
 ; 			plot, x, y, psym=3, xs=3, ys=3, /ylog, xtitle='Period (days)', ytitle=goodtex('D/\sigma_{MarPLE}'), /xlog
 ; 			d = 10^(findgen(100)/100.0*4 - 3)
-; ; 		end		
-; 
+; ; 		end
+;
 ; 	endcase
 END
