@@ -1,4 +1,4 @@
-This document describes how to install the MITTENS, the MEarth IDL Tools for Transits of Extrasolar Neptunes and Super-earths. This assumes that you are a member of Dave's "exoplanet" group on the CF Unix network. If you're not a member, become a member!
+tom This document describes how to install the MITTENS, the MEarth IDL Tools for Transits of Extrasolar Neptunes and Super-earths. This assumes that you are a member of Dave's "exoplanet" group on the CF Unix network. If you're not a member, become a member!
 
 
 ### INSTALLING THE IDL-SQL INTERFACE

@@ -1,19 +1,17 @@
 This README describes the MITTENS', the MEarth IDL Tools for Transits of Extrasolar Neptunes and Super-earths. It contains information about how to install them, when and how they should be run to keep the processing of incoming data (and modifications to the database) up to date, and how to use them to explore, visualize, and interact with MEarth light curve data.
 
-===============================
-BASIC INSTALLATION INSTRUCTIONS
-===============================
+# BASIC INSTALLATION INSTRUCTIONS
 
 First, you'll need to install the IDL SQL interface that Jonathan put together for us. To do so, follow the instructions Jonathan wrote up in /data/mearth1/db/CLIENT-SETUP. They are summarized here:
 
-# (1) create a hidden .postgressql/ directory in your home directory
+###(1) create a hidden .postgressql/ directory in your home directory
 cp /data/mearth1/db/CLIENT-SETUP.tar ~/.
 cd ~/
-tar -xvf CLIENT-SETUP.tar	
+tar -xvf CLIENT-SETUP.tar
 
-# (2) open ~/.postgresql/pg_service in your favorite text editor and change the "user=" field to your CF account name (this works because Jonathan already created SQL accounts for all of us)
+### (2) open ~/.postgresql/pg_service in your favorite text editor and change the "user=" field to your CF account name (this works because Jonathan already created SQL accounts for all of us)
 
-# add the following two lines to your .myrc file:
+### add the following two lines to your .myrc file:
 setenv IDL_DLM_PATH /data/mearth1/db/idl
 setenv PGSERVICE mearth
 
@@ -49,7 +47,7 @@ Whenever new data comes in, MITTENS will need to be run to propagate these data 
 
 fits_into_lightcurves
 ; open MEarth FITS curves,
-; pull out target stars, 
+; pull out target stars,
 ; save lightcurves (+ more!) into MITTENS directories
 
 lightcurves_into_marples
@@ -59,7 +57,7 @@ lightcurves_into_marples
 
 marples_into_candidates
 ; take MarPLEs, in either star-year or star chunks,
-; and search all relevant periods, phases, and durations 
+; and search all relevant periods, phases, and durations
 ; for the best possible periodic planet candidates
 
 --------
@@ -77,7 +75,7 @@ load_summary_of_candidates
 Whenever new measurements enter the database that could affect the stellar parameter estimates, the MITTENS directories will need to have their internal stellar parameter estimates updated. To do so, run from the |mittens| prompt:
 
 load_stellar_properties
-; runs an SQL query, save the structure in the MITTEN directory 
+; runs an SQL query, save the structure in the MITTEN directory
 
 repopulate_stars_with_new_parameters
 ; goes into each star directory, and replaces its stellar parameters
@@ -96,4 +94,3 @@ repopulate_stars_with_new_parameters
 KNOWN BUGS
 
 can't select data points when diagnostics are turned on (an annoying problem!)
-
