@@ -111,7 +111,7 @@ PRO inspect_update_lists, input_object=input_object
 				whatarewelookingat.mode = 'candidate'
 				whatarewelookingat.i_candidate = i_match
 				process_with_candidate, whatarewelookingat.best_candidates[whatarewelookingat.i_candidate]
-			endif else stop
+			endif else mprint, 'Uh-oh! It looks like you might need to run load_summary_of_candidates.'
 		endif
 		if tag_exist(input_object, 'MARPLE') then begin
 			i_match = where(whatarewelookingat.best_boxes.hjd eq input_object.marple.hjd and whatarewelookingat.best_boxes.duration eq input_object.marple.duration, n_match)
