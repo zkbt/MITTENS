@@ -23,7 +23,7 @@ set_star, /random, n=50
 	title=''
 	gray=220
 	while(!mouse.button lt 4 ) do begin
-		cleanplot
+		cleanplot, /silent
 		xplot, xsize=xsize, ysize=ysize, /top, xpos=0
 
 	if keyword_set(show_all) then i_ok = indgen(n_elements(c)) else	i_ok = where(c.ignore eq 0 and c.known eq 0 and c.variability eq 0 and c.duration ge duration_min/24. and c.period gt 0.1)
@@ -78,7 +78,7 @@ set_star, /random, n=50
 				end
 		endcase
 		if n_elements(yrange) eq 1 then yrange=[yrange, max(yplot[i_ok])]
-	;	if not keyword_set(xrange) then 
+	;	if not keyword_set(xrange) then
 		xrange = range(xplot[i_ok])
 		if not keyword_set(yrange) then yrange = range(yplot[i_ok])
 		plot, xplot, yplot, psym=1, /xlog, xs=3,  ys=3, /nodata, title='', xtitle=xtitle, ytitle=ytitle, xrange=xrange, yrange=yrange
@@ -87,7 +87,7 @@ set_star, /random, n=50
 ;			1: xyouts, xplot, yplot, strcompress(/remo, c.star_dir), align=0.5, noclip=0, charsize=charsize, color=gray*(c.ignore or c.known or c.variability)
 ;			2: xyouts, xplot, yplot, strcompress(/remo, c.n_boxes) + ' boxes!C'+ strcompress(/remo, c.n_points) + ' points', align=0.5, noclip=0, charsize=charsize, color=gray*(c.ignore or c.known or c.variability)
 ;			3: xyouts, xplot, yplot, strcompress(/remo, 'D='+goodtex(string(format='(F5.3)', c.depth) + '\pm'+string(format='(F5.3)', c.depth_uncertainty))), align=0.5, noclip=0, charsize=charsize, color=gray*(c.ignore or c.known or c.variability)
-		
+
 		;print_struct, !mouse
 		;print, x, y
 		if not keyword_set(first) then begin
@@ -104,7 +104,7 @@ set_star, /random, n=50
 			!y.margin=[4, 17]
 
 			plot_pdf_spectrum, octopus=octopus, dir=c[i_selected].star_dir, candidate=c[i_selected]
-	
+
 
 	;		legend, /top, /right, box=0, c[i_selected].star_dir
 			xyouts, 0.98, 0.5, align=0.5, orient=90, 'EXPLORE?', charsize=4,charthick=4, /normal

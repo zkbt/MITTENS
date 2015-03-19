@@ -1,11 +1,11 @@
 pro plot_skymap, LSPM
-	cleanplot
+	cleanplot, /silent
 loadct, 0
 	device, decomposed=0
 	!p.background=255
 	!p.color=0
 	erase
-	common mearth_tools	
+	common mearth_tools
 ;if keyword_set(remake) then begin
 ;		restore, 'thesis_sphere.idl'
 
@@ -15,11 +15,11 @@ loadct, 0
 ; 		sample_phased_t50 = fltarr(n_elements(c), n_elements(radii))+1500
 ; 		sample_triggered_t50 = fltarr(n_elements(c), n_elements(radii))+1500
 ; 		sample_nobs =  fltarr(n_elements(c), n_elements(radii))
-; 	
-; 		i_match = value_locate(c.lspm, stars.obs.lspm); print, c[i_match].lspm -stars.obs.lspm          
+;
+; 		i_match = value_locate(c.lspm, stars.obs.lspm); print, c[i_match].lspm -stars.obs.lspm
 ; 		sample_phased_t50[i_match,*] = phased_t50
 ; 		sample_triggered_t50[i_match,*] = triggered_t50
-; 
+;
 ; 		sample_nobs[i_match] = total_nobs;stars.obs.n_goodpointings
 		sample_nobs = ones(n_elements(sample))
 		i_plot = where(sample.distance lt 33 and sample.radius lt 0.35)
@@ -96,9 +96,9 @@ loadct, 0
 			months = ['September', ' ', 'December', ' ', 'March', ' ', 'June', ' ']
 			for i=0, n_elements(angles)-1 do xyouts, d*cos(-angles[i]*!pi/180+ROT), d*sin(-angles[i]*!pi/180+ROT), rw(angles[i]*24/360)+'h', CHARSIZE=0.8, charthick=1, align=0.5, orient=-(angles[i]+90)+ROT*180/!Pi
 			for i=0, n_elements(angles)-1 do xyouts, d*cos(-angles[i]*!pi/180+ROT), d*sin(-angles[i]*!pi/180+ROT), '!C'+months[i], charsize=1, charthick=1, align=0.5, orient=-(angles[i]+90)+ROT*180/!Pi, color=100
-	
-	
-	
+
+
+
 						loadct, 0, file='~/zkb_colors.tbl'
 				if keyword_set(bw) then loadct, file='~/zkb_colors.tbl', 65
 
@@ -123,19 +123,19 @@ loadct, 0
 ; 				edge = d*1.1
 ; 				nobs = float([100,300,1000,3000])
 ; 				symsize = sqrt(nobs)/max(sqrt(sample_nobs[i_plot[i_sort]]));*3
-; 				x = fltarr(n_elements(nobs)) - edge 
+; 				x = fltarr(n_elements(nobs)) - edge
 ; 				y = edge -10 + findgen(n_elements(nobs))*2
 ; 				loadct, 0
 ; 				if keyword_set(bw) then loadct, file='~/zkb_colors.tbl', 65
 ; 				xyouts, -edge-2, 2+edge-0.1, "The MEarth Project's", CHARSIZE=1, charthick=6
 ; 				xyouts, -edge-2, 2+edge-2, goodtex("observational coverage on!C  0.1-0.35R_{"+zsymbol(/sun) + "} M dwarfs"), charsize=1.5, charthick=6
-; 
+;
 ; 				for i=0, n_elements(nobs)-1 do plots, x[i]+10, y[i], psym=8, color=75, symsize=symsize[i]
 ; 				xyouts, x+10, y-0.5, string(form='(I5)', nobs) + ' obs. =  ', color =75, charthick=1, charsize=1.5, align=1
 ; 			endelse
 
 
  		endfor
-	
+
 
 END

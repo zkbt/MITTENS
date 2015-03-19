@@ -1,7 +1,7 @@
 PRO plot_inspect_population, input_mo, counter=counter, summary_of_candidates=summary_of_candidates, interesting_marples=interesting_marples, ensemble_observation_summary=ensemble_observation_summary, stellar_sample=stellar_sample, coordinate_conversions=coordinate_conversions, data_click=data_click, selected_object=selected_object, xrange=xrange, yrange=yrange, filtering_parameters=filtering_parameters
 
 	common mearth_tools
-	cleanplot
+	cleanplot, /silent
 	!p.color = 0
 	!p.background = 255
 	loadct, 39
