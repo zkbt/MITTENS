@@ -7,12 +7,12 @@
 ;	this template instead of writing your widget applications from
 ;	"scratch".
 ;
-;	This documentation should be altered to reflect the actual 
-;	implementation of the xlc_event widget.  Use a global search and 
-;	replace to replace the word "xlc_event" with the name of the routine 
-;	you would like to use. 
+;	This documentation should be altered to reflect the actual
+;	implementation of the xlc_event widget.  Use a global search and
+;	replace to replace the word "xlc_event" with the name of the routine
+;	you would like to use.
 ;
-;	All the comments with a "***" in front of them should be read, decided 
+;	All the comments with a "***" in front of them should be read, decided
 ;	upon and removed for your final copy of the xlc_event widget
 ;	routine.
 ;
@@ -62,9 +62,9 @@
 ;	procedure xlc_event_ev
 ;------------------------------------------------------------------------------
 ; This procedure processes the events being sent by the XManager.
-;*** This is the event handling routine for the xlc_event widget.  It is 
+;*** This is the event handling routine for the xlc_event widget.  It is
 ;*** responsible for dealing with the widget events such as mouse clicks on
-;*** buttons in the xlc_event widget.  The tool menu choice routines are 
+;*** buttons in the xlc_event widget.  The tool menu choice routines are
 ;*** already installed.  This routine is required for the xlc_event widget to
 ;*** work properly with the XManager.
 ;------------------------------------------------------------------------------
@@ -72,18 +72,18 @@
 
 
 PRO xlc_event_ev, event
-	
+
 	common xlc_event_common, xlc_event_camera, xlc_event_coordinate_conversions, xlc_event_select, xlc_event_selected_times, xlc_event_ds9, xlc_event_censored_exposures, xlc_event_censored_filenames, xlc_event_censorship
 	@widget_geometries
 	common this_star
 	common mearth_tools
-	
+
 	COMPILE_OPT hidden	; Don't appear in HELP output unless HIDDEN keyword is specified.
 	WIDGET_CONTROL, event.id, GET_UVALUE = eventval		;find the user value of the widget where the event occured
-	
+
 	; debugging
 	;print_struct, event
-	
+
 	IF N_ELEMENTS(eventval) EQ 0 THEN thebuttonclicked = '' else begin
 
 		; debugging
@@ -95,19 +95,19 @@ PRO xlc_event_ev, event
 
 	;debugging
 	print, 'thebuttonclicked is ', thebuttonclicked
-	
+
 	CASE thebuttonclicked OF
 		; if clicking somewhere on the plotting window
 		"draw": begin
 			; get the geometry of the plotting window
 			geometry = widget_info(event.id, /geom)
-	
+
 			; convert the click in the plotting window to data coordinates
 			data_click = smulti_datacoord(event=event, coordinate_conversions=xlc_event_coordinate_conversions, geometry=geometry)
-		
+
 			print, data_click ;debugging
 
-			; if the middle mouse button is pushed, start zooming in on the x-axis			
+			; if the middle mouse button is pushed, start zooming in on the x-axis
 			if event.press eq 2 then begin
 				if ~xlc_event_camera.setting_zoom_left and ~xlc_event_camera.setting_zoom_right then xlc_event_camera.setting_zoom_left = 1
 			endif
@@ -130,7 +130,7 @@ PRO xlc_event_ev, event
 					if xlc_event_camera.xrange[0] gt xlc_event_camera.xrange[1] then begin
 						xlc_event_camera.xrange = reverse(xlc_event_camera.xrange)
 					endif
-				endif	
+				endif
 				; when the mouse button is released
 				if event.release gt 0 then begin
 					xlc_event_camera.setting_zoom_right = 0
@@ -188,7 +188,7 @@ PRO xlc_event_ev, event
 					if xlc_event_camera.select_yrange[0] gt xlc_event_camera.select_yrange[1] then begin
 						xlc_event_camera.select_yrange = reverse(xlc_event_camera.select_yrange)
 					endif
-				endif	
+				endif
 				; when the mouse button is released
 				if event.release gt 0 then begin
 					xlc_event_camera.setting_select_right = 0
@@ -254,14 +254,14 @@ PRO xlc_event_ev, event
 		; to zoom in vertically
 		"scale + ": xlc_event_camera.scale *= 0.5
 		; to zoom out vertically
-		"scale - ": xlc_event_camera.scale *= 2		
+		"scale - ": xlc_event_camera.scale *= 2
 		; to reset the vertical zoom
 		"scalereset": xlc_event_camera.scale = xlc_event_camera.original_scale
 
-		; to zoom in (toward center), horizontally	
+		; to zoom in (toward center), horizontally
 		"zoom + ": begin
 			; if xrange is not set, just zoom in
-			xlc_event_camera.zoom *=0.5	
+			xlc_event_camera.zoom *=0.5
 			; if xrange is set to something custom, manually readjust it
 			if  xlc_event_camera.xrange[0] ne 0 or xlc_event_camera.xrange[1] ne 0 then begin
 				center = mean(xlc_event_camera.xrange)
@@ -269,10 +269,10 @@ PRO xlc_event_ev, event
 				xlc_event_camera.xrange = center + [-1.,1.]*span/2.0*0.5
 			endif
 		end
-		; to zoom out (from center), horizontally	
+		; to zoom out (from center), horizontally
 		"zoom - ": begin
 			; if xrange is not set, just zoom out
-			xlc_event_camera.zoom *=2		
+			xlc_event_camera.zoom *=2
 			; if xrange is set to something custom, manually readjust it
 			if  xlc_event_camera.xrange[0] ne 0 or xlc_event_camera.xrange[1] ne 0 then begin
 				center = mean(xlc_event_camera.xrange)
@@ -321,22 +321,22 @@ PRO xlc_event_ev, event
 			endif else begin
 				new_ysize = height + xlc_event_camera.ypad
 			endelse
-			resized = 1	
+			resized = 1
 		end
 		"optionanonymous?" : xlc_event_camera.anonymous = ~xlc_event_camera.anonymous
 		; "optioncomparisons" : xlc_event_camera.comparisons = ~xlc_event_camera.comparisons
 
-		; should we plot the variability light curve?	
+		; should we plot the variability light curve?
 		"whichlcvariability" : xlc_event_camera.variability = ~xlc_event_camera.variability
 		; should we plot the cleaned light curve
 		"whichlccleaned" : xlc_event_camera.cleaned = ~xlc_event_camera.cleaned
 
-		; to save the current plot to eps		
+		; to save the current plot to eps
 		"eps" : begin
 			widget_control, xlc_event_camera.message_label_id, set_val='Saving to EPS; acroread will open shortly.'
 			xlc_event_camera.eps=1
 		end
-		; to save the current plot to png		
+		; to save the current plot to png
 		"png" : begin
 			widget_control, xlc_event_camera.message_label_id, set_val='Saving to PNG; konqueror will open shortly.'
 			xlc_event_camera.png=1
@@ -370,12 +370,12 @@ PRO xlc_event_ev, event
 		end
 		'censor': begin
 			xlc_event_camera.perform_censoring = 1
-		end	
+		end
 		'test_cm': begin
 			test_cm, event= xlc_event_camera.events[xlc_event_camera.whichevent], /eps
 		end
 		'save':begin
-			n_flagged_in_ds9 =  n_elements(xlc_event_censored_exposures) 
+			n_flagged_in_ds9 =  n_elements(xlc_event_censored_exposures)
 			if n_flagged_in_ds9 gt 0 then begin
 				openw, raw_censor_lun, /get_lun, star_dir + 'raw_image_xlc_event_censorship.log', /append
 				for i=0, n_flagged_in_ds9-1 do begin
@@ -384,10 +384,10 @@ PRO xlc_event_ev, event
 					endif
 				endfor
 				close, raw_censor_lun
-				spawn, 'kwrite ' + star_dir + 'raw_image_xlc_event_censorship.log'	
+				spawn, 'kwrite ' + star_dir + 'raw_image_xlc_event_censorship.log'
 				spawn, 'touch ' + star_dir + 'needtomakemarple'
-			endif 
-			if n_tags(xlc_event_ds9) gt 0 then begin	
+			endif
+			if n_tags(xlc_event_ds9) gt 0 then begin
 				; quit the ds9 window you were using
 				spawn, 'xpaset -p '+ xlc_event_ds9.xpa_name +' quit;'
 			endif
@@ -406,7 +406,7 @@ PRO xlc_event_ev, event
 		end
 		'dontsave': begin
 			WIDGET_CONTROL, event.top, /DESTROY
-			if n_tags(xlc_event_ds9) gt 0 then begin	
+			if n_tags(xlc_event_ds9) gt 0 then begin
 				; quit the ds9 window you were using
 				spawn, 'xpaset -p '+ xlc_event_ds9.xpa_name +' quit;'
 			endif
@@ -415,7 +415,7 @@ PRO xlc_event_ev, event
 		else: print, "there's no event handler defined for ", thebuttonclicked
 	ENDCASE
 
-; 	
+;
 	if tag_names(event, /struc) eq "WIDGET_BASE" then resized = 1;thebuttonclicked = "resized"
 	if keyword_set(resized) then begin
 
@@ -425,7 +425,7 @@ PRO xlc_event_ev, event
 			new_ysize = event.y
 		; or was it resized within the program
 		endif else begin
-			; new_xsize and new_ysize 
+			; new_xsize and new_ysize
 		endelse
 
 		; set the new size of the window
@@ -437,7 +437,7 @@ PRO xlc_event_ev, event
 		frame_width = frame_info.xsize
 		draw_width = frame_width - xlc_event_camera.xpad
 		draw_height = frame_height -  xlc_event_camera.ypad;(topborder + bottomborder )
-	
+
 		; resize the draw window
 		widget_control, xlc_event_camera.draw_id, xsize=long(draw_width), YSIZE =long(draw_height)
 		wset, xlc_event_camera.draw_window
@@ -447,11 +447,11 @@ PRO xlc_event_ev, event
 		printl
 	endif
 
-;	debugging	
+;	debugging
 ;	print_struct, event
 ;	print_struct, xlc_event_camera
 ;	print, 'xrange is ', xlc_event_camera.xrange
-	
+
 	needtoplot=1B
 	while (needtoplot $
 		and xlc_event_camera.setting_zoom_left eq 0 and xlc_event_camera.setting_zoom_right eq 0$
@@ -465,14 +465,14 @@ PRO xlc_event_ev, event
 		!p.color=0
 		plot, [0], /nodata, xs=4, ys=4
 		coordinate_conversions = 0
-	
+
 		if xlc_event_camera.xrange[0] ne 0 or xlc_event_camera.xrange[1] ne 0 then xrange=xlc_event_camera.xrange else xrange=0
 		lc_plot, /event, box = xlc_event_camera.events[xlc_event_camera.whichevent], zoom=xlc_event_camera.zoom, shift=xlc_event_camera.shift, scale=xlc_event_camera.scale, /externalformat, charsize=1, symsize=xlc_event_camera.symsize, /time,binned=xlc_event_camera.binned, anonymous=xlc_event_camera.anonymous, no_model=~keyword_set(xlc_event_camera.model), no_cleaned=~keyword_set(xlc_event_camera.cleaned), no_var=~keyword_set(xlc_event_camera.variability), no_raw=~keyword_set(xlc_event_camera.raw), no_outliers=~keyword_set(xlc_event_camera.outliers), noright=~keyword_set(xlc_event_camera.histograms), no_intransit=~keyword_set(xlc_event_camera.intransit), eps=keyword_set(xlc_event_camera.eps), png=keyword_set(xlc_event_camera.png), diagnos=xlc_event_camera.diagnostics, compa=xlc_event_camera.comparisons, coordinate_conversions=coordinate_conversions, xrange=xrange, select_xrange=xlc_event_camera.select_xrange, select_yrange=xlc_event_camera.select_yrange , select_which= xlc_event_camera.select_which, selected_times = xlc_event_selected_times, censorship=xlc_event_censorship, perform_censoring=xlc_event_camera.perform_censoring
-	
+
 		xlc_event_camera.perform_censoring = 0
 		needtoplot =0B
 		xlc_event_coordinate_conversions = coordinate_conversions
-		
+
 		if keyword_set(xlc_event_camera.eps) or keyword_set(xlc_event_camera.png) then begin
 			xlc_event_camera.eps = 0
 			xlc_event_camera.png = 0
@@ -484,15 +484,15 @@ PRO xlc_event_ev, event
 ;	help, xlc_event_selected_times
 	if n_tags(xlc_event_selected_times) gt 0 then begin
 		widget_control, xlc_event_camera.select_label_id, set_value=rw(xlc_event_selected_times.n_raw) + ' exp. + ' + rw(xlc_event_selected_times.n_binned) + ' obs.'+ 'selected'
-		widget_control, xlc_event_camera.ds9_button_id, sensitive=xlc_event_selected_times.n_raw gt 0 or xlc_event_selected_times.n_binned gt 0 
-		widget_control, xlc_event_camera.flag_ds9_button_id, sensitive=xlc_event_selected_times.n_raw gt 0 or xlc_event_selected_times.n_binned gt 0 
-		widget_control, xlc_event_camera.censor_button_id, sensitive=xlc_event_selected_times.n_raw gt 0 or xlc_event_selected_times.n_binned gt 0 
+		widget_control, xlc_event_camera.ds9_button_id, sensitive=xlc_event_selected_times.n_raw gt 0 or xlc_event_selected_times.n_binned gt 0
+		widget_control, xlc_event_camera.flag_ds9_button_id, sensitive=xlc_event_selected_times.n_raw gt 0 or xlc_event_selected_times.n_binned gt 0
+		widget_control, xlc_event_camera.censor_button_id, sensitive=xlc_event_selected_times.n_raw gt 0 or xlc_event_selected_times.n_binned gt 0
 	endif else begin
 		widget_control, xlc_event_camera.ds9_button_id, sensitive=0
 		widget_control, xlc_event_camera.flag_ds9_button_id, sensitive=0
 		widget_control, xlc_event_camera.censor_button_id, sensitive=0
 	endelse
-	
+
 END
 
 
@@ -502,33 +502,33 @@ END
 ;------------------------------------------------------------------------------
 ; This routine creates the widget and registers it with the XManager.
 ;*** This is the main routine for the xlc_event widget.  It creates the
-;*** widget and then registers it with the XManager which keeps track of the 
-;*** currently active widgets.  
+;*** widget and then registers it with the XManager which keeps track of the
+;*** currently active widgets.
 ;------------------------------------------------------------------------------
 PRO xlc_event, GROUP = GROUP, BLOCK=block, id=id
-	
+
 	common xlc_event_common
-	
+
 	;*** If xlc_event can have multiple copies running, then delete the following
 	;*** line and the comment for it.  Often a common block is used that prohibits
-	;*** multiple copies of the widget application from running.  In this case, 
+	;*** multiple copies of the widget application from running.  In this case,
 	;*** leave the following line intact.
-	
+
 	; only run one xlc_event widget at a tiem
 	IF(XRegistered("xlc_event") NE 0) THEN begin
-	RETURN	
-	endif							
+	RETURN
+	endif
 	IF N_ELEMENTS(block) EQ 0 THEN block=0
-	
+
 	; get the widget geometry from the definition file
 	@widget_geometries
-	
+
 	; make the main xlc_event window
 	xlc_eventbase = WIDGET_BASE(TITLE = "xlc_event", row=3,/base_align_center, /tlb_size_events);
-	
+
 	; define the window's ID so it can be killed externally
 	id = xlc_eventbase
-	
+
 	; set up three rows for widget base
 	toprow_base =  WIDGET_BASE(xlc_eventbase, /row, /base_align_center, frame=3);xoffset=leftborder/2,
 		output_buttons_base = widget_base(toprow_base, /row, /align_center)
@@ -537,7 +537,7 @@ PRO xlc_event, GROUP = GROUP, BLOCK=block, id=id
 		left_base = widget_base(supermiddlerow_base, /base_align_center)
 		middlerow_base =  WIDGET_BASE(supermiddlerow_base, /base_align_center, col=3, frame=3)
 		right_base = widget_base(supermiddlerow_base, /base_align_center)
-	bottomrow_base =  WIDGET_BASE(xlc_eventbase, /row, /base_align_center, frame=3);xoffset=0, ysize=bottomborder,yoffset=topborder + height, 
+	bottomrow_base =  WIDGET_BASE(xlc_eventbase, /row, /base_align_center, frame=3);xoffset=0, ysize=bottomborder,yoffset=topborder + height,
 		outer_goto_base = widget_base(bottomrow_base, /col, /base_align_center, frame=2)
 			mjdbox_label = widget_label(outer_goto_base, value='Jump to a Moment:')
 			goto_base = widget_base(outer_goto_base, /row, /base_align_center)
@@ -554,7 +554,7 @@ PRO xlc_event, GROUP = GROUP, BLOCK=block, id=id
 	comment_button = widget_button(output_buttons_base, uvalue='comment', value='comment on star', accelerator='Shift+C')
 
 	message_label = widget_label(messagebox_base, uvalue='message', value='                                                           ', frame=1)
-	dontsave_button = widget_button(output_buttons_base, uvalue='dontsave', value='quit+undo', accelerator='Shift+Q')	
+	dontsave_button = widget_button(output_buttons_base, uvalue='dontsave', value='quit+undo', accelerator='Shift+Q')
 	save_button = widget_button(output_buttons_base, uvalue='save', value='QUIT+SAVE', accelerator='Shift+S')
 
 
@@ -564,33 +564,33 @@ PRO xlc_event, GROUP = GROUP, BLOCK=block, id=id
 	whichlc_values = ['basic', 'variability', 'cleaned']
 	whichlc_set_value = [1, 1, 1]
 	whichlc_buttons = cw_bgroup(middlerow_base, whichlc_values, /COLUMN, LABEL_TOP='Light curves:', frame=3,uvalue='whichlc'+whichlc_values, /nonexclus, set_value=whichlc_set_value)
-	
-	option_values = ['binned', 'model', 'raw', 'outliers', 'in-transit', 'histograms', 'diagnostics','anonymous?']; 'comparisons', 
+
+	option_values = ['binned', 'model', 'raw', 'outliers', 'in-transit', 'histograms', 'diagnostics','anonymous?']; 'comparisons',
 	options_set_value = [0, 1, 0, 1, 0, 1, 0]
 	option_buttons = cw_bgroup(middlerow_base, option_values, /COLUMN, LABEL_TOP='Options:', frame=3,uvalue='option'+option_values, /nonexclus, set_value=options_set_value)
-	
+
 	; create the draw window
-	draw = WIDGET_DRAW(middlerow_base, XSIZE = width, YSIZE =height, units=0, fram=5, uval='draw', /button_event) 
-	
+	draw = WIDGET_DRAW(middlerow_base, XSIZE = width, YSIZE =height, units=0, fram=5, uval='draw', /button_event)
+
 	; create flux zoom buttons
 	scale_values = [' + ',  ' - ', 'reset']
 	scale_buttons = cw_bgroup(middlerow_base, scale_values, /COLUMN, LABEL_TOP='Flux Zoom:', frame=0, uvalue='scale'+scale_values)
-	
+
 	; create time zoom buttons
 	zoom_values = [' + ', ' - ', 'custom', 'reset']
 	zoom_buttons = cw_bgroup(xrange_base, zoom_values, /row, LABEL_TOP='Time Zoom:', uvalue='zoom'+zoom_values, frame=2)
-	
+
 	; create goto
 	mjdbox_label = widget_label(goto_base, value='MJD:')
 	mjdbox_text = widget_text(goto_base, uvalue='mjd', xsize=10, /edit)
-	
+
 	; create goto
 	nightbox_label = widget_label(goto_base, value='YYYYMMDD:')
 	nightbox_text = widget_text(goto_base, uvalue='night', xsize=10, /edit)
-	
-	
-	
-	
+
+
+
+
 	;create select buttons
 	leftselect_base =  widget_base(/col, topselect_base)
 	select_button =widget_button( leftselect_base, uvalue='select', value='select')
@@ -605,11 +605,11 @@ PRO xlc_event, GROUP = GROUP, BLOCK=block, id=id
 	test_cm_button = widget_button(extra_base, uvalue='test_cm', value='Look at CM?')
 
 ;===============
-	
+
 	restore, star_dir() + 'cleaned_lc.idl'
 	restore, star_dir() + 'box_pdf.idl'
 	duration_bin = median(boxes[0].duration[1:*]  - boxes[0].duration)
-	i_duration = value_locate(boxes[0].duration-duration_bin/2, candidate.duration)	
+	i_duration = value_locate(boxes[0].duration-duration_bin/2, candidate.duration)
 
 	phased_time = (boxes.hjd - candidate.hjd0)/candidate.period mod 1.0
 	i_under = where(phased_time lt -0.5, n_under)
@@ -625,7 +625,11 @@ PRO xlc_event, GROUP = GROUP, BLOCK=block, id=id
 	; populat previous and next event buttons
 	previous_button = widget_button(left_base, uvalue='previous', value ='previous event', sensitive=whichevent ne 0)
 	next_button = widget_button(right_base, uvalue='next', value='next event', sensitive=whichevent ne n_it-1)
-	
+
+	; is the a kludge?
+	if n_it eq 0 then return
+
+
 	events = replicate({hjd:0.0d, depth:0.0d, depth_uncertainty:0.0d, duration:0.0}, n_it)
 	events.hjd = boxes[i_boxesintransit].hjd
 	events.depth = boxes[i_boxesintransit].depth[i_duration]
@@ -634,15 +638,15 @@ PRO xlc_event, GROUP = GROUP, BLOCK=block, id=id
 
 
 
-	
+
 	; bring the whole thing into existence
 	WIDGET_CONTROL, xlc_eventbase, /REALIZE
-	
+
 	; figure out what window index correponds to the draw window
-	WIDGET_CONTROL, draw, GET_VALUE = draw_window 
-	
+	WIDGET_CONTROL, draw, GET_VALUE = draw_window
+
 	; first pass at plot
-	WSET, draw_window 
+	WSET, draw_window
 	cleanplot, /silent
 	loadct, 0
 	!p.background=255
@@ -681,10 +685,10 @@ junk = temporary( xlc_event_censorship)
 	xlc_event_camera.ypad = frame_info.ysize - height
 
 	; register the widget with the xmanager
-	XManager, "xlc_event", xlc_eventbase, $			
+	XManager, "xlc_event", xlc_eventbase, $
 			EVENT_HANDLER = "xlc_event_ev", $
-			GROUP_LEADER = GROUP, $		
-			NO_BLOCK=(NOT(FLOAT(block)))		
-	
+			GROUP_LEADER = GROUP, $
+			NO_BLOCK=(NOT(FLOAT(block)))
+
 
 END
