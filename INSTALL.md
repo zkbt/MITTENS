@@ -33,6 +33,9 @@ For the most part, MITTENS is just big group of IDL *.pro files that can be used
     # set the PATH to the MITTENS routines, which you can set to whereever you want
     setenv MITTENS_PATH ~/MITTENS
 
+    # uncomment this if you don't have a PYTHONPATH already defined elsewhere
+    setenv PYTHONPATH
+
     # run the mittens setup script
     source $MITTENS_PATH/mittens_setup.sh
 

@@ -4,7 +4,7 @@ FUNCTION mearth_timezone
 	if strmatch(star_dir, '*te1*') then timezone = 5.0/24.0 ; in hours west!
 	if strmatch(star_dir, '*te0*') then timezone = 7.0/24.0
 	if strmatch(star_dir, '*combined*') then begin
-		mprint, tab_string, 'using MEarth Average Timezone (MAT = -6hrs)'
+		;mprint, tab_string, tab_string, 'using MEarth Average Timezone (MAT = -6hrs)'
 		timezone = 6.0/24
 	endif
 	if n_elements(timezone) eq 0 then begin

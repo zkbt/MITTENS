@@ -44,7 +44,7 @@ PRO call_origami_bot, bulldoze=bulldoze
 			endfor
 		endif else mprint, skipping_string, 'no MarPLES were found for ' + star_dir() + '; skipping origami search'
 
-		origami_to_candidates
+		;extract_candidates_from_origami
 
 		; clean up inprogress file
 		file_delete, star_dir() + 'octopusinprogress.txt', /allow

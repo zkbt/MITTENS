@@ -1,8 +1,9 @@
 FUNCTION mo2name, mo
 	common mearth_tools
-	names = strarr(n_elements(mo))
+	names = name2mo(mo)
+	
 	for i=0, n_elements(mo)-1 do begin
-		i_match = where(mo_ensemble.mo eq mo[i], n_match)
+		i_match = where(mo_ensemble.mo eq name2mo(mo[i]), n_match)
 		if n_match eq 0 then continue
 		if n_match gt 1 then i_match = i_match[0]
 		
@@ -25,7 +26,6 @@ FUNCTION mo2name, mo
 			names[i] = 'NLTT' + rw( mo_ensemble[i_match].NLTT)
 			continue
 		endif
-
 		names[i] = 'MO' + mo[i]
 	endfor
 	if n_elements(names) eq 1 then names = names[0]

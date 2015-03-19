@@ -1,4 +1,4 @@
-PRO marples_into_candidates, desired_mo, start=start
+PRO marples_into_origami, desired_mo, start=start
 	common mearth_tools
 	
 	if keyword_set(desired_mo) then begin
@@ -11,9 +11,9 @@ PRO marples_into_candidates, desired_mo, start=start
 		return
 	endif
 	mprint, /line
-	mprint, tab_string, 'marples_into_candidates.pro is taking the MarPLES located in'
+	mprint, tab_string, 'marples_into_origami.pro is taking the MarPLES located in'
 	mprint, tab_string, tab_string, getenv('MITTENS_DATA')
-	mprint, tab_string, 'and generating periodic candidates (and an origami spectrum) from them'
+	mprint, tab_string, 'and generating periodic origami spectra from them'
 	mprint, /line
 
 ;	display, /off

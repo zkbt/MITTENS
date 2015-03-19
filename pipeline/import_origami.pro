@@ -13,12 +13,19 @@ PRO import_origami, dont=dont
 	mprint, /line
 
 
+	; download the origami spectra from MIT
 	file_mkdir, 'origami_received'
-	if ~keyword_set(dont) then spawn, 'rsync -rv zkbt@antares.mit.edu:/corscorpii/d1/zkbt/mearth/results/ origami_received/'
+	if ~keyword_set(dont) then spawn, 'rsync -trv zkbt@antares.mit.edu:/corscorpii/d1/zkbt/mearth/results/ origami_received/'
 
+	; make sure their group permissions are set to exoplanet (this seems to work only from zach's directory)
+	spawn, 'chgrp -R exoplanet origami_received/*', error
+	spawn, 'chmod 660 origami_received/*', error
+  
+	; compile a list of all the files that have been received
 	f = file_search('origami_received/*')
 	mo = name2mo(f)
-	ls = long(stregex(/ext, stregex(/ext, f, 'ls[0-9]+'), '[0-9]+'))
+
+	; loop through these files and move them to their proper directories
 	for i=0, n_elements(f)-1 do begin
 		new_file = mo_prefix + mo[i]+'/combined/boxes_all_durations.txt.bls'
 		print, 'moving ', f[i], ' to ', new_file

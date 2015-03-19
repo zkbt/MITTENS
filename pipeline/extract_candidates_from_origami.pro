@@ -1,14 +1,14 @@
-PRO origami_to_candidates, remake=remake, n_save=n_save
+PRO extract_candidates_from_origami, remake=remake, n_save=n_save
 ; 	; find peaks in the huge grid search
 	common this_star
 	common mearth_tools
 
 	if is_uptodate(star_dir + typical_candidate_filename, star_dir + 'boxes_all_durations.txt.bls') and ~keyword_set(remake) then begin
-		mprint, skipping_string + 'candidates are up-to-date with with the origami spectrum; skipping origami_to_candidates'
+		mprint, skipping_string + 'candidates are up-to-date with with the origami spectrum; skipping extract_candidates_from_origami'
 		return
 	endif
 	if ~file_test(star_dir() + "boxes_all_durations.txt.bls") and ~file_test(star_dir() + 'box_pdf.idl') and ~keyword_set(remake) then begin
-		mprint, skipping_string + 'no origami spectrum was found, so origami_to_candidates cannot be run'
+		mprint, skipping_string + 'no origami spectrum was found, so extract_candidates_from_origami cannot be run'
 		return
 	endif
 
