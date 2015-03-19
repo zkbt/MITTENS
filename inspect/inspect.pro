@@ -55,6 +55,7 @@ PRO inspect_ev, event
 	; debug
 	;help, event, eventval, /st
 	mo = mo_info.mo
+	;print "there was a click -- inspect.pro is trying to deal with it"
 	; decide what to do, based on what kind of event it is
 	CASE tag_names(event, /struct) of
 
@@ -116,8 +117,6 @@ PRO inspect_ev, event
 	widget_control, filter_box.distance_max, get_value=val
 	filtering_parameters.distance_max = val
 
-;	help, filtering_parameters
-	print, whatwasclicked
 
 	; skip event handling if nothing was clicked
 	if n_elements(whatwasclicked) gt 0 then begin
@@ -335,8 +334,10 @@ END
 PRO inspect, input_mo, GROUP = GROUP, BLOCK=block
 
 
-	if keyword_set(input_mo) then set_star, input_mo, /combined
-
+	if keyword_set(input_mo) then begin
+	  set_star, input_mo, /combined
+	  mo = name2mo(currentname())
+	endif
 	; load up lots of necessary common blocks
 	common inspect_common
 	common mearth_tools
@@ -347,7 +348,13 @@ PRO inspect, input_mo, GROUP = GROUP, BLOCK=block
 	device, decomposed=0
 
 	; only allow one instance of inspect to be running at time
-	IF(XRegistered("inspect") NE 0) THEN RETURN
+	IF(XRegistered("inspect") NE 0) THEN begin
+
+	  if keyword_set(mo) then wset, inspect_camera.draw_window & plot_inspect_population, filtering_parameters=filtering_parameters, mo, coordinate_conversions=inspect_coordinate_conversions, selected_object=selected_object
+
+	  RETURN
+	endif
+
 	IF N_ELEMENTS(block) EQ 0 THEN block=0
 
 	; create the main window of the inspect GUI; give it a name
@@ -462,8 +469,8 @@ PRO inspect, input_mo, GROUP = GROUP, BLOCK=block
 							;routine is to be
 							;called from some group
 							;leader.
-
-print, 'waiting a second to allow the xmanager to register what has happened'
+mprint, 'initializing a new inspection window'
+mprint, tab_string, 'waiting two seconds to allow the xmanager to register what has happened'
 wait, 2
 					; update the information panel, candidates lists, and plots to incorporate the new selected object
 					inspect_update_lists, input_object=selected_object ; this seems to update

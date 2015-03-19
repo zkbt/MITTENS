@@ -260,8 +260,9 @@ PRO plot_inspect_population, input_mo, counter=counter, summary_of_candidates=su
 		normal_select = convert_coord(x[i_selected], y[i_selected], /data, /to_normal)
 		floating_xyouts, x[i_selected], y[i_selected], text, align=normal_select[0] gt 0.5, charsize=2, charthick=2
 
-		
-		;help, /st, selected_object
+
+		mprint, 'inspect will now point at ', selected_object.mo, ' = ', name2mo(selected_object.mo)
+
 	endif
 ;
 ; 	case mode of
