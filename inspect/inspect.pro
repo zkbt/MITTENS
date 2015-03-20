@@ -352,6 +352,10 @@ PRO inspect, input_mo, GROUP = GROUP, BLOCK=block
 
 	  if keyword_set(mo) then wset, inspect_camera.draw_window & plot_inspect_population, filtering_parameters=filtering_parameters, mo, coordinate_conversions=inspect_coordinate_conversions, selected_object=selected_object
 
+					inspect_update_lists, input_object=selected_object ; this seems to update
+					inspect_update_information_panel
+					inspect_remake_plots
+
 	  RETURN
 	endif
 
