@@ -9,7 +9,7 @@ PRO plot_inspect_population, input_mo, counter=counter, summary_of_candidates=su
 	; load the necessary population summary files
 	if n_elements(summary_of_comments) eq 0 then restore, 'population/summary_of_comments.idl'
 	if n_elements(summary_of_candidates) eq 0 then restore, 'population/summary_of_candidates.idl'
-	if n_elements(ensemble_observation_summary) eq 0 then restore, 'population/ensemble_observation_summary.idl'
+	;if n_elements(ensemble_observation_summary) eq 0 then restore, 'population/ensemble_observation_summary.idl'
 	if n_elements(interesting_marples) eq 0 then restore, 'population/summary_of_interesting_marples.idl'
 	if n_elements(stellar_sample) eq 0 then stellar_sample = compile_sample()
 
@@ -163,8 +163,10 @@ PRO plot_inspect_population, input_mo, counter=counter, summary_of_candidates=su
 		end
 	endcase
 
-	; &*!#^&*!^ indices are messed up!!!!
+	; &*!#^&*!^ indices are messed up!!!! (are they?)
 	matched_sample = stellar_sample[value_locate(stellar_sample.mo, structure.mo)]
+	matched_comments = summary_of_comments[value_locate(summary_of_comments.mo, structure.mo)]
+
 	if n_elements(filtering_parameters) gt 0 then begin
 		ra_hours = matched_sample.ra/15.0
 		if filtering_parameters.ra_min gt filtering_parameters.ra_max then begin
@@ -176,7 +178,11 @@ PRO plot_inspect_population, input_mo, counter=counter, summary_of_candidates=su
 		size_mask = matched_sample.radius ge filtering_parameters.size_min and matched_sample.radius le filtering_parameters.size_max
 		distance_mask = matched_sample.distance ge filtering_parameters.distance_min and matched_sample.distance le filtering_parameters.distance_max
 
-		if filter_parameters.known eq 0 then
+		; add comment flags!
+		flag_mask = matched_comments
+		;if filter_parameters.known eq 0 then
+
+		stop
 		i_filter = where(ra_mask and dec_mask and size_mask and distance_mask, n_filter)
 	endif else i_filter = lindgen(n_elements(structure))
 

@@ -56,4 +56,4 @@ Here are two quick tests of the installation:
 
 * 2) type "res=pgsql_query('select 1')" from the IDL prompt. If you have everything set up correctly with the IDL SQL interface, this should work.
 
-* 3) type "inspect" from the IDL prompt. This should open the main exploratory tool. Try clicking around -- and please report error messages to zkbt@mit.edu.
+* 3) type "inspect" from the IDL prompt. This should open the main exploratory tool. Try clicking around -- and please report error messages to zkbt@mit.edu or as issues on the github repository.
