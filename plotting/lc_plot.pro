@@ -63,7 +63,7 @@ PRO lc_plot, time=time, night=night, transit=transit, eps=eps, phased=phased, ca
 ; =============================
 
 	if file_test(star_dir + 'target_lc.idl') eq 0 then begin
-		mprint, skipping_string, "can't plot non-existent light curves!"
+		mprint, tab_string;, skipping_string, "can't plot non-existent light curves!"
 	endif
 
 	if keyword_set(png) then eps =1
@@ -599,14 +599,14 @@ PRO lc_plot, time=time, night=night, transit=transit, eps=eps, phased=phased, ca
 			selected = bytarr(n_elements(lcs.(i))) + 1
 			if n_elements(select_xrange) eq 0 and n_elements(select_yrange) eq 0 then selected *= 0
 			if n_elements(select_xrange) gt 0 then begin
-				print, select_xrange
+				;print, select_xrange
 				selected = selected AND lcs.(i).x ge min(select_xrange) and lcs.(i).x le max(select_xrange)
-				print, total(selected)
+				;print, total(selected)
 
 			endif
 			if n_elements(select_yrange) gt 0 then begin
-				print, select_yrange
-				print, total(selected)
+				;print, select_yrange
+				;print, total(selected)
 
 				selected = selected AND lcs.(i).flux ge min(select_yrange) and lcs.(i).flux le max(select_yrange)
 			endif
@@ -614,7 +614,7 @@ PRO lc_plot, time=time, night=night, transit=transit, eps=eps, phased=phased, ca
 				i_tocensor = where(selected, n_tocensor)
 				if n_tocensor gt 0 then begin
 					censorship[i_tocensor].okay = censorship[i_tocensor].okay ne 1
-					print, 'censoring to : ', censorship[i_tocensor].okay
+					;mprint, 'censoring to : ', censorship[i_tocensor].okay
 				endif
 				for i_lc=0, n_lc-1 do lcs.(i_lc).okay = lcs.(i_lc).okay and censorship.okay
 			endif
@@ -626,16 +626,16 @@ PRO lc_plot, time=time, night=night, transit=transit, eps=eps, phased=phased, ca
 			raw_selected = bytarr(n_elements(raw_lcs.(i))) + 1
 			if n_elements(select_xrange) eq 0 and n_elements(select_yrange) eq 0 then raw_selected *= 0
 			if n_elements(select_xrange) gt 0 then begin
-				print, select_xrange
+				;print, select_xrange
 				raw_selected = raw_selected AND raw_lcs.(i).x ge min(select_xrange) and raw_lcs.(i).x le max(select_xrange)
-				print, total(raw_selected)
+				;print, total(raw_selected)
 
 			endif
 			if n_elements(select_yrange) gt 0 then begin
-				print, select_yrange
+				;print, select_yrange
 
 				raw_selected = raw_selected AND raw_lcs.(i).flux ge min(select_yrange) and raw_lcs.(i).flux le max(select_yrange)
-				print, total(raw_selected)
+				;print, total(raw_selected)
 			endif
 			i_raw_selected = where(raw_selected and raw_lcs.(i).okay, n_raw_selected)
 
@@ -780,7 +780,7 @@ PRO lc_plot, time=time, night=night, transit=transit, eps=eps, phased=phased, ca
 				endif
 				if keyword_set(phased) then binwidth = 24*candidate.duration/6.0
 			endif
-			print, 'binsize is ', binwidth
+			;print, 'binsize is ', binwidth
 			;if ~keyword_set(n_bins) then n_bins = 5*candidate.period/candidate.duration
 			plot_binned, lcs.(i).x, lcs.(i).flux,  lcs.(i).fluxerr, binwidth=binwidth, /sem,  psym=8, /overplot, color=180, symsize=0.3, thick=5*keyword_set(eps), /justbins, hatlen=hatlen, xrange=!x.range
 		endif

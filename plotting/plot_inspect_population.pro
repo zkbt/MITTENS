@@ -1,4 +1,4 @@
-PRO plot_inspect_population, input_mo, counter=counter, summary_of_candidates=summary_of_candidates, interesting_marples=interesting_marples, ensemble_observation_summary=ensemble_observation_summary, stellar_sample=stellar_sample, coordinate_conversions=coordinate_conversions, data_click=data_click, selected_object=selected_object, xrange=xrange, yrange=yrange, filtering_parameters=filtering_parameters
+PRO plot_inspect_population, input_mo, counter=counter, summary_of_candidates=summary_of_candidates, interesting_marples=interesting_marples, summary_of_comments=summary_of_comments, ensemble_observation_summary=ensemble_observation_summary, stellar_sample=stellar_sample, coordinate_conversions=coordinate_conversions, data_click=data_click, selected_object=selected_object, xrange=xrange, yrange=yrange, filtering_parameters=filtering_parameters
 
 	common mearth_tools
 	cleanplot, /silent
@@ -7,6 +7,7 @@ PRO plot_inspect_population, input_mo, counter=counter, summary_of_candidates=su
 	loadct, 39
 
 	; load the necessary population summary files
+	if n_elements(summary_of_comments) eq 0 then restore, 'population/summary_of_comments.idl'
 	if n_elements(summary_of_candidates) eq 0 then restore, 'population/summary_of_candidates.idl'
 	if n_elements(ensemble_observation_summary) eq 0 then restore, 'population/ensemble_observation_summary.idl'
 	if n_elements(interesting_marples) eq 0 then restore, 'population/summary_of_interesting_marples.idl'
@@ -22,7 +23,8 @@ PRO plot_inspect_population, input_mo, counter=counter, summary_of_candidates=su
 	counter = counter mod n_elements(possible_modes)
 	mode = possible_modes[counter]
 
-	print, counter, mode
+	mprint, 'currently plotting population ', mode, ' (', counter, ')'
+
 	; if we're dealing with candidates, cull them down and freak out if none exist
 	if strmatch(mode, 'candidates*') then begin
 		i = where(summary_of_candidates.period lt 10000, n)
@@ -173,6 +175,8 @@ PRO plot_inspect_population, input_mo, counter=counter, summary_of_candidates=su
 		dec_mask = matched_sample.dec ge filtering_parameters.dec_min and matched_sample.dec le filtering_parameters.dec_max
 		size_mask = matched_sample.radius ge filtering_parameters.size_min and matched_sample.radius le filtering_parameters.size_max
 		distance_mask = matched_sample.distance ge filtering_parameters.distance_min and matched_sample.distance le filtering_parameters.distance_max
+
+		if filter_parameters.known eq 0 then
 		i_filter = where(ra_mask and dec_mask and size_mask and distance_mask, n_filter)
 	endif else i_filter = lindgen(n_elements(structure))
 
@@ -229,7 +233,7 @@ PRO plot_inspect_population, input_mo, counter=counter, summary_of_candidates=su
 		i_selected = where(r eq min(r))
 		i_selected = i_selected[0]
 		input_mo = mo_list[i_selected]
-		print, normal_click
+		;print, normal_click
 	endif
 
 	if keyword_set(input_mo) then begin
