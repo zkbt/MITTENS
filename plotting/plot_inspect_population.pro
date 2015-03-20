@@ -179,13 +179,36 @@ PRO plot_inspect_population, input_mo, counter=counter, summary_of_candidates=su
 		distance_mask = matched_sample.distance ge filtering_parameters.distance_min and matched_sample.distance le filtering_parameters.distance_max
 
 		; add comment flags!
-		flag_mask = matched_comments
-		;if filter_parameters.known eq 0 then
+		flag_mask = distance_mask*0 + 1
+		anything_set = distance_mask*0
+		print, filtering_parameters.known, filtering_parameters.ignore, filtering_parameters.variability
+		for c=0, n_elements(summary_of_comments)-1 do begin
+		  ihascomment = where(structure.mo eq summary_of_comments[c].mo, nhascomment)
+		  print, summary_of_comments[c].mo, nhascomment
+		  if nhascomment gt 0 then begin
+		    
+		    
+		    if ~filtering_parameters.known then flag_mask[ihascomment] *= ~summary_of_comments[c].known
+		    if ~filtering_parameters.ignore then flag_mask[ihascomment] *= ~summary_of_comments[c].ignore
+		    if ~filtering_parameters.variability then flag_mask[ihascomment] *= ~summary_of_comments[c].variability
+		    
+		    anything_set[ihascomment] = (summary_of_comments[c].known or summary_of_comments[c].variability or summary_of_comments[c].ignore)
 
-		stop
-		i_filter = where(ra_mask and dec_mask and size_mask and distance_mask, n_filter)
+		    print, summary_of_comments[c], flag_mask[ihascomment]
+		  endif
+		endfor
+		if ~filtering_parameters.unmarked then flag_mask *= anything_set 
+		
+		i_filter = where(ra_mask and dec_mask and size_mask and distance_mask and flag_mask, n_filter)
 	endif else i_filter = lindgen(n_elements(structure))
 
+	if n_filter eq 0 then begin
+	  mprint, 'no stars matched your filtering criteria! please be less picky!'
+	  stop
+	  return
+	endif else begin
+	  mprint, 'plotting ' + rw(n_filter) + ' points in population plot (excluding ' + rw(n_elements(structure)-n_filter) + ')'
+	endelse
 	x = x[i_filter]
 	y = y[i_filter]
 	mo_list = mo_list[i_filter]

@@ -7,15 +7,10 @@ PRO load_summary_of_candidates, summary_of_candidates
 	original_star_dir = star_dir
 	f = file_search('mo*/combined/'+typical_candidate_filename)
 
-;	f = subset_of_stars(filename,  year=year, tel=tel, lspm=lspm, radius_range=radius_range, n=n, combined=combined) + filename
-; 	if keyword_set(unknown) then begin
-; 		ls =  long(stregex(/ext, stregex(/ext, f, 'ls[0-9]+'), '[0-9]+'))
-; 		i_unknown = where(ls ne 1186 and ls ne 3512 and ls ne 3229 and ls ne 1803, n)
-; 		if n gt 0 then f = f[i_unknown] else stop
-; 	endif
+
 	mo = name2mo(f)
 	n = n_elements(f)
-	template = create_struct('MO', '', 'STAR_DIR', '', {period:0.0d, hjd0:0.0d, duration:0.0, depth:0.0d, depth_uncertainty:0.0d, ratio:0.0, n_boxes:0, n_points:0, rescaling:1.0, inflation_for_bad_duration:1.0, ignore:0B, known:0B, variability:0B, stats:{boxes:fltarr(9), points:0, points_per_box:fltarr(9), start:0.0d, finish:0.0d, periods_searched:0L}} )
+	template = create_struct('MO', '', 'STAR_DIR', '', {period:0.0d, hjd0:0.0d, duration:0.0, depth:0.0d, depth_uncertainty:0.0d, ratio:0.0, n_boxes:0, n_points:0, rescaling:1.0, inflation_for_bad_duration:1.0, stats:{boxes:fltarr(9), points:0, points_per_box:fltarr(9), start:0.0d, finish:0.0d, periods_searched:0L}} )
 	summary_of_candidates = replicate(template, n)
 	has_boxes = bytarr(n)
 	mprint, doing_string, 'making a summary of the candidates; saving to population/summary_of_candidates.idl'
@@ -26,18 +21,7 @@ PRO load_summary_of_candidates, summary_of_candidates
 		copy_struct, best_candidates[0], s
 		has_boxes[i]= file_test(star_dir + 'box_pdf.idl')
 		
-		if file_test(star_dir + 'comments.log') then begin
-			comments = ''
-			openr, lun, /get_lun, star_dir + 'comments.log'
-			while eof(lun) eq 0 do begin
-				readf, lun, comments
-				if strmatch(comments, '*IGNORE*', /fold_case) then s.ignore = 1
-				if strmatch(comments, '*VARIAB*', /fold_case) then s.variability = 1
-				if strmatch(comments, '*KNOWN*', /fold_case) then s.known = 1
-			endwhile
-			close, lun
-			free_lun, lun
-		endif
+
 		summary_of_candidates[i] = s
 		summary_of_candidates[i].star_dir = star_dir
 		summary_of_candidates[i].mo = mo[i]

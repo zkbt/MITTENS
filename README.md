@@ -14,7 +14,10 @@ Read the [cheatsheet](https://github.com/zkbt/MITTENS/blob/master/cheatsheet.md)
 
 From there, a main population-level window will open. Use the inspector to [going roughly left to right across the window] (1) select a star you're interested in, (2) select a periodic candidate or interesting single event you're interested in, (3) display plots, either individual events, or phased to period, or several other options.
 
-Most of the individual-level plot windows include lots of options for what points or curves to plot [along the left], what time range to focus on [along the bottom], how to output the plot or the star's data [top left], and how to comment on the star [top right]. Comments will be saved as flat text files, in the stars' MITTENS directories.
+Most of the individual-level plot windows include lots of options for what points or curves to plot [along the left], what time range to focus on [along the bottom], how to output the plot or the star's data [top left], and how to comment on the star [top right]. Comments will be saved as flat text files, in the stars' MITTENS directories. Currently, a few keywords can be used to filter objects in the population plots. If a star's comment file contains:
+  * `known`: points from this star can be excluded with the 'known' flag (meant to hide or highlight things we already know about)  
+  * `ignore`: points from this star can be excluded with the 'weirdos' flag (meant for hiding stars that have mysteriously bad data; things like shutter failures or blends)  
+  * `variability` or `variable` or anything starting with `varib`: points from this star can be excluded with the 'variability' flag (meant to hide stars that are just too darn difficult -- use sparingly!)
 
 
 ### SCHEDULE FOR UPDATING ANALYSES

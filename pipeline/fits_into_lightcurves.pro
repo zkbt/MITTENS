@@ -46,7 +46,7 @@ PRO fits_into_lightcurves, desired_mo, remake=remake, all=all, old=old, k_start=
 		;pass the MO through name2mo to make sure it becomes a valid MEarth Object
 		desired_mo = name2mo(desired_mo)
 	endif else begin
-		desired_mo = progress[sort(progress.periodic)].mo
+		desired_mo = progress[reverse(sort(progress.periodic))].mo
 	endelse
 
 	; loop over the desired mo's

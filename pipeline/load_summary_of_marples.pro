@@ -55,7 +55,7 @@ PRO load_summary_of_marples, all=all
 	interesting_marples.rescaling = rescalings[i_interesting]
 	interesting_marples.mo = ensemble_of_mos[ordered_indices]
 
-	if ~keyword_set(all) then begin
+	if 0 then begin
 		skip_list = name2mo([1186, 3512, 1803, 3229, 3948])
 		skipmarple = bytarr(n_elements(interesting_marples))
 		for i=0, n_elements(skip_list)-1 do begin

@@ -131,11 +131,14 @@ PRO get_jonathans_lightcurves, filename, remake=remake
 
 					; split up years! (split in late august)
 					caldat, big_ext_var.mjd_obs + 2400000.5d  - 240.0d, months, days, years
+					south = (tel ge 11) and (tel le 18)
+					
+					; kludge to prevent splitting south!
+					if south then years = years[0]
 					year = years[uniq(years)]
 		
 					; throw out the tiny bit with bad old filters at the star of the 2010-2011 season
 					if strmatch(jmi_file_prefix, '*2008-2010-iz*') then year = year[where(year ne 2010)]
-					if (tel ge 11) and (tel le 18) then year = year[0]
 					
 					for i_year=0, n_elements(year)-1 do begin
 						

@@ -430,7 +430,7 @@ PRO inspect, input_mo, GROUP = GROUP, BLOCK=block
 			distance_max = widget_text(distance_base, value='33', uvalue='distance_max', /edit, xsize=4)
 
 	filter_box = {classification:class_buttons, ra_min:ra_min, ra_max:ra_max, dec_min:dec_min, dec_max:dec_max, size_min:size_min, size_max:size_max, distance_min:distance_min, distance_max:distance_max}
-	filtering_parameters = {unmarked:1, known:1, variability:1, ignore:1, ra_min:0.0, ra_max:24.0, dec_min:-90.0, dec_max:90.0, size_min:0.08, size_max:0.35, distance_min:0.0, distance_max:33.0}
+	filtering_parameters = {unmarked:1, known:1, variability:1, ignore:1, ra_min:0.0, ra_max:24.0, dec_min:-90.0, dec_max:90.0, size_min:0.08, size_max:0.35, distance_min:0.0, distance_max:100.0}
 
 
 
