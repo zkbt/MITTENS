@@ -46,12 +46,13 @@ PRO fits_into_lightcurves, desired_mo, remake=remake, all=all, old=old, k_start=
 		;pass the MO through name2mo to make sure it becomes a valid MEarth Object
 		desired_mo = name2mo(desired_mo)
 	endif else begin
-		desired_mo = progress[reverse(sort(progress.periodic))].mo
+		desired_mo = progress[reverse(sort(progress.lightcurves))].mo
 	endelse
 
 	; loop over the desired mo's
 	for i=0, n_elements(desired_mo)-1 do begin
 	   stillneeded=1
+	   if strmatch(desired_mo[i], '*\?*') then continue
 	   set_star, desired_mo[i]
 	   files = ''
 	   readcol, mo_dir() + 'files.txt', files, format='A'

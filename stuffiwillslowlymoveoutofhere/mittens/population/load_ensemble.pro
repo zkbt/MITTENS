@@ -1,7 +1,7 @@
 FUNCTION load_ensemble, p,  year=year, tel=tel, lspm=lspm, radius_range=radius_range, suffix, n=n
 f = subset_of_stars('cleaned_lc.idl',  year=year, tel=tel, lspm=lspm, radius_range=radius_range, n=n)
 f = f[where(file_test(f + '/ext_var.idl'))]
-	skip_list = [	'ls3229/ye10/te04/', 'ls3229/ye10/te07/', 'ls1186/ye10/te01/'];, $
+	;skip_list = [	'ls3229/ye10/te04/', 'ls3229/ye10/te07/', 'ls1186/ye10/te01/'];, $
 
   ls = long(stregex(/ext, stregex(/ext, f, 'ls[0-9]+'), '[0-9]+'))
   ye = long(stregex(/ext, stregex(/ext, f, 'ye[0-9]+'), '[0-9]+'))
@@ -12,7 +12,7 @@ f = f[where(file_test(f + '/ext_var.idl'))]
   for i=0, n-1 do begin
 
  	star_dir = f[i];strmid(f[i], 0, strpos(f[i], 'cleaned'))
-	if total(strmatch(skip_list, star_dir)) then continue
+	;if total(strmatch(skip_list, star_dir)) then continue
 	
 		print, star_dir
 		restore, star_dir + 'cleaned_lc.idl'

@@ -22,7 +22,7 @@ PRO plot_alltheboxes, ensemble, eps=eps
 
 	for j=0, n_tags(ensemble)-1 do begin
 		n_durations = n_elements(ensemble.(j)[0].depth)
-		unknown = ensemble.(j).lspm ne 1186 and ensemble.(j).lspm ne 3512 and ensemble.(j).lspm ne 3229 and ensemble.(j).lspm ne 1803
+		unknown = ones(n_elements(ensemble.(j).lspm);ensemble.(j).lspm ne 1186 and ensemble.(j).lspm ne 3512 and ensemble.(j).lspm ne 3229 and ensemble.(j).lspm ne 1803
 		for i=0, n_durations -1 do begin
 			not_flare = ensemble.(j).n[i] gt 0
 			defined = ensemble.(j).depth[i] ne 0 and ensemble.(j).depth_uncertainty[i] gt 0

@@ -43,6 +43,7 @@ FUNCTION name2mo, input
 				  mo[i] = mo_ensemble[imatch].mo
 				endif else begin
 				  mprint, tab_string, 'name2mo.pro could not find a unique match for ', this
+				  mo[i] = "???"
 				endelse
 			endelse
 		endif
@@ -51,6 +52,7 @@ FUNCTION name2mo, input
 			i_match = where(mo_ensemble.lspmn eq long(this), n_match)
 			if n_match eq 0 then begin
 				mprint, tab_string, error_string, 'but no matching MEarth Objects were found!'
+				mo[i] = '???'
 			endif else begin
 				if n_match gt 1 then begin 
 					mprint, tab_string, error_string, 'multiple matching MEarth Objects were found, using the first one!'

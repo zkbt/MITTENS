@@ -53,6 +53,7 @@ PRO lightcurves_into_marples, desired_mo, remake=remake, start=start
 	if n_elements(start) eq 0 then start = 0
 	for i=start*n_elements(f), n_elements(f)-1 do begin
 		mo = name2mo(f[i])
+		if strmatch(mo, '*\?*') then continue
 		marplify, mo, remake=remake
 	endfor
 END

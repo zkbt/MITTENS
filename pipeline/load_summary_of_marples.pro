@@ -55,20 +55,6 @@ PRO load_summary_of_marples, all=all
 	interesting_marples.rescaling = rescalings[i_interesting]
 	interesting_marples.mo = ensemble_of_mos[ordered_indices]
 
-	if 0 then begin
-		skip_list = name2mo([1186, 3512, 1803, 3229, 3948])
-		skipmarple = bytarr(n_elements(interesting_marples))
-		for i=0, n_elements(skip_list)-1 do begin
-			i_match = where(interesting_marples.mo eq skip_list[i], n_match)
-			if n_match gt 0 then begin
-				skipmarple[i_match] = 1
-			endif
-			mprint, tab_string, tab_string, 'will exclude lspm' + rw(skip_list[i]) + ' from MarPLE population plots'
-		endfor
-		ok = where(skipmarple eq 0, n_ok)
-		if n_ok eq 0 then stop
-		interesting_marples = interesting_marples[ok]
-	endif
 
 	save, interesting_marples, filename='population/summary_of_interesting_marples.idl'
 

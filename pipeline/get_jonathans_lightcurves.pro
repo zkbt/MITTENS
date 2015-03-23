@@ -145,6 +145,7 @@ PRO get_jonathans_lightcurves, filename, remake=remake
 						ext_var = big_ext_var
 						star_dir = make_star_dir(mo_string, year[i_year], tel)
 						if ((tel ge 1) and (tel le 18)) eq 0 then stop
+						if strmatch(star_dir, '*\?*') then continue
 						if file_test(star_dir) eq 0 then file_mkdir, star_dir
 						
 						; to make it easier to look things up later....
