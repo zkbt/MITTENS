@@ -65,8 +65,8 @@ PRO load_stellar_properties
 			clear_struct, this
 			this.mo = name2mo(twomassid)
 			for j=0, n_elements(this)-1 do begin
-				this[j].ra = ten(rah[j] + ':' + ram[j] + ':' + ras[j])*15.0
-				this[j].dec = ten(decd[j] + ':' + decm[j] + ':' + decs[j])
+				this[j].ra = ten(rw(rah[j] + ':' + ram[j] + ':' + ras[j]))*15.0
+				this[j].dec = ten(rw(decd[j] + ':' + decm[j] + ':' + decs[j]))
 			endfor
 			this.ra_string = rah + ':' + ram + ':' + ras
 			this.dec_string = decd + ':' + decm + ':' + decs

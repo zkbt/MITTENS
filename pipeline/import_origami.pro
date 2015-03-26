@@ -18,8 +18,8 @@ PRO import_origami, dont=dont
 	if ~keyword_set(dont) then spawn, 'rsync -trv zkbt@antares.mit.edu:/corscorpii/d1/zkbt/mearth/results/ origami_received/'
 
 	; make sure their group permissions are set to exoplanet (this seems to work only from zach's directory)
-	spawn, 'chgrp -R exoplanet origami_received/*', error
-	spawn, 'chmod 660 origami_received/*', error
+	spawn, 'chgrp -R exoplanet origami_received/*'
+	spawn, 'chmod 660 origami_received/*'
   
 	; compile a list of all the files that have been received
 	f = file_search('origami_received/*')
