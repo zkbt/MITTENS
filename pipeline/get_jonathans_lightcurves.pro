@@ -41,7 +41,8 @@ PRO get_jonathans_lightcurves, filename, remake=remake
 		fits_lc = mrdfits(filename, 1, header_lc, status=status, /silent)
 		; if successfully read in, then continue to generate an IDL lightcurve		
 		if status eq 0 then begin
-			mprint, doing_string, ' extracting all M dwarf light curves from ', filename
+			mprint, doing_string, ' extracting all M dwarf light curves from '
+			mprint, tab_string, filename
 			jmi_file_prefix = strmid(filename, 0, strpos(filename, '_daily.fits'))
 			if jmi_file_prefix eq '' then jmi_file_prefix = strmid(filename, 0, strpos(filename, '_lc.fits'))
 			start = stregex(jmi_file_prefix, '(lspm[0-9]+)+', length=length)
@@ -134,7 +135,7 @@ PRO get_jonathans_lightcurves, filename, remake=remake
 					south = (tel ge 11) and (tel le 18)
 					
 					; kludge to prevent splitting south!
-					if south then years = years[0]
+					if south then years[*] = years[0]
 					year = years[uniq(years)]
 		
 					; throw out the tiny bit with bad old filters at the star of the 2010-2011 season
@@ -289,14 +290,15 @@ PRO get_jonathans_lightcurves, filename, remake=remake
 
 							endif
 						endif else mprint, '         lightcurve already made, not remaking'
-						all_files = file_search(star_dir + '*')
-						catch, error_status
-						if error_status ne 0 then begin
-						  mprint, "   couldn't modify the file permissions"
-						endif else begin
-						  file_chmod, /u_read, /u_write, /u_execute, /g_read, /g_write, /g_execute, all_files
-						  catch, /cancel
-						endelse
+						;all_files = file_search(star_dir + '*')
+						;catch, error_status
+						;if error_status ne 0 then begin
+						;  mprint, "   couldn't modify the file permissions"
+						;endif else begin
+						;  file_chmod, /u_read, /u_write, /u_execute, /g_read, /g_write, /g_execute, all_files
+						;  catch, /cancel
+						;endelse
+						mittens_permissions
 					endfor
 				endfor
 			endif

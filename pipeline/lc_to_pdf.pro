@@ -34,6 +34,7 @@ PRO lc_to_pdf, test=test, redtest=redtest, remake=remake, grazing=grazing, highr
 	common this_star
 	common mearth_tools
 
+	display, /off
 	; make text displayed within this procedure is labeled
 	procedure_prefix = '[lc_to_pdf]'
 

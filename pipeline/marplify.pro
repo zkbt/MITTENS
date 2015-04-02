@@ -137,4 +137,5 @@ PRO marplify, input_mo, old=old, remake=remake, fake=fake, nofold=nofold, bulldo
 	free_lun, lun
 	close, /all
 	file_delete, star_dir() + 'needtomakemarple', /allow
+	mittens_permissions
 END

@@ -98,10 +98,13 @@ PRO load_stellar_properties
 	copy_struct, combined, mo_ensemble
 	mo_ensemble.teff = (mo_ensemble.lum/mo_ensemble.radius^2)^0.25*5780.0
 	mo_ensemble.mo = strip_twomass(mo_ensemble.mo)
-	bad = where(mo_ensemble.bestname eq '', nbad)
+	bad = where(mo_ensemble.bestname eq '' or mo_ensemble.mo eq '', nbad)
 	if nbad > 0 then mo_ensemble[bad].bestname = mo_ensemble[bad].mo
 	; save the IDL structure in a central spot
 	
+	mo_ensemble.ra_string = rw(mo_ensemble.ra_string)
+	mo_ensemble.dec_string = rw(mo_ensemble.dec_string)
+	mo_ensemble.bestname = rw(mo_ensemble.bestname)
 	save, mo_ensemble, filename='population/mo_ensemble.idl'
 
 	; loop through all stars in north and south samples, creating a folder for each

@@ -1,4 +1,4 @@
-PRO update, mo, remake=remake
+PRO update, mo, remake=remake, origami=origami
   if keyword_set(mo) then begin
     mprint, 'updating ', mo
   endif else begin
@@ -7,6 +7,8 @@ PRO update, mo, remake=remake
   endelse
   fits_into_lightcurves, mo, remake=remake
   lightcurves_into_marples, mo, remake=remake
-  marples_into_origami, mo
-  origami_into_candidates, mo
+  if keyword_set(origami) then begin
+    marples_into_origami, mo
+    origami_into_candidates, mo
+  endif
 END

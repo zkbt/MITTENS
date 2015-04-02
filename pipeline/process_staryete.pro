@@ -25,6 +25,7 @@ PRO process_staryete, bulldoze=bulldoze, remake=remake, lenient=lenient,  baddat
 			weed_lightcurve, remake=remake, lenient=lenient,  baddatesokay=baddatesokay, trimtransits=trimtransits
 	
 			; make a quick, rough attempt at cleaning
+			display, /off
 			rough_clean
 			rough_clean, /use_sin
 

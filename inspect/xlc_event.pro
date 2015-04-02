@@ -87,14 +87,14 @@ PRO xlc_event_ev, event
 	IF N_ELEMENTS(eventval) EQ 0 THEN thebuttonclicked = '' else begin
 
 		; debugging
-		print, "eventval is : ", eventval
+		;print, "eventval is : ", eventval
 		if n_elements(eventval) gt 1 then begin
 			thebuttonclicked = eventval[event.value]
 		endif else thebuttonclicked = eventval
 	endelse
 
 	;debugging
-	print, 'thebuttonclicked is ', thebuttonclicked
+	;print, 'thebuttonclicked is ', thebuttonclicked
 
 	CASE thebuttonclicked OF
 		; if clicking somewhere on the plotting window

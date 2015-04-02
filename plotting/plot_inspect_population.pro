@@ -181,10 +181,10 @@ PRO plot_inspect_population, input_mo, counter=counter, summary_of_candidates=su
 		; add comment flags!
 		flag_mask = distance_mask*0 + 1
 		anything_set = distance_mask*0
-		print, filtering_parameters.known, filtering_parameters.ignore, filtering_parameters.variability
+		;print, filtering_parameters.known, filtering_parameters.ignore, filtering_parameters.variability
 		for c=0, n_elements(summary_of_comments)-1 do begin
 		  ihascomment = where(structure.mo eq summary_of_comments[c].mo, nhascomment)
-		  print, summary_of_comments[c].mo, nhascomment
+		  ;print, summary_of_comments[c].mo, nhascomment
 		  if nhascomment gt 0 then begin
 		    
 		    
@@ -194,7 +194,7 @@ PRO plot_inspect_population, input_mo, counter=counter, summary_of_candidates=su
 		    
 		    anything_set[ihascomment] = (summary_of_comments[c].known or summary_of_comments[c].variability or summary_of_comments[c].ignore)
 
-		    print, summary_of_comments[c], flag_mask[ihascomment]
+		    ;print, summary_of_comments[c], flag_mask[ihascomment]
 		  endif
 		endfor
 		if ~filtering_parameters.unmarked then flag_mask *= anything_set 

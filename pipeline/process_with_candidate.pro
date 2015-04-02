@@ -77,7 +77,6 @@ PRO process_with_candidate, input_candidate
 	endif else begin
 		lcs = pdf_to_lc(candidate, vartools=vartools)
 	endelse
-
 	;all_files = file_search(candidate_star_dir + '*')
 	;catch, error_status
 	;if error_status ne 0 then begin
@@ -86,4 +85,5 @@ PRO process_with_candidate, input_candidate
 	;	file_chmod, /u_read, /u_write, /u_execute, /g_read, /g_write, /g_execute, all_files
 	;	catch, /cancel
 	;endelse
+	mittens_permissions
 END

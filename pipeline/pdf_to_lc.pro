@@ -16,6 +16,9 @@ FUNCTION pdf_to_lc, candidate, vartools=vartools
 
 	other_tel =  ~strmatch(star_dir, '*te*')
 	; load up (this season of) this star
+	if file_test(star_dir + 'box_pdf.idl') eq 0 then begin
+	  update
+	endif
 	restore, star_dir + 'box_pdf.idl'
 	restore, star_dir + 'inflated_lc.idl'
 

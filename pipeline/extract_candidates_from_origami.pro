@@ -156,5 +156,6 @@ PRO extract_candidates_from_origami, remake=remake, n_save=n_save
 	mprint, tab_string + tab_string + doing_string + 'saving ' + rw(n_save) + ' candidates to ' + star_dir + typical_candidate_filename
 	; plot the spectra
 	mprint, done_string
+	mittens_permissions
 
 END

@@ -17,12 +17,13 @@ PRO call_origami_bot, bulldoze=bulldoze
 	if ~file_test(star_dir() + 'octopusinprogress.txt') then begin 
 		;make a temporary file to prevent duplication of effort for this long step
 		openw, lun, star_dir() + 'octopusinprogress.txt', /get_lun
+		
 		spawn, 'hostname', hostname
 		printf, lun, hostname
 		printf, lun, systime()
 		close, lun
 		free_lun, lun
-
+		
 		; run origami bot, if possible
 		if file_test(star_dir() + 'box_pdf.idl') then begin
 
@@ -52,6 +53,7 @@ PRO call_origami_bot, bulldoze=bulldoze
 		mprint, skipping_string, 'not running call_origami_bot.pro because it may already be running somewhere else'
 		mprint, tab_string, 'delete '+ star_dir() + 'octopusinprogress.txt'+ ' or run with /bulldoze to continue'
 	endelse
+	mittens_permissions
 END
 
 
