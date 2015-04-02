@@ -5,7 +5,8 @@ PRO display, on=on, off=off
   if keyword_set(on) then display = 1
   if keyword_set(off) then display = 0
   tf = ['false', 'true']
-  if keyword_set(verbose) then begin
+  ;if keyword_set(verbose) then begin
+  if 0:
     printl
     print, '   plotting?     = ', tf[display]
     printl

@@ -3,7 +3,7 @@ PRO fit_season
 
 
 	
-	xplot, xsize=2000
+	;xplot, xsize=2000
 	loadct, 39
 	common this_star
 	common mearth_tools
