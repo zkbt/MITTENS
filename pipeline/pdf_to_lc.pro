@@ -17,7 +17,8 @@ FUNCTION pdf_to_lc, candidate, vartools=vartools
 	other_tel =  ~strmatch(star_dir, '*te*')
 	; load up (this season of) this star
 	if file_test(star_dir + 'box_pdf.idl') eq 0 then begin
-	  update
+	  mprint, ")(!&%!% UH-OH! something went wrong in pdf_to_lc. Are you sure this star has been recently marplified?"
+	  return, -1
 	endif
 	restore, star_dir + 'box_pdf.idl'
 	restore, star_dir + 'inflated_lc.idl'
