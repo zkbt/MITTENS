@@ -156,6 +156,7 @@ PRO inspect_ev, event
 					inspect_update_lists, input_object=selected_object
 					inspect_update_information_panel
 					inspect_remake_plots
+					mittens_permissions
 				endif
 
 
