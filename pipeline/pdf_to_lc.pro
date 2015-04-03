@@ -138,7 +138,7 @@ FUNCTION pdf_to_lc, candidate, vartools=vartools
 	save, filename=star_dir + 'cleaned_lc.idl', cleaned_lc, candidate, in_an_intransit_box
 	save, filename=star_dir + 'variability_lc.idl', variability_lc, candidate, uncertainty_variability_model, uncertainty_overall_model
 	save, filename=star_dir + 'nightly_fits.idl', nightly_fits, nothings
-
+	
 END
 
 
