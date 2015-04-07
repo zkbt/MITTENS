@@ -1,19 +1,24 @@
+import numpy as np
+import pyximport; pyximport.install(setup_args={
+                              "include_dirs":np.get_include()},
+                  reload_support=True)
+
 from zachopy.Talker import Talker
 import matplotlib.pyplot as plt
-import numpy as np
 import astropy.table, astropy.io.ascii
 import zachopy.display
-import python.origami
+import origami
 
 class Folder(Talker):
-    def __init__(self):
+    def __init__(self, filename='/Users/zkbt/Desktop/mo00113182+5908400_marples.txt'):
 
         Talker.__init__(self)
         self.period_max = 20.0
-        self.read()
+        self.read(filename=filename)
         self.gridify()
 
-    def read(self, filename='/Users/zkbt/Desktop/mo23584285-6245423_marples.txt'):
+    def read(self, filename=None):
+        self.filename = filename
         self.speak('loading text MarPLEs from {0}'.format(filename))
         data = np.loadtxt(filename)
         self.ndurations = (data.shape[1]-1)/2
@@ -49,8 +54,47 @@ class Folder(Talker):
         #self.grid['uncertainties'][0,:] = np.ones_like(self.grid['hjd'])
         self.grid['inversevariances'] = 1.0/self.grid['uncertainties']**2
 
+    #@numba.jit(nopython=True)
+    def fold(self, period):
+
+        # how many epochs exist for this period?
+        nepochs = period/self.hjd_step
+
+        # what is this as an integer?
+        integerepochs = np.int(np.ceil(nepochs))
+
+        # wha
+        np.int(np.round(np.arange((self.hjd_max - self.hjd_min)/period)*nepochs))
+        intransit = (np.round(self.indices/nepochs) == 0).nonzero()
+
+        depths, inversevariances = 0
+        for i in range(integerepochs.shape[0]):
+            for j in range(intransit.shape[0]):
+
+            depths = self.grid['depths'][:,intransit+i]
+            inversevariances = self.grid['inverservariances'][:.intransit + i]
+
+
+
+                # regrid the depths and inversevariances, so they're folded back on one another
+                regridded_depths = grid_depths[:,0:ntotal].reshape((ndurations, ncycles, nperiod))
+                regridded_inversevariances = grid_inversevariances[:,0:ntotal].reshape((ndurations, ncycles, nperiod))
+
+                # stack each period to measure the S/N at all epochs
+                cycleaxis = 1
+                eweights = np.sum(regridded_inversevariances, cycleaxis)
+
+
+                epochs_depths = np.sum(regridded_depths*regridded_inversevariances, cycleaxis)/eweights
+                epochs_uncertainties = np.sqrt(1.0/eweights)
+                epochs_nboxes = np.sum(regridded_inversevariances > 0)
+
+                epochs_chisq = np.sum((regridded_depths - epochs_depths.reshape((ndurations, 1, nperiod)))*regridded_inversevariances)
+                epochs_rescaling = np.sqrt(np.maximum(epochs_chisq/(epochs_nboxes-1), 1))
+                epochs_uncertainties *= epochs_rescaling
+
     def foldall(self):
-        python.origami.foldall(self)
+        origami.foldall(self)
 
     def plotfolding(self):
         try:
@@ -69,3 +113,7 @@ class Folder(Talker):
         plt.errorbar(self.hjd, self.depths[i,:], self.uncertainties[i,:], alpha=0.5)
         ok = self.grid_depths[i,:].mask == False
         plt.errorbar(self.grid_hjd[ok], self.grid_depths[i,ok], self.grid_uncertainties[i,ok], alpha=0.5)
+
+if __name__ == '__main__':
+    f = Folder()
+    f.foldall()

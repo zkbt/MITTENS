@@ -1,12 +1,13 @@
 import numpy as np
 cimport numpy as np
-def foldall(self):
 
-  for nperiod in range(200,300):
+
+def foldall(self):
+  for nperiod in range(200,210):
       fold(self.grid['depths'], self.grid['inversevariances'], nperiod, self.hjd_max, self.hjd_min, self.hjd_step)
       print ('{0}'.format(nperiod))
 
-def fold(np.ndarray grid_depths, np.ndarray grid_inversevariances, np.int nperiod, np.float hjd_max, np.float hjd_min, np.float hjd_step):
+def fold(np.ndarray grid_depths, np.ndarray grid_inversevariances,  nperiod, hjd_max, hjd_min, hjd_step):
     '''Take the gridified MarPLES, and fold them back every nperiod epochs.'''
 
     # calculate the number of cycles spanned by the data, for this nperiod
@@ -23,7 +24,7 @@ def fold(np.ndarray grid_depths, np.ndarray grid_inversevariances, np.int nperio
     regridded_inversevariances = grid_inversevariances[:,0:ntotal].reshape((ndurations, ncycles, nperiod))
 
     # stack each period to measure the S/N at all epochs
-    cdef int cycleaxis = 1
+    cycleaxis = 1
     eweights = np.sum(regridded_inversevariances, cycleaxis)
 
 
