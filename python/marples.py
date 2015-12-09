@@ -3,7 +3,7 @@ from zachopy.Talker import Talker
 import matplotlib.pyplot as plt
 import astropy.table, astropy.io.ascii
 import zachopy.display
-import folder
+#import folder
 
 period_max = 20.0
 
@@ -97,6 +97,11 @@ class Marples(Talker):
             ax.errorbar(self.grid['hjd'][ok], self.grid['depths'][i,ok], self.grid['uncertainties'][i,ok], alpha=0.5)
             ax.set_ylabel('{0}hr'.format(24*self.durations[i]), rotation=0, ha='right')
         plt.show()
+
+
+
+    def plot(self, period=?, midtransit=?, phasefolded=True/False):
+
 
     def fold(self,  type='slow'):
         if type == 'slow':
