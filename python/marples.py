@@ -102,6 +102,11 @@ class Marples(Talker):
             ax.set_ylabel('{0}hr'.format(24*self.durations[i]), rotation=0, ha='right')
         plt.show()
 
+
+
+    def plot(self, period=?, midtransit=?, phasefolded=True/False):
+
+
     def fold(self,  type='slow'):
         if type == 'slow':
             return folder.fold(self.grid['hjd'], self.grid['depths'], self.grid['inversevariances'])
