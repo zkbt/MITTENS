@@ -127,13 +127,10 @@ class Folder(Talker):
         depth = numerator/denominator
         inversevariance = denominator
 
-
+        # this step rescales the uncertainties to include the variance of the data itself
         chisq = np.sum((de[:,indices] - depth.reshape(ndurations,1,nepochs))**2*iv[:,indices], 1)
         count = np.sum(iv[:,indices]>0, 1)
-        '''
         rescaling = np.sqrt(np.maximum(chisq/np.maximum((count - 1),1), 2))
-        '''
-        rescaling=1
 
         snr = depth*np.sqrt(inversevariance)/rescaling
 
