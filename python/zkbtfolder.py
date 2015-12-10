@@ -2,13 +2,18 @@ from zachopy.Talker import Talker
 import numpy as np, matplotlib.pyplot as plt
 import zachopy.utils, glob
 import fastfasefolding as nick
+import multiprocessing as mp
 
 plt.ion()
 #cimport numpy as np
 
 #DTYPE = np.float
 #ctypedef np.float_t DTYPE_t
-
+def nickfold(t,d,inverse_var,P,etft):
+    return nick.fold(t,d,inverse_var,P,etft)
+    
+def starfold(args):
+     return nickfold(*args)
 
 class Folder(Talker):
     def __init__(self, marple, output='untrimmed'):
@@ -85,12 +90,35 @@ class Folder(Talker):
         self.plot=plot
 
         # loop over the periods
+        print self.periods
+        if option == 'Nick':
+            import itertools as itool
+            start = self.marple.grid['hjd'][0]
+            epoch = 2457184.55786-2400000.5
+            teft = (epoch - self.marple.grid['hjd'][0])%1.6289 + self.marple.grid['hjd'][0]
+            print teft
+            pool = mp.Pool()
+            print pool._processes
+            q = itool.izip(itool.repeat(self.marple.grid['hjd']),
+                                                 itool.repeat(self.marple.grid['depths'].T),
+                                                 itool.repeat(self.marple.grid['inversevariances'].T),
+                                                 self.periods,
+                                                 itool.repeat(teft))
+            m = pool.map(starfold, itool.izip(itool.repeat(self.marple.grid['hjd']),
+                                                 itool.repeat(self.marple.grid['depths'].T),
+                                                 itool.repeat(self.marple.grid['inversevariances'].T),
+                                                 self.periods,
+                                                 itool.repeat(teft)))
+            print np.array(m).T
+            m = np.array(m).T
+            #self.snr[:,i] = doversigma
         for i in xrange(len(self.periods)):
-            print '{0}/{1}'.format(i,n)
+            #print "hello"
+            #print '{0}/{1}'.format(i,n)
             if option == 'Nick':
                 start = self.marple.grid['hjd'][0]
                 epoch = 2457184.55786-2400000.5
-                teft = (epoch - self.marple.grid['hjd'][0])%periods[i] + self.marple.grid['hjd'][0]
+                teft = (epoch - self.marple.grid['hjd'][0])%1.6289 + self.marple.grid['hjd'][0]
                 doversigma = nick.fold( self.marple.grid['hjd'],
                                         self.marple.grid['depths'].T,
                                         self.marple.grid['inversevariances'].T,
@@ -98,7 +126,8 @@ class Folder(Talker):
                 self.snr[:,i] = doversigma
             elif option == "Zach":
                 self.snr[:,i] = self.foldby(self.iperiods[i])
-
+        print self.snr
+        print np.array_equal(m,self.snr)
     def findbestepoch(self, period):
         iperiod = period/self.marple.hjd_step
         snr = self.foldby(iperiod, dontcollapse=True)
