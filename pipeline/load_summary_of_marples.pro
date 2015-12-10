@@ -28,7 +28,7 @@ PRO load_summary_of_marples, all=all
 
            ;Stuff the events for this one star in our array
 
-           ensemble_of_boxes[running_count_of_good_events:running_count_of_good_events + n_for_this_star-1] = filtered_events.hjd
+           ensemble_of_boxes[running_count_of_good_events:running_count_of_good_events + n_for_this_star-1].hjd = filtered_events.hjd
            ensemble_of_boxes[running_count_of_good_events:running_count_of_good_events + n_for_this_star-1].duration = filtered_events.duration
            ensemble_of_boxes[running_count_of_good_events:running_count_of_good_events + n_for_this_star-1].depth = filtered_events.depth
            ensemble_of_boxes[running_count_of_good_events:running_count_of_good_events + n_for_this_star-1].depth_uncertainty = filtered_events.depth_uncertainty

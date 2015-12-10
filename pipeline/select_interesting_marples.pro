@@ -190,7 +190,7 @@ FUNCTION select_interesting_marples, boxes, mo
                                 ;Trim the excess from 20 million to
                                 ;get the actual array of actual things
                                 ;for actual reasons
-  ensemble_of_boxes = ensemble_of_boxes[0:running_count_of_good_events]
+  ensemble_of_boxes = ensemble_of_boxes[0:running_count_of_good_events-1]
   return,ensemble_of_boxes
 
 END
