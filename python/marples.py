@@ -1,4 +1,4 @@
-import numpy as np
+rimport numpy as np
 from zachopy.Talker import Talker
 import matplotlib.pyplot as plt
 import astropy.table, astropy.io.ascii
@@ -77,7 +77,7 @@ class Marples(Talker):
         self.gridshape = (self.ndurations, self.ngrid)
         # create empty depth and uncertainty grids
 
-        self.grid['depths'] = np.full(self.gridshape, 0.0, dtype=np.float)
+        self.grid['depths'] = np.full(self.gridshape, np.nan, dtype=np.float)
         self.grid['uncertainties'] = np.full(self.gridshape, np.inf, dtype=np.float)
 
         # populate them with data where we have it
@@ -102,6 +102,14 @@ class Marples(Talker):
             ax.set_ylabel('{0}hr'.format(24*self.durations[i]), rotation=0, ha='right')
         plt.show()
 
+<<<<<<< HEAD
+=======
+
+
+    #def plot(self, period=?, midtransit=?, phasefolded=True/False):
+
+
+>>>>>>> 72dbe75b4fd19fbb321cbe69786a48d825823396
     def fold(self,  type='slow'):
         if type == 'slow':
             return folder.fold(self.grid['hjd'], self.grid['depths'], self.grid['inversevariances'])
