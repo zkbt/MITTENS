@@ -17,6 +17,7 @@ PRO load_summary_of_marples, all=all
         ;End Added by jason
 
 	for i=0, n_elements(f)-1 do begin
+           print,"on ",str(i)," of ",n_elements(f)
 		
 		restore, f[i]
 	;	if n_elements(ensemble_of_boxes) eq 0 then ensemble_of_boxes = boxes else ensemble_of_boxes = [ensemble_of_boxes, boxes]
@@ -46,6 +47,14 @@ PRO load_summary_of_marples, all=all
                 for j=0,n_elements(boxes.hjd)-1 do begin
                    max_signal_to_noise = max(boxes[j].depth / boxes[j].depth_uncertainty)
                    best_index = where(boxes[j].depth/boxes[j].depth_uncertainty EQ max_signal_to_noise)
+                                ;if have a tie for best S/N, then take
+                                ;the shortest transit. This really
+                                ;only happens when the S/N is super
+                                ;low anyways. Plus the shorter
+                                ;durations are more likely.
+                   IF n_elements(best_index) GT 1 THEN BEGIN
+                      best_index = best_index[0]
+                   ENDIF
                    
                    ;Store for later use
                    best_hjds_jad[j] = boxes[j].hjd
@@ -54,7 +63,7 @@ PRO load_summary_of_marples, all=all
                    best_depth_sigma_jad[j] = boxes[j].depth_uncertainty[best_index]
                    best_n_jad = boxes[j].N[best_index]
                    best_rescaling_jad[j] = boxes[j].rescaling[best_index]
-                endfor
+                ENDFOR
 
                ;We now have, for this object and each
                                 ;timestamp, the best candidate
@@ -83,18 +92,21 @@ PRO load_summary_of_marples, all=all
                       still_searching = 1
                       current_look_ahead_value = 1
                       WHILE still_searching EQ 1 DO BEGIN
-                         IF culling_the_herd+current_look_ahead_value LE n_elements(best_hjds_jad) THEN BEGIN
+                         iterated = 0
+                         IF culling_the_herd+current_look_ahead_value LT n_elements(best_hjds_jad) THEN BEGIN
                             difference_from_next_event = best_hjds_jad[culling_the_herd+current_look_ahead_value] - best_hjds_jad[culling_the_herd]
-                            IF difference_from_next_event GT best_dur_jad[culling_the_herd] AND difference_from_next_event GT best_dur_jad[culling_the_heard+current_look_ahead_value] THEN BEGIN
+                            IF difference_from_next_event GT best_dur_jad[culling_the_herd] AND difference_from_next_event GT best_dur_jad[culling_the_herd+current_look_ahead_value] THEN BEGIN
                                ;Mutually exclusive events, we're done
                                still_searching = 0
                             ENDIF
-                            IF difference_from_next_event LT best_dur_jad[culling_the_herd] AND difference_from_next_event LT best_dur_jad[culling_the_heard+current_look_ahead_value] THEN BEGIN
+                            IF difference_from_next_event LE best_dur_jad[culling_the_herd] OR difference_from_next_event LE best_dur_jad[culling_the_herd+current_look_ahead_value] THEN BEGIN
                                  ;Overlapping events, may the best one
                                  ;win
+                               ;print,"overlapping events detected"
                                SN1 = best_depth_jad[culling_the_herd] / best_depth_sigma_jad[culling_the_herd]
                                SN2 = best_depth_jad[culling_the_herd+current_look_ahead_value] / best_depth_sigma_jad[culling_the_herd+current_look_ahead_value]
-                               IF SN1 GT SN2 THEN BEGIN
+                           
+                               IF SN1 GE SN2 THEN BEGIN
                                   ;Kill event 2
                                   best_depth_jad[culling_the_herd+current_look_ahead_value] = 0
                                ENDIF
@@ -104,12 +116,16 @@ PRO load_summary_of_marples, all=all
                                ENDIF
                                ;Iterate the looking ahead value
                                current_look_ahead_value = current_look_ahead_value + 1
+                               iterated = 1
                                still_searching = 1 ;just in case i fucked up and change it somewhere?
                             ENDIF
                          ENDIF ELSE BEGIN
                             ;No more array to search!
                             still_searching = 0
                          ENDELSE
+                      if iterated eq 0 then begin
+                         current_look_ahead_value = current_look_ahead_value + 1
+                      endif
                       ENDWHILE
                    ENDIF
                 ENDFOR
@@ -124,26 +140,41 @@ PRO load_summary_of_marples, all=all
                 best_depth_sigma_jad = best_depth_sigma_jad[good_ones]
                 best_n_jad = best_n_jad[good_ones]
                 best_rescaling_jad = best_rescaling_jad[good_ones]
+
                       
                 ;Need to somehow create the
                 ;"ensemble_of_boxes" structure                
                 ;END ADDED BY JASON
 
-                ensemble_of_boxes.hjd[running_count_of_good_events:running_count_of_good_events + n_elements(best_hjds_jad)-1] = best_hjds_jad
-                ensemble_of_boxes.duration[running_count_of_good_events:running_count_of_good_events + n_elements(best_hjds_jad)-1] = best_dur_jad
-                ensemble_of_boxes.depth[running_count_of_good_events:running_count_of_good_events + n_elements(best_hjds_jad)-1] = best_depth_jad
-                ensemble_of_boxes.depth_uncertainty[running_count_of_good_events:running_count_of_good_events + n_elements(best_hjds_jad)-1] = best_depth_sigma_jad
-                ensemble_of_boxes.n[running_count_of_good_events:running_count_of_good_events + n_elements(best_hjds_jad)-1] = best_n_jad
-                ensemble_of_boxes.rescaling[running_count_of_good_events:running_count_of_good_events + n_elements(best_hjds_jad)-1] = best_rescaling_jad
-                ensemble_of_boxes.mo[running_count_of_good_events:running_count_of_good_events + n_elements(best_hjds_jad)-1] = mo[i]
+                                ;Don't add things that have S/N
+                                ;< 3 and good ones = -1 (because if
+                                ;there are no good ones then we get -1
+                                ;and -1 index is python-y because FUCK
+                                ;IDL
+                do_it = 1
+                IF n_elements(good_ones) EQ 1 THEN BEGIN
+                   IF good_ones EQ -1 THEN BEGIN
+                      do_it = 0
+                   ENDIF
+                ENDIF
+                IF do_it EQ 1 THEN BEGIN
+                   ensemble_of_boxes[running_count_of_good_events:running_count_of_good_events + n_elements(best_hjds_jad)-1].hjd = best_hjds_jad
+                   ensemble_of_boxes[running_count_of_good_events:running_count_of_good_events + n_elements(best_hjds_jad)-1].duration = best_dur_jad
+                   ensemble_of_boxes[running_count_of_good_events:running_count_of_good_events + n_elements(best_hjds_jad)-1].depth = best_depth_jad
+                   ensemble_of_boxes[running_count_of_good_events:running_count_of_good_events + n_elements(best_hjds_jad)-1].depth_uncertainty = best_depth_sigma_jad
+                   ensemble_of_boxes[running_count_of_good_events:running_count_of_good_events + n_elements(best_hjds_jad)-1].n = best_n_jad
+                   ensemble_of_boxes[running_count_of_good_events:running_count_of_good_events + n_elements(best_hjds_jad)-1].rescaling = best_rescaling_jad
+                   ensemble_of_boxes[running_count_of_good_events:running_count_of_good_events + n_elements(best_hjds_jad)-1].mo = mo[i]
 
-                running_count_of_good_events += n_elements(best_hjds_jad)
+                   running_count_of_good_events += n_elements(best_hjds_jad)
+                ENDIF
 
-		if running_count_of_good_events gt starting_size then begin
+		IF running_count_of_good_events GT starting_size THEN BEGIN
 			mprint, error_string, 'the assumed starting size of ', rw(starting_size), " for the MarPLE array wasn't big enough!"
 			stop
-		endif
-             endfor
+		ENDIF
+             ENDFOR
+
 
 
         ;Trim the excess from 20 million to
