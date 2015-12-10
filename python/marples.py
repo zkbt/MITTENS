@@ -1,4 +1,4 @@
-rimport numpy as np
+import numpy as np
 from zachopy.Talker import Talker
 import matplotlib.pyplot as plt
 import astropy.table, astropy.io.ascii

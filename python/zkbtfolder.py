@@ -1,6 +1,8 @@
 from zachopy.Talker import Talker
 import numpy as np, matplotlib.pyplot as plt
 import zachopy.utils, glob
+import fastfasefolding as nick
+
 plt.ion()
 #cimport numpy as np
 
@@ -65,7 +67,7 @@ class Folder(Talker):
         self.plotSpectrum()
         self.save()
 
-    def fold(self, n=10, period_minimum=1.5, period_maximum=1.7, plot=False):
+    def fold(self, n=10, period_minimum=1.5, period_maximum=1.7, plot=False, option='Nick'):
         # fold over a range of periods
 
         # set up period grid
@@ -83,9 +85,19 @@ class Folder(Talker):
         self.plot=plot
 
         # loop over the periods
-        for i in range(len(self.periods)):
+        for i in xrange(len(self.periods)):
             print '{0}/{1}'.format(i,n)
-            self.snr[:,i] = self.foldby(self.iperiods[i])
+            if option == 'Nick':
+                start = self.marple.grid['hjd'][0]
+                epoch = 2457184.55786-2400000.5
+                teft = (epoch - self.marple.grid['hjd'][0])%periods[i] + self.marple.grid['hjd'][0]
+                doversigma = nick.fold( self.marple.grid['hjd'],
+                                        self.marple.grid['depths'].T,
+                                        self.marple.grid['inversevariances'].T,
+                                        periods[i], teft)
+                self.snr[:,i] = doversigma
+            elif option == "Zach":
+                self.snr[:,i] = self.foldby(self.iperiods[i])
 
     def findbestepoch(self, period):
         iperiod = period/self.marple.hjd_step
