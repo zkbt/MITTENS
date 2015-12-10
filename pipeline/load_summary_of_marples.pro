@@ -49,11 +49,11 @@ PRO load_summary_of_marples, all=all
                    
                    ;Store for later use
                    best_hjds_jad[j] = boxes[j].hjd
-                   best_dur_jad = boxes[j].duration[best_index]
-                   best_depth_jad = boxes[j].depth[best_index]
-                   best_depth_sigma_jad = boxes[j].depth_uncertainty[best_index]
+                   best_dur_jad[j] = boxes[j].duration[best_index]
+                   best_depth_jad[j] = boxes[j].depth[best_index]
+                   best_depth_sigma_jad[j] = boxes[j].depth_uncertainty[best_index]
                    best_n_jad = boxes[j].N[best_index]
-                   best_rescaling_jad = boxes[j].rescaling[best_index]
+                   best_rescaling_jad[j] = boxes[j].rescaling[best_index]
                 endfor
 
                ;We now have, for this object and each
