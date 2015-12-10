@@ -1,6 +1,7 @@
 from marples import Marples
 import matplotlib.pyplot as plt
 import numpy as np
+from zachopy import cmaps
 
 class Candidate():
 
@@ -75,7 +76,9 @@ class Candidate():
             errorplot[errorplot < err_min] = err_min_comp
             errorplot[errorplot > err_max] = err_max_comp 
 
-            sc = plt.scatter(time,depths,s=20,edgecolor='none',c=errorplot,cmap=plt.cm.Blues, alpha=.75)
+            cmap = cmaps.one2another('black', 'black', 1., 0.)
+
+            sc = plt.scatter(time,depths,s=20,marker='None',edgecolor='none',c=errorplot,cmap=cmap)
             #sc_compare = plt.scatter(time,depths,s=20,edgecolor='none',c=errorplot,cmap=plt.cm.Blues)
 
             clb = plt.colorbar(sc)
@@ -84,7 +87,7 @@ class Candidate():
             a, b, c = plt.errorbar(time,depths,yerr=error,capsize=0,ls='',zorder=0)
 
             #convert time to a color tuple using the colormap used for scatter
-            error_color = clb.to_rgba(errorplot, alpha=0.75)
+            error_color = clb.to_rgba(errorplot)
 
             #adjust the color of c[0], which is a LineCollection, to the colormap
             c[0].set_color(error_color)
