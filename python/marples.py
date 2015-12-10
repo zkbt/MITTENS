@@ -98,15 +98,18 @@ class Marples(Talker):
                 plt.setp(ax.get_xticklabels(), visible=False)
             share=ax
             ok = self.grid['inversevariances'][i] > 0
-            ax.errorbar(self.grid['hjd'][ok], self.grid['depths'][i,ok], self.grid['uncertainties'][i,ok], alpha=0.5)
+            ax.errorbar(self.grid['hjd'][ok], self.grid['depths'][i,ok], self.grid['uncertainties'][i,ok], alpha=0.8)
             ax.set_ylabel('{0}hr'.format(24*self.durations[i]), rotation=0, ha='right')
         plt.show()
 
+<<<<<<< HEAD
+=======
 
 
     #def plot(self, period=?, midtransit=?, phasefolded=True/False):
 
 
+>>>>>>> 72dbe75b4fd19fbb321cbe69786a48d825823396
     def fold(self,  type='slow'):
         if type == 'slow':
             return folder.fold(self.grid['hjd'], self.grid['depths'], self.grid['inversevariances'])
