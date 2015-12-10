@@ -61,6 +61,10 @@ class Marples(Talker):
         self.indices = np.round((self.hjd - self.hjd_min)/self.hjd_step).astype(np.int)
 
     def gridify(self, tail=20):
+        """
+        Takes a Marple time series with gaps and creates a "gapless" and evenly spaced array
+        Fill in gaps with points that have 0 inverse variance (infinite uncertainties)
+        """
 
         # create an empty dictionary to store everything on a *uniform* grid of times
         self.grid = {}
