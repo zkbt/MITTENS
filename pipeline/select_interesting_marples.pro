@@ -20,14 +20,7 @@ FUNCTION select_interesting_marples, boxes, mo
 
   ;INITIAL VARIABLES
   signal_to_noise_threshold_to_give_a_shit_about = 3.0
-  starting_size = 20000000l     ;20 million
-
-
-                                ;Create arbitrarily big structure to
-                                ;store all the cool things, will trim
-                                ;it down to size later.
-
-  ensemble_of_boxes = replicate({hjd:0.0d, duration:0.0d, depth:0.0d, depth_uncertainty:0.0d, n:0l, rescaling:0.0d, mo:''}, starting_size)       
+     
   running_count_of_good_events = 0
 
                                 ;initialize best arrays for each
@@ -170,7 +163,10 @@ FUNCTION select_interesting_marples, boxes, mo
         do_it = 0
      ENDIF
   ENDIF
-  IF do_it EQ 1 THEN BEGIN
+
+  ensemble_of_boxes = replicate({hjd:0.0d, duration:0.0d, depth:0.0d, depth_uncertainty:0.0d, n:0l, rescaling:0.0d, mo:''}, n_elements(good_ones))  
+
+  If do_it EQ 1 THEN BEGIN
      ensemble_of_boxes[running_count_of_good_events:running_count_of_good_events + n_elements(best_hjds_jad)-1].hjd = best_hjds_jad
      ensemble_of_boxes[running_count_of_good_events:running_count_of_good_events + n_elements(best_hjds_jad)-1].duration = best_dur_jad
      ensemble_of_boxes[running_count_of_good_events:running_count_of_good_events + n_elements(best_hjds_jad)-1].depth = best_depth_jad
@@ -179,18 +175,14 @@ FUNCTION select_interesting_marples, boxes, mo
      ensemble_of_boxes[running_count_of_good_events:running_count_of_good_events + n_elements(best_hjds_jad)-1].rescaling = best_rescaling_jad
      ensemble_of_boxes[running_count_of_good_events:running_count_of_good_events + n_elements(best_hjds_jad)-1].mo = mo
      
-     running_count_of_good_events += n_elements(best_hjds_jad)
   ENDIF
 
-  IF running_count_of_good_events GT starting_size THEN BEGIN
-     mprint, error_string, 'the assumed starting size of ', rw(starting_size), " for the MarPLE array wasn't big enough!"
-     stop
+  IF do_it EQ 0 THEN BEGIN
+     ensemble_of_boxes = replicate({hjd:0.0d, duration:0.0d, depth:0.0d, depth_uncertainty:0.0d, n:0l, rescaling:0.0d, mo:''}, 1)
+     ensemble_of_boxes = ensemble_of_boxes[0:0]
   ENDIF
 
-                                ;Trim the excess from 20 million to
-                                ;get the actual array of actual things
-                                ;for actual reasons
-  ensemble_of_boxes = ensemble_of_boxes[0:running_count_of_good_events]
+
   return,ensemble_of_boxes
 
 END
