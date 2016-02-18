@@ -5,7 +5,11 @@
 # =======================================================================
 
 # modify the Python path to include the MITTENS python directory (packages within this directory should also be available
-setenv PYTHONPATH {$MITTENS_PATH}/python
+if ! $?PYTHONPATH then
+    echo "PYTHONPATH not set, setting environment..."
+    setenv PYTHONPATH
+endif
+setenv PYTHONPATH ${PYTHONPATH}:${MITTENS_PATH}/python
 
 # sets the directory where are all data (reprocessed LC's, search results, etc...) will be stored
 setenv MITTENS_DATA /data/mearth2/marples/
