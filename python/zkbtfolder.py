@@ -2,6 +2,8 @@ from zachopy.Talker import Talker
 import numpy as np, matplotlib.pyplot as plt
 import zachopy.utils, glob
 import fastfasefolding as nick
+import multiprocessing as mp
+import itertools as itool
 
 plt.ion()
 #cimport numpy as np
@@ -9,6 +11,18 @@ plt.ion()
 #DTYPE = np.float
 #ctypedef np.float_t DTYPE_t
 
+#Need the following two functions to act as helpers for
+#the multiprocessing implementation of the phase folder.
+#Note that these must be declared at the top level of
+#the module in order for the pool.map() function to work.
+def nickfold(t,d,inverse_var,P,etft):
+    return nick.fold(t,d,inverse_var,P,etft)
+
+#the map function only works on input functions with one arguement,
+#so we need this helper to unpack a zipped object and pass the
+#zipped args as individual args.
+def starfold(args):
+     return nickfold(*args)
 
 class Folder(Talker):
     def __init__(self, marple, output='untrimmed'):
@@ -67,7 +81,7 @@ class Folder(Talker):
         self.plotSpectrum()
         self.save()
 
-    def fold(self, n=10, period_minimum=1.5, period_maximum=1.7, plot=False, option='Nick'):
+    def fold(self, n=10, period_minimum=1.5, period_maximum=1.7, plot=False, option='Nick',usemp=True):
         # fold over a range of periods
 
         # set up period grid
@@ -84,21 +98,42 @@ class Folder(Talker):
         self.nudge = 0
         self.plot=plot
 
-        # loop over the periods
-        for i in xrange(len(self.periods)):
-            print '{0}/{1}'.format(i,n)
-            if option == 'Nick':
-                start = self.marple.grid['hjd'][0]
-                epoch = 2457184.55786-2400000.5
-                teft = (epoch - self.marple.grid['hjd'][0])%periods[i] + self.marple.grid['hjd'][0]
-                doversigma = nick.fold( self.marple.grid['hjd'],
-                                        self.marple.grid['depths'].T,
-                                        self.marple.grid['inversevariances'].T,
-                                        periods[i], teft)
-                self.snr[:,i] = doversigma
-            elif option == "Zach":
-                self.snr[:,i] = self.foldby(self.iperiods[i])
-
+        if option == 'Nick' and usemp:
+            #going to need to implement passing of time of first transit (teft)
+            #to folder, this only works for testing purposes.
+            start = self.marple.grid['hjd'][0]
+            epoch = 2457184.55786-2400000.5
+            teft = (epoch - self.marple.grid['hjd'][0])%1.6289 + self.marple.grid['hjd'][0]
+            pool = mp.Pool() #use all available CPUs
+            print "Number of CPUs found: %d" % pool._processes
+            #in this map, only periods is being iterated over.  itool.repeat merely provides
+            #copies of its arg for each self.periods values.
+            m = pool.map(starfold, itool.izip(itool.repeat(self.marple.grid['hjd']),
+                                                 itool.repeat(self.marple.grid['depths'].T),
+                                                 itool.repeat(self.marple.grid['inversevariances'].T),
+                                                 self.periods,
+                                                 itool.repeat(teft)))
+            m = np.array(m).T
+            self.snr = m
+        #if not using multiprocessing, revert to serial implementations
+        #w/ loop over periods
+        if not usemp or option == 'Zach':
+            for i in xrange(len(self.periods)):
+                #print "hello"
+                #print '{0}/{1}'.format(i,n)
+                if option == 'Nick':
+                    start = self.marple.grid['hjd'][0]
+                    epoch = 2457184.55786-2400000.5
+                    teft = (epoch - self.marple.grid['hjd'][0])%1.6289 + self.marple.grid['hjd'][0]
+                    doversigma = nick.fold( self.marple.grid['hjd'],
+                                            self.marple.grid['depths'].T,
+                                            self.marple.grid['inversevariances'].T,
+                                            periods[i], teft)
+                    self.snr[:,i] = doversigma
+                elif option == "Zach":
+                    self.snr[:,i] = self.foldby(self.iperiods[i])
+#            print self.snr
+#            print np.array_equal(m,self.snr)
     def findbestepoch(self, period):
         iperiod = period/self.marple.hjd_step
         snr = self.foldby(iperiod, dontcollapse=True)

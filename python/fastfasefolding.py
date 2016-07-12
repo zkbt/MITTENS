@@ -13,12 +13,13 @@ import matplotlib.pyplot as plt
 def fold(t,d,inverse_var,P,etft):
     """
     Function to fold Marple lightcurves of d/sigma to a master d/sigma.
+    #assumes all time values are in same units
     Inputs:
-    t    :: Nx1 array of times
-    d    :: NxM array of depths for M durations
-    sigma:: NxM array of sigmas for M durations
-    P    :: Period to fold on
-    eft  :: Expected time of first transit #need to change this to an initial phase
+    t           :: Nx1 array of times
+    d           :: NxM array of depths for M durations
+    inverse_var :: NxM array of inverse variances for M durations
+    P           :: Period to fold on
+    eft         :: Expected time of first transit #need to change this to an initial phase
     """    
     etft = etft - np.min(t)            
     dt = t[1]-t[0]
@@ -37,8 +38,8 @@ def fold(t,d,inverse_var,P,etft):
     tmax = np.max(t)
     nmax = np.ceil(tmax/P)
     n = np.arange(0,nmax,1)
+    #etts  expected times of transits
     etts = P*n + etft
-    #need to deal with inserted data - maybe something like data_transit = data_transit[data_transit != -99/0/w.e]?
     for m in xrange(ncol):
         #Find centers and pull out data closest to center of presumed transit
         centers = np.rint(etts/dt).astype(np.int)

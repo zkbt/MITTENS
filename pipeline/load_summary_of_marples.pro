@@ -49,6 +49,10 @@ PRO load_summary_of_marples, all=all
         ;get the actual array of actual things
         ;for actual reasons
 	ensemble_of_boxes = ensemble_of_boxes[0:running_count_of_good_events]
+
+        ;Get rid of 0's in the array (when there are no marples?)
+        good_filter = where(ensemble_of_boxes.hjd GT 0)
+        ensemble_of_boxes = ensemble_of_boxes[good_filter]
         interesting_marples = ensemble_of_boxes
 
 	save, interesting_marples, filename='population/summary_of_interesting_marples.idl'
