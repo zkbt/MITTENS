@@ -26,7 +26,6 @@ These tools will allow you to run the analysis pipeline (takes a long time, and 
 
 The MITTENS pipeline consists of lots of different routines that convert, through a series of cascading steps, Jonathan's MEarth light curve files into MarPLEs and planet candidates, ready for visualizing. These steps are best run more or less on the following schedule:
 
-
 *[weekly-monthly]* Whenever new data comes in, MITTENS will need to be run to propagate these data into the MarPLES and to search them for new candidates. All steps except the phased search can be performed in about a day (for five years of data); the phased search will take longer. Here are the commands:
 
     fits_into_lightcurves
@@ -37,6 +36,9 @@ The MITTENS pipeline consists of lots of different routines that convert, throug
 
     outsource_folding
     ; upload all the (newly updated) processed MarPLES to the MIT antares cluster for phase-folding (currently, this can still be done only by Zach)
+
+    (run create_scripts.py and submit_batch.py on the antares cluster)
+    ; it takes a couple of days for the MIT cluster to crunch through all the phase-fold searches, and the results will be saved in the "results" directory over there
 
     import_folding
     ; download processed period spectra from the MIT cluster, and move them into the appropriate directories
@@ -58,6 +60,28 @@ The MITTENS pipeline consists of lots of different routines that convert, throug
     load_stellar_properties
     ; runs an SQL query, saves the structure in the MITTEN directory, repopulates star directories
 
+*[monthly-yearly]* Whenever new measurements enter the database that could affect the stellar parameter estimates, the MITTENS directories will need to have their internal stellar parameter estimates updated. To do so, run:
+
+    load_stellar_properties
+    ; runs an SQL query, saves the structure in the MITTEN directory, repopulates star directories
+
+*[when you're curious about a star]* To ingest and process new data on a particular star, you can use:
+
+    update, 'PROXIMA CEN'
+    ; this will run `fits_into_lightcurves` and `lightcurves_into_marples` on "PROXIMA CEN"
+
+    update, 'mo09125959-8311515'
+    ; this is the same as the above command, but it is generally safer to use the MEarth Object identifier ("mo{2MASS numeric string}" or simply "{2MASS numeric string}"). The name-matching relies on the top name hit that was scrubbed out of Jonathan's database, so isn't always intuitive (e.g. `update, 'GJ 1214'` works, but `update, 'LHS 281'` is required to grab GJ 1132)
+
+    update, 'mo09125959-8311515', /remake
+    ; update up through the marples, even if recent data have already been processed
+
+    update, 'mo09125959-8311515', /origami
+    ; run `fits_into_lightcurves`, `lightcurves_into_marples`, `marples_into_origami`, `origami_into_candidates` on this particular star. The phase-folding will take quite a while, but this will go all the way to candidates for the particular star.
+
+    update, /all
+    ; this will run `update` on all the stars, looping through the list of MEarth Objects
+    
 ### REPORTING BUGS
 There *will* definitely be problems with MITTENS.  Please copy error messages to zkbt@mit.edu or [post them as issues](https://github.com/zkbt/MITTENS/issues).
 
