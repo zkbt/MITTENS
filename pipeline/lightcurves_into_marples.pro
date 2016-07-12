@@ -1,4 +1,4 @@
-PRO lightcurves_into_marples, desired_mo, remake=remake, start=start
+PRO lightcurves_into_marples, desired_mo, remake=remake, start=start, listonly=listonly
 ;+
 ; NAME:
 ;	lightcurves_into_marples

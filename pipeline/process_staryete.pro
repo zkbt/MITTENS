@@ -30,10 +30,10 @@ PRO process_staryete, bulldoze=bulldoze, remake=remake, lenient=lenient,  baddat
 			rough_clean, /use_sin
 
 			; run lc_to_pdf
-			if has_data( days=3) then begin
+			if has_data( days=1, n=50) then begin
 				lc_to_pdf, remake=remake;, highres=highres
 			endif else file_delete, star_dir() + 'needtomakemarple', /allow
-			if has_data(days=3) and keyword_set(fake) then begin
+			if has_data(days=1, n=50) and keyword_set(fake) then begin
 				if keyword_set(display) then display, /off
 				if keyword_set(interactive) then interactive, /off
 			;	lc_to_pdf, /remake, /fake_setup

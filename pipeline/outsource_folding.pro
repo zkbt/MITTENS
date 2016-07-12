@@ -38,5 +38,6 @@ PRO outsource_folding, lspm, remake=remake, year=year
 		endif
 	endfor
 	print, 'trying to scp the marple files over to MIT...'
-	spawn, 'scp marples_to_send/* zkbt@antares.mit.edu:/corscorpii/d1/zkbt/mearth/marples/'
+	;spawn, 'scp marples_to_send/* zkbt@antares.mit.edu:/corscorpii/d1/zkbt/mearth/marples/'
+	spawn, 'scp marples_to_send/* zkbt@antares.mit.edu:/akrab/d1/zkbt/mearth/marples/'
 END

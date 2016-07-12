@@ -248,7 +248,7 @@ int main(int argc, char* argv[]) {
 	printf("        any box within half this time of mid-transit will be consider a unique, in-transit event.\n");
 
 	// set up period grid
-	double p_min = 0.25, p_max = 10.0, max_misalign = 5.0/60.0/24.0;
+	double p_min = 0.5, p_max = 20.0, max_misalign = 5.0/60.0/24.0;
 	double data_span = (HJD[nBoxes-1] - HJD[0]);
 	double dlnperiod = max_misalign/data_span;
 	if (dlnperiod < RESOLUTION)

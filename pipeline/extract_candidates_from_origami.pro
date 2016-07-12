@@ -106,15 +106,20 @@ PRO extract_candidates_from_origami, remake=remake, n_save=n_save
 		; figure out where spectrum is reasonable
 		i_finite = where(finite(sn))
 
+print, n_elements(i_finite), ' finite elements of the spectrum'
+
 		; select the peaks from the spectrum
 		period_peaks = i_finite[select_peaks(sn[i_finite], n_save, pad=10)]	
 
+print, period_peaks
 		; loop through these peaks, and find the best epochs at these periods
 		for j=0, n_elements(period_peaks)-1 do begin
 			; skip phase-folding this particular candidate if unnecessary
 			if SN_of_peaks[i,j] ge threshold then begin
+print, SN_of_peaks[i,j]
 				peak_candidates[i,j] = find_best_epoch(boxes, periods[period_peaks[j]], durations[i])
-			endif
+print, peak_candidates[i,j]
+endif
 		endfor
 
 		; apply a correction to the depth uncertainty of the candidates based on duration
@@ -123,6 +128,7 @@ PRO extract_candidates_from_origami, remake=remake, n_save=n_save
 		peak_candidates[i,*].inflation_for_bad_duration = original_SN/updated_SN
 		peak_candidates[i,*].depth_uncertainty *= peak_candidates[i,*].inflation_for_bad_duration
 
+print, peak_candidates
 		; create a plot to show what's going on
 		if keyword_set(display) then begin
 			cleanplot, /silent

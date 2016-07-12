@@ -17,6 +17,8 @@ PRO load_summary_of_candidates, summary_of_candidates
 	for i=0, n-1 do begin
 		s = template
 		restore, f[i]
+		
+
 		star_dir = stregex(f[i], /ext, mo_prefix + mo_regex + '/(ye[0-9]+|combined)/((te[0-9]+|combined)/)?');stregex(f[i], /ext, 'ls[0-9]+/(ye[0-9]+/te[0-9]+|combined)') +'/'
 		copy_struct, best_candidates[0], s
 		has_boxes[i]= file_test(star_dir + 'box_pdf.idl')

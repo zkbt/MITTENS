@@ -63,13 +63,16 @@ PRO lc_to_pdf, test=test, redtest=redtest, remake=remake, grazing=grazing, highr
 	unsatisfied_with_harmonic_terms = 1B
 	n_harmonics = 1
 	while(unsatisfied_with_harmonic_terms) do begin
+
 		templates = generate_templates(target_lc=target_lc, common_mode_lc=common_mode_lc, n_harmonics=n_harmonics)
+		
 		if keyword_set(crude_lens) then boxes = generate_boxes(target_lc, durations=(findgen(13)+1.0)/12.0*0.5, res=0.5/24.0) else boxes = generate_boxes(target_lc, highres=highres)
 		
 		grazers = generate_grazers(target_lc)
 		flares = generate_flares(target_lc)	; good that it's sampled only at data points!
 		initialized_fit = setup_bayesfit(target_lc, templates, /use_sin, /use_constant)	; not using sin
-		; run as a test using (possibily correlated) Gaussian noise
+		
+	; run as a test using (possibily correlated) Gaussian noise
 		if keyword_set(test) then begin
 			restore, star_dir + 'ext_var.idl'
 			original_stddev = stddev(target_lc.flux)
@@ -95,7 +98,7 @@ PRO lc_to_pdf, test=test, redtest=redtest, remake=remake, grazing=grazing, highr
 		i_fit = where(season_fit.solved and strmatch(season_fit.name, 'NIGHT*') eq 0, n_fit)
 ;		print, 'intial guess at parameters'
 ;		print_struct, season_fit[i_fit]
-	
+		
 		; decide which additional templates to include, and refit
 		if ~keyword_set(timemachine) and ~keyword_set(fake_setup) then templates = add_templates(templates, residuals)
 		initialized_fit = setup_bayesfit(target_lc, templates, /use_sin, /use_constant)	; not using sin

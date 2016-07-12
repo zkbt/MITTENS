@@ -15,7 +15,9 @@ PRO import_origami, dont=dont
 
 	; download the origami spectra from MIT
 	file_mkdir, 'origami_received'
-	if ~keyword_set(dont) then spawn, 'rsync -trv zkbt@antares.mit.edu:/corscorpii/d1/zkbt/mearth/results/ origami_received/'
+	if ~keyword_set(dont) then spawn, 'rsync -trv zkbt@antares.mit.edu:/akrab/d1/zkbt/mearth/results/ origami_received/'
+	
+;	if ~keyword_set(dont) then spawn, 'rsync -trv zkbt@antares.mit.edu:/corscorpii/d1/zkbt/mearth/results/ origami_received/'
 
 	; make sure their group permissions are set to exoplanet (this seems to work only from zach's directory)
 	spawn, 'chgrp -R exoplanet origami_received/*'
