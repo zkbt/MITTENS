@@ -71,17 +71,23 @@ The MITTENS pipeline consists of lots of different routines that convert, throug
     ; this will run `fits_into_lightcurves` and `lightcurves_into_marples` on "PROXIMA CEN"
 
     update, 'mo09125959-8311515'
-    ; this is the same as the above command, but it is generally safer to use the MEarth Object identifier ("mo{2MASS numeric string}" or simply "{2MASS numeric string}"). The name-matching relies on the top name hit that was scrubbed out of Jonathan's database, so isn't always intuitive (e.g. `update, 'GJ 1214'` works, but `update, 'LHS 281'` is required to grab GJ 1132)
+    ; this is the same as the above command, but it is generally safer to use
+    the MEarth Object identifier ("mo{2MASS numeric string}" or simply "{2MASS
+    numeric string}"). The name-matching relies on the top name hit that was
+    scrubbed out of Jonathan's database, so isn't always intuitive (e.g.
+    `update, 'GJ 1214'` works, but `update, 'LHS 281'` is required to grab GJ1132)
 
     update, 'mo09125959-8311515', /remake
     ; update up through the marples, even if recent data have already been processed
 
     update, 'mo09125959-8311515', /origami
-    ; run `fits_into_lightcurves`, `lightcurves_into_marples`, `marples_into_origami`, `origami_into_candidates` on this particular star. The phase-folding will take quite a while, but this will go all the way to candidates for the particular star.
+    ; run `fits_into_lightcurves`, `lightcurves_into_marples`, `marples_into_origami`, `origami_into_candidates` on this particular star.
+    The phase-folding will take quite a while, but this will go all the way to
+    candidates for the particular star.
 
     update, /all
     ; this will run `update` on all the stars, looping through the list of MEarth Objects
-    
+
 ### REPORTING BUGS
 There *will* definitely be problems with MITTENS.  Please copy error messages to zkbt@mit.edu or [post them as issues](https://github.com/zkbt/MITTENS/issues).
 
