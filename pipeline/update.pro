@@ -1,4 +1,7 @@
 PRO update, mo, remake=remake, origami=origami, all=all
+
+  common mearth_tools
+
   if keyword_set(all) then begin
     desired_mo = mo_ensemble[sort(mo_ensemble.dec)].mo
     for i=0, n_elements(desired_mo)-1 do begin
